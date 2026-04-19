@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Model Selection Lab — Executive AI Program</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f4f3ef;
+  --surface:#ffffff;
+  --surface2:#eeecea;
+  --border:rgba(0,0,0,0.09);
+  --border2:rgba(0,0,0,0.16);
+  --text:#181714;
+  --text2:#67665f;
+  --text3:#a09f99;
+  --teal:#0F6E56;--teal-l:#E1F5EE;--teal-m:#1D9E75;
+  --blue:#185FA5;--blue-l:#E6F1FB;--blue-m:#378ADD;
+  --purple:#534AB7;--purple-l:#EEEDFE;--purple-m:#7F77DD;
+  --amber:#854F0B;--amber-l:#FAEEDA;--amber-m:#EF9F27;
+  --coral:#993C1D;--coral-l:#FAECE7;--coral-m:#D85A30;
+  --green:#3B6D11;--green-l:#EAF3DE;--green-m:#639922;
+  --red:#A32D2D;--red-l:#FCEBEB;
+  --gray-l:#F1EFE8;
+  --r:10px;--rl:14px;
+}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;}
+
+.site-header{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 2rem;display:flex;align-items:center;justify-content:space-between;
+  height:62px;position:sticky;top:0;z-index:100;
+}
+.hbrand{display:flex;align-items:center;gap:12px;}
+.hlogo{
+  width:34px;height:34px;border-radius:9px;background:var(--teal);
+  display:flex;align-items:center;justify-content:center;
+  color:#fff;font-size:16px;font-weight:600;
+}
+.hname{font-size:15px;font-weight:600;}
+.hsub{font-size:12px;color:var(--text2);}
+.hpill{
+  font-size:12px;font-weight:500;color:var(--text2);
+  background:var(--surface2);border:1px solid var(--border);
+  padding:4px 14px;border-radius:20px;
+}
+
+.layout{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 62px);}
+
+.sidebar{
+  background:var(--surface);border-right:1px solid var(--border);
+  padding:1.5rem 0;position:sticky;top:62px;
+  height:calc(100vh - 62px);overflow-y:auto;
+}
+.slabel{
+  font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);padding:0 1.5rem;margin-bottom:6px;margin-top:1rem;display:block;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:9px 1rem;
+  border-radius:var(--r);cursor:pointer;transition:all .15s;
+  font-size:13px;color:var(--text2);border:none;background:none;
+  width:calc(100% - 1rem);margin:0 0.5rem;text-align:left;
+}
+.nav-item:hover{background:var(--surface2);color:var(--text);}
+.nav-item.active{background:var(--teal-l);color:var(--teal);font-weight:500;}
+.nav-item.done{color:var(--green);}
+.nav-num{
+  width:22px;height:22px;border-radius:6px;background:var(--surface2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:600;color:var(--text2);flex-shrink:0;
+}
+.nav-item.active .nav-num{background:var(--teal-m);color:#fff;}
+.nav-item.done .nav-num{background:var(--green-l);color:var(--green);}
+.nav-time{font-size:11px;color:var(--text3);margin-left:auto;}
+
+.prog-wrap{padding:1rem 1.5rem;border-top:1px solid var(--border);margin-top:1rem;}
+.prog-track{height:4px;background:var(--surface2);border-radius:2px;overflow:hidden;}
+.prog-fill{height:100%;background:var(--teal);border-radius:2px;transition:width .4s;}
+.prog-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;}
+
+.main{padding:2rem;max-width:820px;}
+.phase{display:none;}
+.phase.visible{display:block;}
+
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--teal);margin-bottom:6px;}
+.ptitle{font-size:26px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.pdesc{font-size:15px;color:var(--text2);line-height:1.7;margin-bottom:1.75rem;}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:1.25rem 1.5rem;margin-bottom:1rem;}
+.ctitle{font-size:13px;font-weight:600;color:var(--text);margin-bottom:1rem;}
+
+.metric-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;}
+.metric{background:var(--surface2);border-radius:var(--r);padding:14px 16px;}
+.mlabel{font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:500;}
+.mvalue{font-size:22px;font-weight:600;color:var(--text);}
+.msub{font-size:11px;color:var(--text3);margin-top:2px;}
+
+.slider-row{display:flex;align-items:center;gap:14px;margin:10px 0;}
+.slabel2{font-size:13px;color:var(--text2);min-width:160px;}
+.sval{font-size:13px;font-weight:600;min-width:70px;text-align:right;color:var(--text);}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--surface2);outline:none;border:1px solid var(--border);}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--teal);cursor:pointer;border:2px solid #fff;box-shadow:0 0 0 1px var(--teal);}
+
+.insight-box{padding:14px 18px;border-left:3px solid var(--teal);background:var(--teal-l);border-radius:0 var(--r) var(--r) 0;margin:1rem 0;}
+.insight-box p{font-size:13px;color:#085041;line-height:1.7;}
+.insight-box strong{color:var(--teal);}
+
+.bar-track{height:20px;border-radius:5px;background:var(--surface2);overflow:hidden;margin:4px 0;}
+.bar-fill{height:100%;border-radius:5px;transition:width .4s;}
+
+.model-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1rem;}
+.model-card{border:1px solid var(--border);border-radius:var(--rl);padding:1.1rem;background:var(--surface);cursor:pointer;transition:all .15s;position:relative;}
+.model-card:hover{border-color:var(--border2);}
+.model-card.selected{border:2px solid var(--teal-m);background:var(--teal-l);}
+.model-badge{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;margin-bottom:8px;}
+.model-name{font-size:15px;font-weight:600;margin-bottom:4px;}
+.model-sub{font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.5;}
+.model-price{font-size:12px;font-weight:600;}
+.model-check{position:absolute;top:10px;right:10px;width:18px;height:18px;border-radius:50%;border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;}
+.model-card.selected .model-check{background:var(--teal-m);border-color:var(--teal-m);color:#fff;}
+
+.dim-bar-wrap{margin:8px 0;}
+.dim-label-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text2);margin-bottom:3px;}
+.radar-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+
+.matrix-wrap{overflow-x:auto;}
+.matrix{width:100%;border-collapse:collapse;font-size:13px;}
+.matrix th{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);padding:8px 12px;border-bottom:1px solid var(--border);text-align:left;}
+.matrix td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:top;}
+.matrix tr:last-child td{border-bottom:none;}
+.matrix tr:hover td{background:var(--surface2);}
+
+.pill{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;}
+.pill-teal{background:var(--teal-l);color:var(--teal);}
+.pill-blue{background:var(--blue-l);color:var(--blue);}
+.pill-purple{background:var(--purple-l);color:var(--purple);}
+.pill-amber{background:var(--amber-l);color:var(--amber);}
+.pill-green{background:var(--green-l);color:var(--green);}
+
+.dot-score{display:flex;gap:3px;align-items:center;}
+.dot{width:10px;height:10px;border-radius:50%;}
+.dot.on{background:var(--teal-m);}
+.dot.off{background:var(--surface2);border:1px solid var(--border);}
+
+.quiz-q{font-size:15px;font-weight:500;color:var(--text);margin-bottom:14px;line-height:1.6;}
+.quiz-opts{display:flex;flex-direction:column;gap:8px;}
+.quiz-opt{
+  padding:11px 16px;border:1px solid var(--border2);border-radius:var(--r);
+  font-size:14px;color:var(--text);cursor:pointer;transition:all .15s;
+  text-align:left;background:var(--surface);font-family:'Sora',sans-serif;
+}
+.quiz-opt:hover{background:var(--surface2);}
+.quiz-opt.correct{background:var(--green-l);border-color:#97C459;color:var(--green);font-weight:500;}
+.quiz-opt.wrong{background:var(--red-l);border-color:#F09595;color:var(--red);}
+.quiz-fb{margin-top:12px;font-size:13px;padding:12px 16px;border-radius:var(--r);display:none;line-height:1.6;}
+.quiz-fb.show{display:block;}
+.fb-ok{background:var(--green-l);color:var(--green);border:1px solid #97C459;}
+.fb-no{background:var(--red-l);color:var(--red);border:1px solid #F09595;}
+
+.score-ring{text-align:center;padding:2rem 1rem 1rem;}
+.score-num{font-size:64px;font-weight:700;color:var(--teal);line-height:1;}
+.score-lbl{font-size:15px;color:var(--text2);margin-top:8px;}
+.score-msg{text-align:center;font-size:14px;color:var(--text2);padding:0 2rem 1.5rem;}
+
+.action-bar{display:flex;justify-content:space-between;align-items:center;margin-top:2rem;padding-top:1.25rem;border-top:1px solid var(--border);}
+.btn{padding:9px 20px;border:1px solid var(--border2);border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;background:var(--surface);color:var(--text);transition:all .15s;font-family:'Sora',sans-serif;}
+.btn:hover{background:var(--surface2);}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff;}
+.btn.primary:hover{background:var(--teal-m);}
+.btn:disabled{opacity:.35;pointer-events:none;}
+.ptxt{font-size:12px;color:var(--text3);}
+
+.selector-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.q-select{width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--r);font-size:13px;font-family:'Sora',sans-serif;background:var(--surface);color:var(--text);cursor:pointer;}
+.q-select:focus{outline:none;border-color:var(--teal-m);}
+.recommendation-box{padding:16px 20px;border-radius:var(--rl);border:2px solid var(--teal-m);background:var(--teal-l);margin-top:12px;}
+.rec-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--teal);margin-bottom:6px;}
+.rec-model{font-size:20px;font-weight:700;color:#085041;margin-bottom:4px;}
+.rec-reason{font-size:13px;color:#0F6E56;line-height:1.6;}
+
+.tradeoff-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.to-card{padding:12px 14px;border-radius:var(--r);border:1px solid var(--border);}
+
+.scenario-btn{padding:10px 14px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;cursor:pointer;background:var(--surface);color:var(--text);transition:all .15s;width:100%;text-align:left;font-family:'Sora',sans-serif;margin-bottom:6px;}
+.scenario-btn:hover{background:var(--surface2);}
+.scenario-btn.active{background:var(--teal-l);border-color:var(--teal-m);color:var(--teal);font-weight:500;}
+
+@media(max-width:700px){
+  .layout{grid-template-columns:1fr;}
+  .sidebar{display:none;}
+  .main{padding:1.25rem;}
+  .metric-row,.model-grid,.tradeoff-grid{grid-template-columns:1fr 1fr;}
+  .selector-wrap,.radar-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="hbrand">
+    <div class="hlogo">M</div>
+    <div>
+      <div class="hname">LLM Model Selection Lab</div>
+      <div class="hsub">Executive AI Program</div>
+    </div>
+  </div>
+  <span class="hpill">15-minute lab</span>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <span class="slabel">Modules</span>
+    <button class="nav-item active" onclick="goPhase(0)"><span class="nav-num">1</span>The model landscape<span class="nav-time">3 min</span></button>
+    <button class="nav-item" onclick="goPhase(1)"><span class="nav-num">2</span>Selection dimensions<span class="nav-time">3 min</span></button>
+    <button class="nav-item" onclick="goPhase(2)"><span class="nav-num">3</span>Decision simulator<span class="nav-time">4 min</span></button>
+    <button class="nav-item" onclick="goPhase(3)"><span class="nav-num">4</span>Tradeoff scenarios<span class="nav-time">2 min</span></button>
+    <button class="nav-item" onclick="goPhase(4)"><span class="nav-num">5</span>Knowledge check<span class="nav-time">3 min</span></button>
+    <div class="prog-wrap">
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:500;">YOUR PROGRESS</div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="prog-meta"><span id="prog-lbl">Module 1 of 5</span><span id="prog-pct">0%</span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- PHASE 0: Model Landscape -->
+    <div class="phase visible" id="phase-0">
+      <p class="eyebrow">Module 1 · 3 minutes</p>
+      <h1 class="ptitle">The LLM model landscape</h1>
+      <p class="pdesc">LLMs are not interchangeable. Every model sits on a spectrum of capability, speed, and cost — and the right choice depends entirely on your task. Understanding this landscape is the prerequisite to every AI deployment decision.</p>
+
+      <div class="card">
+        <p class="ctitle">Model tier overview — click any card to explore</p>
+        <div class="model-grid" id="model-cards">
+          <div class="model-card" onclick="selectModel('frontier')" id="mc-frontier">
+            <div class="model-check" id="chk-frontier"></div>
+            <span class="model-badge" style="background:var(--purple-l);color:var(--purple);">Frontier</span>
+            <div class="model-name">Claude Opus / GPT-4o</div>
+            <div class="model-sub">Maximum reasoning depth. Handles ambiguity, nuance, and multi-step problems.</div>
+            <div class="model-price" style="color:var(--purple);">$15–$30 / M input tokens</div>
+          </div>
+          <div class="model-card" onclick="selectModel('midtier')" id="mc-midtier">
+            <div class="model-check" id="chk-midtier"></div>
+            <span class="model-badge" style="background:var(--blue-l);color:var(--blue);">Mid-tier</span>
+            <div class="model-name">Claude Sonnet / GPT-4 mini</div>
+            <div class="model-sub">High quality, faster, significantly cheaper. The workhorse of most deployments.</div>
+            <div class="model-price" style="color:var(--blue);">$3–$6 / M input tokens</div>
+          </div>
+          <div class="model-card" onclick="selectModel('fast')" id="mc-fast">
+            <div class="model-check" id="chk-fast"></div>
+            <span class="model-badge" style="background:var(--teal-l);color:var(--teal);">Fast / Lightweight</span>
+            <div class="model-name">Claude Haiku / Gemini Flash</div>
+            <div class="model-sub">Near-instant responses. Ideal for classification, routing, and high-volume simple tasks.</div>
+            <div class="model-price" style="color:var(--teal);">$0.25–$1 / M input tokens</div>
+          </div>
+        </div>
+        <div id="model-detail" style="display:none;padding:14px 16px;border-radius:var(--r);margin-top:4px;font-size:13px;line-height:1.7;"></div>
+      </div>
+
+      <div class="card">
+        <p class="ctitle">Key dimensions at a glance</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;">Reasoning depth</div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Frontier</span><span style="color:var(--purple);font-weight:600;">95/100</span></div><div class="bar-track"><div class="bar-fill" style="width:95%;background:var(--purple-m);"></div></div></div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Mid-tier</span><span style="color:var(--blue);font-weight:600;">78/100</span></div><div class="bar-track"><div class="bar-fill" style="width:78%;background:var(--blue-m);"></div></div></div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Fast</span><span style="color:var(--teal);font-weight:600;">52/100</span></div><div class="bar-track"><div class="bar-fill" style="width:52%;background:var(--teal-m);"></div></div></div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;">Speed (tokens/sec, relative)</div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Frontier</span><span style="color:var(--purple);font-weight:600;">25/100</span></div><div class="bar-track"><div class="bar-fill" style="width:25%;background:var(--purple-m);"></div></div></div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Mid-tier</span><span style="color:var(--blue);font-weight:600;">65/100</span></div><div class="bar-track"><div class="bar-fill" style="width:65%;background:var(--blue-m);"></div></div></div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Fast</span><span style="color:var(--teal);font-weight:600;">96/100</span></div><div class="bar-track"><div class="bar-fill" style="width:96%;background:var(--teal-m);"></div></div></div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;">Cost efficiency</div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Frontier</span><span style="color:var(--purple);font-weight:600;">10/100</span></div><div class="bar-track"><div class="bar-fill" style="width:10%;background:var(--purple-m);"></div></div></div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Mid-tier</span><span style="color:var(--blue);font-weight:600;">60/100</span></div><div class="bar-track"><div class="bar-fill" style="width:60%;background:var(--blue-m);"></div></div></div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Fast</span><span style="color:var(--teal);font-weight:600;">98/100</span></div><div class="bar-track"><div class="bar-fill" style="width:98%;background:var(--teal-m);"></div></div></div>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;">Context window</div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Frontier</span><span style="color:var(--purple);font-weight:600;">200K tokens</span></div><div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--purple-m);"></div></div></div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Mid-tier</span><span style="color:var(--blue);font-weight:600;">128K tokens</span></div><div class="bar-track"><div class="bar-fill" style="width:64%;background:var(--blue-m);"></div></div></div>
+            <div class="dim-bar-wrap"><div class="dim-label-row"><span>Fast</span><span style="color:var(--teal);font-weight:600;">48K tokens</span></div><div class="bar-track"><div class="bar-fill" style="width:24%;background:var(--teal-m);"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        <p><strong>Executive frame:</strong> Model selection is not a one-time IT decision. It is an ongoing portfolio management exercise — matching task complexity to model capability, just as you match talent seniority to task complexity in your organization.</p>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn" disabled>← Previous</button>
+        <span class="ptxt">Module 1 of 5</span>
+        <button class="btn primary" onclick="goPhase(1)">Next module →</button>
+      </div>
+    </div>
+
+    <!-- PHASE 1: Selection Dimensions -->
+    <div class="phase" id="phase-1">
+      <p class="eyebrow">Module 2 · 3 minutes</p>
+      <h1 class="ptitle">The five selection dimensions</h1>
+      <p class="pdesc">Every model selection decision can be decomposed into five orthogonal dimensions. Executives who understand these dimensions can set clear procurement criteria and evaluate vendor claims objectively.</p>
+
+      <div class="card">
+        <p class="ctitle">Dimension explorer — adjust importance weights for your organization</p>
+        <div id="dim-sliders">
+          <div class="slider-row"><span class="slabel2">Task complexity</span><input type="range" min="1" max="10" step="1" value="8" id="d-complexity" oninput="updateDims()"><span class="sval" id="dv-complexity">8/10</span></div>
+          <div class="slider-row"><span class="slabel2">Response latency</span><input type="range" min="1" max="10" step="1" value="5" id="d-latency" oninput="updateDims()"><span class="sval" id="dv-latency">5/10</span></div>
+          <div class="slider-row"><span class="slabel2">Cost sensitivity</span><input type="range" min="1" max="10" step="1" value="6" id="d-cost" oninput="updateDims()"><span class="sval" id="dv-cost">6/10</span></div>
+          <div class="slider-row"><span class="slabel2">Data privacy / sovereignty</span><input type="range" min="1" max="10" step="1" value="7" id="d-privacy" oninput="updateDims()"><span class="sval" id="dv-privacy">7/10</span></div>
+          <div class="slider-row"><span class="slabel2">Output reliability</span><input type="range" min="1" max="10" step="1" value="9" id="d-reliability" oninput="updateDims()"><span class="sval" id="dv-reliability">9/10</span></div>
+        </div>
+        <div style="margin-top:14px;padding:14px 16px;background:var(--surface2);border-radius:var(--r);">
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px;font-weight:500;">Priority ranking from your weights</div>
+          <ol id="dim-ranking" style="font-size:13px;color:var(--text);padding-left:18px;line-height:2;"></ol>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="ctitle">What each dimension means for model selection</p>
+        <table class="matrix">
+          <thead><tr><th>Dimension</th><th>Low importance → choice</th><th>High importance → choice</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:500;">Task complexity</td><td style="color:var(--text2);">Fast/lightweight model sufficient</td><td>Frontier model required</td></tr>
+            <tr><td style="font-weight:500;">Latency</td><td style="color:var(--text2);">Any tier acceptable</td><td>Fast model mandatory; frontier too slow</td></tr>
+            <tr><td style="font-weight:500;">Cost sensitivity</td><td style="color:var(--text2);">Frontier acceptable</td><td>Fast/mid-tier; aggressive routing strategy</td></tr>
+            <tr><td style="font-weight:500;">Privacy / sovereignty</td><td style="color:var(--text2);">Cloud API fine</td><td>On-prem or private cloud deployment</td></tr>
+            <tr><td style="font-weight:500;">Output reliability</td><td style="color:var(--text2);">Single model call acceptable</td><td>Ensemble, validation layer, or human-in-loop</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="insight-box">
+        <p><strong>Common mistake:</strong> Most organizations default to frontier models for everything, treating it as the "safe" choice. It is not — it is the expensive choice. A model that is 10× the cost but only 15% better on a simple task is a <strong>poor capital allocation decision</strong>, regardless of how impressive the benchmark score looks.</p>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn" onclick="goPhase(0)">← Previous</button>
+        <span class="ptxt">Module 2 of 5</span>
+        <button class="btn primary" onclick="goPhase(2)">Next module →</button>
+      </div>
+    </div>
+
+    <!-- PHASE 2: Decision Simulator -->
+    <div class="phase" id="phase-2">
+      <p class="eyebrow">Module 3 · 4 minutes</p>
+      <h1 class="ptitle">Model decision simulator</h1>
+      <p class="pdesc">Answer four questions about your use case and receive a model tier recommendation with rationale. Use this framework in your own AI investment reviews.</p>
+
+      <div class="card">
+        <p class="ctitle">Describe your use case</p>
+        <div class="selector-wrap">
+          <div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;">Task type</div>
+            <select class="q-select" id="q-task" onchange="updateRecommendation()">
+              <option value="">Select task type...</option>
+              <option value="classify">Classification / routing / triage</option>
+              <option value="extract">Data extraction from documents</option>
+              <option value="summarize">Summarization of content</option>
+              <option value="generate">Long-form content generation</option>
+              <option value="code">Code generation or review</option>
+              <option value="reason">Complex reasoning / analysis</option>
+              <option value="converse">Conversational assistant / chat</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;">Expected daily volume</div>
+            <select class="q-select" id="q-volume" onchange="updateRecommendation()">
+              <option value="">Select volume...</option>
+              <option value="low">Low (&lt;1,000 calls/day)</option>
+              <option value="mid">Medium (1K–100K calls/day)</option>
+              <option value="high">High (&gt;100K calls/day)</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;">Error tolerance</div>
+            <select class="q-select" id="q-error" onchange="updateRecommendation()">
+              <option value="">Select tolerance...</option>
+              <option value="high">High — errors are easily caught/corrected</option>
+              <option value="mid">Medium — some errors are acceptable</option>
+              <option value="low">Low — errors have real business consequence</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:500;">Latency requirement</div>
+            <select class="q-select" id="q-latency" onchange="updateRecommendation()">
+              <option value="">Select latency need...</option>
+              <option value="realtime">Real-time (&lt;500ms)</option>
+              <option value="near">Near real-time (&lt;3s)</option>
+              <option value="async">Async / batch acceptable</option>
+            </select>
+          </div>
+        </div>
+        <div id="rec-box" style="display:none;" class="recommendation-box">
+          <div class="rec-label">Recommended model tier</div>
+          <div class="rec-model" id="rec-model">—</div>
+          <div class="rec-reason" id="rec-reason">—</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="ctitle">Cost impact of your decision</p>
+        <div class="slider-row">
+          <span class="slabel2">Monthly call volume</span>
+          <input type="range" min="1000" max="5000000" step="1000" value="100000" id="sim-vol" oninput="updateSimCost()">
+          <span class="sval" id="sim-vol-val">100K</span>
+        </div>
+        <div class="slider-row">
+          <span class="slabel2">Avg tokens per call</span>
+          <input type="range" min="100" max="10000" step="100" value="1500" id="sim-tok" oninput="updateSimCost()">
+          <span class="sval" id="sim-tok-val">1,500</span>
+        </div>
+        <div class="metric-row" style="margin-top:1rem;">
+          <div class="metric">
+            <p class="mlabel">Fast model cost</p>
+            <p class="mvalue" id="cost-fast" style="color:var(--teal);">$38</p>
+            <p class="msub">per month</p>
+          </div>
+          <div class="metric">
+            <p class="mlabel">Mid-tier cost</p>
+            <p class="mvalue" id="cost-mid" style="color:var(--blue);">$450</p>
+            <p class="msub">per month</p>
+          </div>
+          <div class="metric">
+            <p class="mlabel">Frontier cost</p>
+            <p class="mvalue" id="cost-frontier" style="color:var(--purple);">$2,250</p>
+            <p class="msub">per month</p>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--text2);margin-top:8px;padding:10px 14px;background:var(--surface2);border-radius:var(--r);">
+          Frontier vs. Fast annual delta: <strong id="cost-delta" style="color:var(--coral);">$26,544</strong> — enough to fund <strong id="cost-eng" style="color:var(--coral);">0.2 FTE engineers</strong>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn" onclick="goPhase(1)">← Previous</button>
+        <span class="ptxt">Module 3 of 5</span>
+        <button class="btn primary" onclick="goPhase(3)">Next module →</button>
+      </div>
+    </div>
+
+    <!-- PHASE 3: Tradeoff Scenarios -->
+    <div class="phase" id="phase-3">
+      <p class="eyebrow">Module 4 · 2 minutes</p>
+      <h1 class="ptitle">Real-world tradeoff scenarios</h1>
+      <p class="pdesc">Model selection always involves tradeoffs. These six scenarios illustrate the decision logic that separates strategic AI programs from reactive ones.</p>
+
+      <div class="card">
+        <p class="ctitle">Select a scenario to explore the decision logic</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;" id="scenario-btns">
+          <button class="scenario-btn" onclick="showScenario(0)">Customer support triage at scale</button>
+          <button class="scenario-btn" onclick="showScenario(1)">Legal contract review</button>
+          <button class="scenario-btn" onclick="showScenario(2)">Internal employee chatbot</button>
+          <button class="scenario-btn" onclick="showScenario(3)">Real-time fraud detection</button>
+          <button class="scenario-btn" onclick="showScenario(4)">Executive strategy briefing</button>
+          <button class="scenario-btn" onclick="showScenario(5)">Marketing copy generation</button>
+        </div>
+        <div id="scenario-detail" style="display:none;padding:16px 18px;border-radius:var(--r);border:1px solid var(--border);background:var(--surface2);">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div><div style="font-size:11px;color:var(--text3);font-weight:500;margin-bottom:4px;">RECOMMENDED TIER</div><div id="sc-tier" style="font-size:16px;font-weight:700;"></div></div>
+            <div><div style="font-size:11px;color:var(--text3);font-weight:500;margin-bottom:4px;">DECISIVE FACTOR</div><div id="sc-factor" style="font-size:13px;font-weight:500;color:var(--text);"></div></div>
+            <div><div style="font-size:11px;color:var(--text3);font-weight:500;margin-bottom:4px;">COMMON MISTAKE</div><div id="sc-mistake" style="font-size:13px;font-weight:500;color:var(--coral);"></div></div>
+          </div>
+          <div style="font-size:13px;color:var(--text2);line-height:1.7;" id="sc-rationale"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="ctitle">The routing architecture — the highest-leverage pattern</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+          <div style="padding:14px;background:var(--teal-l);border-radius:var(--r);border:1px solid rgba(15,110,86,.2);">
+            <div style="font-size:11px;font-weight:600;color:var(--teal);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Layer 1</div>
+            <div style="font-size:14px;font-weight:600;color:#085041;margin-bottom:4px;">Fast classifier</div>
+            <div style="font-size:12px;color:#0F6E56;line-height:1.6;">Categorize every query in &lt;200ms. Route to the right layer. 80% of queries end here.</div>
+          </div>
+          <div style="padding:14px;background:var(--blue-l);border-radius:var(--r);border:1px solid rgba(24,95,165,.2);">
+            <div style="font-size:11px;font-weight:600;color:var(--blue);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Layer 2</div>
+            <div style="font-size:14px;font-weight:600;color:#0C447C;margin-bottom:4px;">Mid-tier workhorse</div>
+            <div style="font-size:12px;color:#185FA5;line-height:1.6;">Handle nuanced but routine tasks. 15% of queries. 5× cheaper than frontier.</div>
+          </div>
+          <div style="padding:14px;background:var(--purple-l);border-radius:var(--r);border:1px solid rgba(83,74,183,.2);">
+            <div style="font-size:11px;font-weight:600;color:var(--purple);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;">Layer 3</div>
+            <div style="font-size:14px;font-weight:600;color:#3C3489;margin-bottom:4px;">Frontier reserve</div>
+            <div style="font-size:12px;color:#534AB7;line-height:1.6;">Complex reasoning only. 5% of queries. Full capability, justified cost.</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:13px;color:var(--text2);padding:10px 14px;background:var(--surface2);border-radius:var(--r);">
+          A well-designed routing architecture typically achieves <strong>70–85% cost reduction</strong> versus using a frontier model uniformly — with no meaningful quality degradation on the 80% of simple queries.
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn" onclick="goPhase(2)">← Previous</button>
+        <span class="ptxt">Module 4 of 5</span>
+        <button class="btn primary" onclick="goPhase(4)">Final module →</button>
+      </div>
+    </div>
+
+    <!-- PHASE 4: Knowledge Check -->
+    <div class="phase" id="phase-4">
+      <p class="eyebrow">Module 5 · 3 minutes</p>
+      <h1 class="ptitle">Knowledge check</h1>
+      <p class="pdesc">Five scenario-driven questions on LLM model selection. Apply what you have learned — think like an AI investment decision-maker.</p>
+
+      <div id="quiz-container"></div>
+
+      <div id="quiz-complete" style="display:none;">
+        <div class="card">
+          <div class="score-ring">
+            <div class="score-num" id="final-score">—</div>
+            <div class="score-lbl">out of 5 correct</div>
+          </div>
+          <p class="score-msg" id="score-msg"></p>
+          <div style="display:flex;gap:10px;justify-content:center;padding-bottom:1.5rem;">
+            <button class="btn" onclick="restartQuiz()">Retry quiz</button>
+            <button class="btn primary" onclick="sendPrompt('I have completed the LLM model selection lab. Give me a real enterprise model selection challenge to apply these frameworks.')">Get a live challenge ↗</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn" onclick="goPhase(3)">← Previous</button>
+        <span class="ptxt">Module 5 of 5 — Lab complete</span>
+        <button class="btn primary" disabled>Complete ✓</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let currentPhase = 0;
+const totalPhases = 5;
+
+const modelDetails = {
+  frontier: {bg:'var(--purple-l)',color:'#3C3489',text:'Frontier models like Claude Opus and GPT-4o represent the current ceiling of LLM capability. They excel at multi-step reasoning, navigating ambiguity, synthesizing conflicting information, and tasks requiring deep domain understanding. Use them when the quality gap versus cheaper models has real business consequence — complex legal analysis, executive-level strategy synthesis, or novel problem solving where errors are costly. Never use them as the default simply because they score highest on benchmarks.'},
+  midtier: {bg:'var(--blue-l)',color:'#0C447C',text:'Mid-tier models like Claude Sonnet and GPT-4 mini are the workhorses of serious AI programs. They handle the vast majority of enterprise tasks — document analysis, structured content generation, code review, customer service escalation — at a fraction of frontier cost. Most organizations discover that 70–80% of tasks they initially used frontier models for are handled just as well by mid-tier, at 80% lower cost.'},
+  fast: {bg:'var(--teal-l)',color:'#085041',text:'Fast/lightweight models like Claude Haiku and Gemini Flash are purpose-built for speed and scale. At sub-second latency and cents-per-thousand-calls pricing, they are ideal for high-volume classification, triage, routing, sentiment detection, and any task where the answer is relatively binary or structured. They are the critical first layer in any intelligent routing architecture.'}
+};
+
+function selectModel(key) {
+  ['frontier','midtier','fast'].forEach(k => {
+    document.getElementById('mc-'+k).classList.remove('selected');
+    document.getElementById('chk-'+k).textContent = '';
+  });
+  document.getElementById('mc-'+key).classList.add('selected');
+  document.getElementById('chk-'+key).textContent = '✓';
+  const d = modelDetails[key];
+  const el = document.getElementById('model-detail');
+  el.style.display = 'block';
+  el.style.background = d.bg;
+  el.style.color = d.color;
+  el.textContent = d.text;
+}
+
+const dimNames = {
+  'complexity':'Task complexity','latency':'Response latency',
+  'cost':'Cost sensitivity','privacy':'Data privacy / sovereignty','reliability':'Output reliability'
+};
+function updateDims() {
+  const vals = ['complexity','latency','cost','privacy','reliability'].map(k => ({
+    k, label: dimNames[k], v: parseInt(document.getElementById('d-'+k).value)
+  }));
+  vals.forEach(x => document.getElementById('dv-'+x.k).textContent = x.v+'/10');
+  vals.sort((a,b) => b.v - a.v);
+  document.getElementById('dim-ranking').innerHTML = vals.map(x =>
+    `<li><strong>${x.label}</strong> — ${x.v}/10</li>`
+  ).join('');
+}
+
+const recLogic = {
+  classify: {fast:'Fast model ideal — classification is the paradigm use case. High volume, simple output, sub-second response required.', mid:'Mid-tier works. Consider fast model if volume exceeds 10K/day.', high:'Fast model strongly recommended. Classification at high volume with frontier model is a significant overspend.'},
+  extract: {fast:'Consider mid-tier — extraction from complex documents may require nuanced understanding beyond fast model capability.', mid:'Mid-tier is the right fit — strong reading comprehension, structured output, cost-effective.', high:'Mid-tier appropriate. Frontier only if documents are highly complex or ambiguous.'},
+  summarize: {fast:'Mid-tier recommended — summarization benefits from richer language understanding.', mid:'Mid-tier is ideal for summarization workloads.', high:'Mid-tier suits most summarization. Frontier for board-level or legal-grade summaries.'},
+  generate: {fast:'Mid-tier or frontier — fast models produce lower quality long-form content.', mid:'Mid-tier works well for most content generation at scale.', high:'Frontier for high-stakes brand content; mid-tier for volume content generation.'},
+  code: {fast:'Mid-tier or frontier for code — quality and correctness matter significantly.', mid:'Mid-tier handles most code generation and review tasks effectively.', high:'Mid-tier is the standard for code generation. Frontier for complex architecture decisions.'},
+  reason: {fast:'Frontier required — fast models are not suited for complex reasoning tasks.', mid:'Mid-tier may suffice for structured analysis; frontier for genuine multi-step reasoning.', high:'Frontier is justified for complex reasoning tasks — this is where quality gap is largest.'},
+  converse: {fast:'Mid-tier recommended — conversational quality matters for user experience.', mid:'Mid-tier is the standard for conversational AI at scale.', high:'Mid-tier with frontier fallback for complex conversations is the optimal routing strategy.'}
+};
+
+function updateRecommendation() {
+  const task = document.getElementById('q-task').value;
+  const volume = document.getElementById('q-volume').value;
+  const error = document.getElementById('q-error').value;
+  const latency = document.getElementById('q-latency').value;
+  if (!task || !volume || !error || !latency) { document.getElementById('rec-box').style.display='none'; return; }
+
+  let tier, reason;
+  const isRealtime = latency === 'realtime';
+  const isHighError = error === 'high';
+  const isLowError = error === 'low';
+  const isHighVol = volume === 'high';
+
+  if (isRealtime) { tier = 'Fast / Lightweight'; reason = 'Real-time latency (<500ms) eliminates frontier and mid-tier options. Fast model is mandatory. If accuracy is critical, add a validation layer rather than upgrading the model tier.'; }
+  else if (task === 'reason' && isLowError) { tier = 'Frontier'; reason = 'Complex reasoning with low error tolerance requires maximum capability. This is the justified use case for frontier models — the quality gap is real and the error cost is material.'; }
+  else if (isHighVol && isHighError) { tier = 'Fast / Lightweight'; reason = 'High volume + high error tolerance = optimize aggressively for cost. Fast model will handle this task class at a fraction of the cost. Errors can be caught downstream.'; }
+  else if (isHighVol) { tier = 'Mid-tier'; reason = 'High volume pushes toward cost efficiency. Mid-tier provides the quality-cost balance needed at scale. Consider a routing layer to push simple sub-tasks to a fast model.'; }
+  else if (task === 'classify' || task === 'extract') { tier = isRealtime || volume === 'high' ? 'Fast / Lightweight' : 'Mid-tier'; reason = recLogic[task]?.[volume === 'high' ? 'high' : 'mid'] || ''; }
+  else { tier = 'Mid-tier'; reason = 'Mid-tier is the rational default for most enterprise workloads — it covers 80% of use cases at 80% lower cost than frontier, with no meaningful quality difference for standard tasks.'; }
+
+  document.getElementById('rec-model').textContent = tier;
+  document.getElementById('rec-reason').textContent = reason;
+  document.getElementById('rec-box').style.display = 'block';
+}
+
+function updateSimCost() {
+  const vol = parseInt(document.getElementById('sim-vol').value);
+  const tok = parseInt(document.getElementById('sim-tok').value);
+  const displayVol = vol >= 1000000 ? (vol/1000000).toFixed(1)+'M' : vol >= 1000 ? Math.round(vol/1000)+'K' : vol;
+  document.getElementById('sim-vol-val').textContent = displayVol;
+  document.getElementById('sim-tok-val').textContent = tok.toLocaleString();
+  const tokens = vol * tok;
+  const costFast = tokens * 0.25 / 1000000;
+  const costMid = tokens * 3 / 1000000;
+  const costFrontier = tokens * 15 / 1000000;
+  document.getElementById('cost-fast').textContent = '$' + Math.round(costFast).toLocaleString();
+  document.getElementById('cost-mid').textContent = '$' + Math.round(costMid).toLocaleString();
+  document.getElementById('cost-frontier').textContent = '$' + Math.round(costFrontier).toLocaleString();
+  const annualDelta = (costFrontier - costFast) * 12;
+  document.getElementById('cost-delta').textContent = '$' + Math.round(annualDelta).toLocaleString();
+  const fte = (annualDelta / 150000).toFixed(1);
+  document.getElementById('cost-eng').textContent = fte + ' FTE engineers';
+}
+
+const scenarios = [
+  {title:'Customer support triage',tier:'Fast / Lightweight',tierColor:'var(--teal)',factor:'Volume + latency',mistake:'Using frontier for all tickets',rationale:'At 50K+ tickets/day, a fast classifier routes tickets to the right queue in <300ms at ~$150/month. The same workload on a frontier model costs $15,000+/month with 3-5× slower responses. The classification task — is this a billing issue, technical issue, or cancellation risk? — does not require deep reasoning. Save frontier model budget for the 2% of escalated complex cases.'},
+  {title:'Legal contract review',tier:'Frontier',tierColor:'var(--purple)',factor:'Error cost + complexity',mistake:'Using mid-tier to save cost',rationale:'Legal contract review is one of the clearest justified uses for frontier models. Missing a material clause, misreading an indemnification provision, or failing to flag a non-standard term carries real financial and legal risk. The quality gap between frontier and mid-tier in nuanced legal reasoning is significant. The cost difference ($75 vs $15 per M output tokens) is trivially small compared to the risk of a $1M contract oversight.'},
+  {title:'Internal employee chatbot',tier:'Mid-tier',tierColor:'var(--blue)',factor:'Quality + cost balance',mistake:'Over-engineering with frontier',rationale:'An internal HR or IT helpdesk chatbot needs to be conversationally coherent and accurate — but most queries are "what is the PTO policy?", "how do I reset my VPN?" — well within mid-tier capability. Deploying a frontier model for 10,000 daily employee queries adds $500–2,000/month with no perceptible quality improvement to end users. Mid-tier handles it, and the budget is better spent on better UX and retrieval quality.'},
+  {title:'Real-time fraud detection',tier:'Fast / Lightweight',tierColor:'var(--teal)',factor:'Sub-100ms latency required',mistake:'Assuming quality = accuracy',rationale:'Fraud detection must run synchronously with the transaction — typically within 100ms. No frontier model can meet this constraint. A fast classifier, trained or prompted to score transaction risk from structured features, can deliver a binary high/low risk signal at the necessary speed. If the signal is ambiguous, route to a secondary asynchronous review layer. Latency is a hard constraint that overrides quality considerations.'},
+  {title:'Executive strategy briefing',tier:'Frontier',tierColor:'var(--purple)',factor:'Synthesis quality + stakes',mistake:'Trusting mid-tier for C-suite output',rationale:'When an AI is synthesizing competitive intelligence, market signals, and internal data into a briefing that will inform a $50M strategic decision, the quality premium of a frontier model is absolutely justified. The audience is your board. The stakes are high. The task requires genuine multi-source synthesis and nuanced framing. This is precisely the use case frontier models were built for — and the cost ($3–5 per briefing) is immaterial at this level.'},
+  {title:'Marketing copy generation',tier:'Mid-tier',tierColor:'var(--blue)',factor:'Volume + quality threshold',mistake:'Assuming creative = frontier',rationale:'Marketing copy generation at volume — product descriptions, ad variants, email subject lines — is well within mid-tier capability. The quality threshold is "good enough to convert," not "indistinguishable from a senior copywriter." Mid-tier models produce fluent, compelling, brand-appropriate copy at scale. Reserve frontier for high-stakes brand campaigns or when copy will appear without human review in sensitive contexts.'}
+];
+
+function showScenario(i) {
+  document.querySelectorAll('.scenario-btn').forEach((b,j) => b.classList.toggle('active', i===j));
+  const s = scenarios[i];
+  document.getElementById('sc-tier').textContent = s.tier;
+  document.getElementById('sc-tier').style.color = s.tierColor;
+  document.getElementById('sc-factor').textContent = s.factor;
+  document.getElementById('sc-mistake').textContent = s.mistake;
+  document.getElementById('sc-rationale').textContent = s.rationale;
+  document.getElementById('scenario-detail').style.display = 'block';
+}
+
+const quizData = [
+  {
+    q:"Your team is building a real-time product recommendation engine. Recommendations must appear within 400ms of page load. Which model tier is the correct choice, and why?",
+    opts:["Frontier — recommendations directly affect revenue, so quality must be maximized","Mid-tier — the balance of quality and speed is ideal for this use case","Fast / Lightweight — 400ms is a hard latency constraint that only fast models can meet","It depends on the number of products — larger catalogues require frontier models"],
+    correct:2,
+    feedback:"Latency is a hard constraint. No frontier or mid-tier model can reliably deliver a response in 400ms end-to-end. Fast models are purpose-built for sub-second inference. If quality is insufficient, the solution is better retrieval and ranking logic — not a heavier model."
+  },
+  {
+    q:"A CISO proposes using an open-source, self-hosted LLM for all internal AI workloads to ensure data sovereignty. What is the primary strategic tradeoff?",
+    opts:["No tradeoff — open-source models are equivalent to proprietary ones today","Capability ceiling: self-hosted open-source models currently lag frontier proprietary models on complex reasoning tasks","Cost: self-hosted models are always more expensive than API calls","Latency: self-hosted models are always slower than cloud APIs"],
+    correct:1,
+    feedback:"Data sovereignty is a legitimate driver — but executives must understand the capability tradeoff. Open-source models (LLaMA, Mistral, etc.) have narrowed the gap significantly on routine tasks but still lag frontier proprietary models on complex multi-step reasoning. The decision should be task-calibrated: self-host for high-sensitivity routine tasks; accept cloud APIs for complex analytical tasks with proper data agreements."
+  },
+  {
+    q:"Your AI program currently uses a frontier model for 100% of workloads at $80,000/month. An engineer proposes a routing layer that sends 70% of queries to a fast model and 25% to a mid-tier model. What is the approximate monthly cost after routing?",
+    opts:["~$68,000 — minimal savings from routing","~$24,000 — routing saves approximately 70%","~$9,000 — routing saves approximately 89%","~$1,500 — routing is nearly free with smart architecture"],
+    correct:2,
+    feedback:"70% to fast (cost ratio ~0.017× frontier), 25% to mid-tier (~0.2× frontier), 5% to frontier (1×). Blended cost ≈ 0.70×0.017 + 0.25×0.2 + 0.05×1.0 ≈ 0.112× of current spend. $80,000 × 0.112 ≈ $9,000/month. Routing architecture is the highest-leverage cost optimization in any mature AI program."
+  },
+  {
+    q:"A product manager argues: 'We should use the best model available — our customers expect the highest quality.' As an executive, what is the most precise response?",
+    opts:["Agree — customer quality expectations always justify frontier model investment","Quality is subjective — let customers choose their model tier","The question is whether the quality difference is perceptible and material to the customer for this specific task. Defaulting to frontier on that basis is imprecise capital allocation","Disagree — cost should always take priority over quality"],
+    correct:2,
+    feedback:"'Best model = best outcome' is a category error. For tasks where fast and frontier models produce outputs that customers cannot distinguish (simple Q&A, product descriptions, form completion), frontier investment delivers zero customer-facing quality improvement. Executives should demand task-specific quality benchmarking, not general model rankings, before approving a premium model budget."
+  },
+  {
+    q:"You are selecting an LLM for a medical triage assistant that helps nurses prioritize patient intake. Error tolerance is very low. Which approach is most defensible?",
+    opts:["Fast model — speed is critical in medical settings","Frontier model alone — maximum capability reduces errors","Frontier model with a human-in-the-loop validation layer — AI recommends, nurse confirms","Mid-tier model with self-correction prompting"],
+    correct:2,
+    feedback:"In high-stakes, low-error-tolerance domains like clinical settings, model tier alone is insufficient as a safety strategy. The correct architecture is frontier capability (to maximize recommendation quality) combined with human-in-the-loop confirmation for any consequential output. AI augments the nurse's judgment; it does not replace it. This is both the ethically correct and regulatorily defensible design."
+  }
+];
+
+let quizScore = 0;
+function buildQuiz() {
+  quizScore = 0;
+  document.getElementById('quiz-container').innerHTML = quizData.map((q,qi) => `
+    <div class="card" id="qc-${qi}" style="${qi>0?'opacity:.4;pointer-events:none;':''}">
+      <p style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase;">Question ${qi+1} of 5</p>
+      <p class="quiz-q">${q.q}</p>
+      <div class="quiz-opts">${q.opts.map((o,oi)=>`<button class="quiz-opt" id="q${qi}o${oi}" onclick="answerQ(${qi},${oi})">${o}</button>`).join('')}</div>
+      <div class="quiz-fb" id="qfb${qi}"></div>
+    </div>
+  `).join('');
+  document.getElementById('quiz-complete').style.display='none';
+}
+function answerQ(qi,sel) {
+  const q = quizData[qi];
+  document.getElementById('qc-'+qi).querySelectorAll('.quiz-opt').forEach(b=>b.style.pointerEvents='none');
+  document.getElementById('q'+qi+'o'+q.correct).classList.add('correct');
+  if(sel!==q.correct) document.getElementById('q'+qi+'o'+sel).classList.add('wrong');
+  else quizScore++;
+  const fb = document.getElementById('qfb'+qi);
+  fb.textContent = q.feedback;
+  fb.className = 'quiz-fb show '+(sel===q.correct?'fb-ok':'fb-no');
+  if(qi+1<quizData.length) setTimeout(()=>{
+    const n=document.getElementById('qc-'+(qi+1));
+    if(n){n.style.opacity='1';n.style.pointerEvents='auto';n.scrollIntoView({behavior:'smooth',block:'nearest'});}
+  },800);
+  else setTimeout(showResults,800);
+}
+function showResults(){
+  document.getElementById('quiz-complete').style.display='block';
+  document.getElementById('final-score').textContent=quizScore;
+  const msgs=['Review all modules — focus on the decision simulator and routing patterns.','Solid start — revisit the selection dimensions and tradeoff scenarios.','Good grasp — refine your understanding of routing architecture economics.','Strong performance — you are ready to apply these frameworks in investment reviews.','Excellent — you can lead model selection decisions at a board level.','Perfect — exceptional command of LLM model selection strategy.'];
+  document.getElementById('score-msg').textContent=msgs[quizScore]||'';
+  document.getElementById('quiz-complete').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function restartQuiz(){buildQuiz();}
+
+function goPhase(n){
+  document.querySelectorAll('.phase').forEach((p,i)=>p.classList.toggle('visible',i===n));
+  document.querySelectorAll('.nav-item').forEach((b,i)=>{
+    b.classList.remove('active','done');
+    if(i===n) b.classList.add('active');
+    else if(i<n) b.classList.add('done');
+  });
+  document.querySelectorAll('.nav-item.done .nav-num').forEach(el=>el.textContent='✓');
+  currentPhase=n;
+  const pct=Math.round(n/(totalPhases-1)*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-lbl').textContent='Module '+(n+1)+' of '+totalPhases;
+  document.getElementById('prog-pct').textContent=pct+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+updateDims();
+updateSimCost();
+buildQuiz();
+</script>
+</body>
+</html>
