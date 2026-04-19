@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Token Economics Lab — Executive AI Program</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --surface2: #f1f0ec;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --text: #1a1917;
+    --text2: #6b6a66;
+    --text3: #9e9d99;
+    --purple: #534AB7;
+    --purple-light: #EEEDFE;
+    --purple-mid: #7F77DD;
+    --teal: #0F6E56;
+    --teal-light: #E1F5EE;
+    --amber: #854F0B;
+    --amber-light: #FAEEDA;
+    --coral: #993C1D;
+    --coral-light: #FAECE7;
+    --blue: #185FA5;
+    --blue-light: #E6F1FB;
+    --green: #3B6D11;
+    --green-light: #EAF3DE;
+    --red: #A32D2D;
+    --red-light: #FCEBEB;
+    --radius: 10px;
+    --radius-lg: 14px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* HEADER */
+  .site-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-brand { display: flex; align-items: center; gap: 10px; }
+  .header-logo {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--purple); display: flex; align-items: center;
+    justify-content: center; color: white; font-size: 15px; font-weight: 600;
+  }
+  .header-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .header-sub { font-size: 12px; color: var(--text2); margin-left: 2px; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .timer-pill {
+    font-size: 12px; font-weight: 500; color: var(--text2);
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 4px 12px; border-radius: 20px;
+  }
+
+  /* LAYOUT */
+  .layout { display: grid; grid-template-columns: 220px 1fr; min-height: calc(100vh - 60px); }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 60px;
+    height: calc(100vh - 60px);
+    overflow-y: auto;
+  }
+  .sidebar-section { padding: 0 1rem; margin-bottom: 0.5rem; }
+  .sidebar-label {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text3); padding: 0 0.5rem;
+    margin-bottom: 6px; margin-top: 1rem; display: block;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+    border-radius: var(--radius); cursor: pointer; transition: all 0.15s;
+    font-size: 13px; color: var(--text2); border: none; background: none;
+    width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--purple-light); color: var(--purple); font-weight: 500; }
+  .nav-item.done { color: var(--green); }
+  .nav-item.done .nav-num { background: var(--green-light); color: var(--green); }
+  .nav-num {
+    width: 22px; height: 22px; border-radius: 6px; background: var(--surface2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 600; color: var(--text2); flex-shrink: 0;
+  }
+  .nav-item.active .nav-num { background: var(--purple-mid); color: white; }
+  .nav-time { font-size: 11px; color: var(--text3); margin-left: auto; }
+
+  /* PROGRESS BAR */
+  .progress-bar-wrap { padding: 1rem 1.5rem; margin-top: auto; border-top: 1px solid var(--border); }
+  .progress-track { height: 4px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--purple); border-radius: 2px; transition: width 0.4s; }
+  .progress-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); margin-top: 6px; }
+
+  /* MAIN CONTENT */
+  .main { padding: 2rem; max-width: 800px; }
+
+  .phase { display: none; }
+  .phase.visible { display: block; }
+
+  .phase-eyebrow {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--purple); margin-bottom: 6px;
+  }
+  .phase-title { font-size: 26px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+  .phase-desc { font-size: 15px; color: var(--text2); line-height: 1.7; margin-bottom: 1.75rem; }
+
+  /* CARDS */
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1rem;
+  }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 1rem; }
+
+  /* METRICS */
+  .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 1rem; }
+  .metric { background: var(--surface2); border-radius: var(--radius); padding: 14px 16px; }
+  .metric-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; font-weight: 500; }
+  .metric-value { font-size: 22px; font-weight: 600; color: var(--text); }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* SLIDERS */
+  .slider-row { display: flex; align-items: center; gap: 14px; margin: 10px 0; }
+  .slider-label { font-size: 13px; color: var(--text2); min-width: 150px; }
+  .slider-val { font-size: 13px; font-weight: 600; min-width: 70px; text-align: right; color: var(--text); }
+  input[type=range] {
+    flex: 1; -webkit-appearance: none; height: 4px;
+    border-radius: 2px; background: var(--surface2); outline: none;
+    border: 1px solid var(--border);
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 16px; height: 16px;
+    border-radius: 50%; background: var(--purple); cursor: pointer;
+    border: 2px solid white; box-shadow: 0 0 0 1px var(--purple);
+  }
+
+  /* TOKEN CHIPS */
+  .token-visual { display: flex; flex-wrap: wrap; gap: 4px; margin: 12px 0; }
+  .token-chip {
+    display: inline-block; padding: 3px 8px; border-radius: 5px;
+    font-size: 12px; font-weight: 500; line-height: 1.6; font-family: 'DM Mono', monospace;
+    cursor: default; transition: transform 0.1s;
+  }
+  .token-chip:hover { transform: translateY(-2px); }
+  .t-word { background: var(--purple-light); color: var(--purple); }
+  .t-sub { background: var(--blue-light); color: var(--blue); }
+  .t-punct { background: var(--amber-light); color: var(--amber); }
+  .t-space { background: var(--surface2); color: var(--text3); }
+  .t-num { background: var(--green-light); color: var(--green); }
+
+  /* LEGEND */
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+  /* COST BARS */
+  .cost-bar-wrap { margin: 10px 0; }
+  .cost-bar-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 5px; font-weight: 500; }
+  .cost-bar { height: 20px; border-radius: 5px; background: var(--surface2); overflow: hidden; }
+  .cost-bar-fill { height: 100%; border-radius: 5px; transition: width 0.4s; }
+
+  /* INSIGHT BOX */
+  .insight-box {
+    padding: 14px 18px; border-left: 3px solid var(--purple);
+    background: var(--purple-light); border-radius: 0 var(--radius) var(--radius) 0;
+    margin: 1rem 0;
+  }
+  .insight-box p { font-size: 13px; color: #3C3489; line-height: 1.7; }
+  .insight-box strong { color: var(--purple); }
+
+  /* PROMPT EDITOR */
+  .prompt-editor {
+    width: 100%; min-height: 90px; font-size: 13px;
+    font-family: 'DM Mono', monospace; border: 1px solid var(--border2);
+    border-radius: var(--radius); padding: 10px 14px; color: var(--text);
+    background: var(--surface); resize: vertical; outline: none;
+    transition: border-color 0.15s;
+  }
+  .prompt-editor:focus { border-color: var(--purple-mid); }
+
+  /* COMPARISON GRID */
+  .comparison-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .cmp-card { padding: 14px 16px; border-radius: var(--radius); border: 1px solid; }
+  .cmp-card.good { border-color: #97C459; background: var(--green-light); }
+  .cmp-card.bad { border-color: #F09595; background: var(--red-light); }
+  .cmp-tag { font-size: 11px; font-weight: 600; margin-bottom: 8px; display: block; }
+  .cmp-tag.good { color: var(--green); }
+  .cmp-tag.bad { color: var(--red); }
+  .cmp-text { font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text); line-height: 1.7; }
+  .cmp-meta { font-size: 11px; color: var(--text3); margin-top: 8px; }
+
+  /* QUIZ */
+  .quiz-q { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 14px; line-height: 1.6; }
+  .quiz-opts { display: flex; flex-direction: column; gap: 8px; }
+  .quiz-opt {
+    padding: 11px 16px; border: 1px solid var(--border2);
+    border-radius: var(--radius); font-size: 14px; color: var(--text);
+    cursor: pointer; transition: all 0.15s; text-align: left;
+    background: var(--surface); font-family: 'DM Sans', sans-serif;
+  }
+  .quiz-opt:hover { background: var(--surface2); border-color: var(--border2); }
+  .quiz-opt.correct { background: var(--green-light); border-color: #97C459; color: var(--green); font-weight: 500; }
+  .quiz-opt.wrong { background: var(--red-light); border-color: #F09595; color: var(--red); }
+  .quiz-feedback {
+    margin-top: 12px; font-size: 13px; padding: 12px 16px;
+    border-radius: var(--radius); display: none; line-height: 1.6;
+  }
+  .quiz-feedback.show { display: block; }
+  .fb-correct { background: var(--green-light); color: var(--green); border: 1px solid #97C459; }
+  .fb-wrong { background: var(--red-light); color: var(--red); border: 1px solid #F09595; }
+
+  /* TABLE */
+  .data-table { width: 100%; font-size: 13px; border-collapse: collapse; }
+  .data-table th { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); padding: 8px 12px; border-bottom: 1px solid var(--border); text-align: left; }
+  .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+
+  /* PILL BADGE */
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .pill-green { background: var(--green-light); color: var(--green); }
+  .pill-blue { background: var(--blue-light); color: var(--blue); }
+  .pill-purple { background: var(--purple-light); color: var(--purple); }
+
+  /* ACTIONS */
+  .action-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.25rem; border-top: 1px solid var(--border); }
+  .btn {
+    padding: 9px 20px; border: 1px solid var(--border2);
+    border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    cursor: pointer; background: var(--surface); color: var(--text);
+    transition: all 0.15s; font-family: 'DM Sans', sans-serif;
+  }
+  .btn:hover { background: var(--surface2); }
+  .btn.primary { background: var(--purple); border-color: var(--purple); color: white; }
+  .btn.primary:hover { background: #3C3489; }
+  .btn:disabled { opacity: 0.35; pointer-events: none; }
+  .progress-text { font-size: 12px; color: var(--text3); }
+
+  /* SCORE */
+  .score-ring { text-align: center; padding: 2rem 1rem 1rem; }
+  .score-num { font-size: 64px; font-weight: 700; color: var(--purple); line-height: 1; }
+  .score-label { font-size: 15px; color: var(--text2); margin-top: 8px; }
+  .score-msg { text-align: center; font-size: 14px; color: var(--text2); padding: 0 2rem 1.5rem; }
+
+  /* TECHNIQUE CHIPS */
+  .technique-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .technique-chip { font-size: 13px; padding: 10px 14px; border-radius: var(--radius); line-height: 1.5; }
+
+  /* CONTEXT BAR */
+  .ctx-bar { height: 28px; border-radius: 6px; display: flex; overflow: hidden; border: 1px solid var(--border); margin: 1rem 0; }
+
+  /* SAVINGS READOUT */
+  .savings-panel { padding: 12px 16px; background: var(--surface2); border-radius: var(--radius); margin-top: 12px; display: flex; gap: 2rem; }
+  .savings-item { display: flex; flex-direction: column; }
+  .savings-label { font-size: 11px; color: var(--text3); }
+  .savings-val { font-size: 16px; font-weight: 600; color: var(--text); }
+
+  textarea { font-family: 'DM Mono', monospace !important; }
+
+  @media (max-width: 700px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .main { padding: 1.25rem; }
+    .metric-row { grid-template-columns: 1fr 1fr; }
+    .comparison-grid { grid-template-columns: 1fr; }
+    .technique-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-brand">
+    <div class="header-logo">T</div>
+    <div>
+      <div class="header-name">Token Economics Lab</div>
+      <div class="header-sub">Executive AI Program</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="timer-pill">30-minute lab</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <span class="sidebar-label">Modules</span>
+      <button class="nav-item active" onclick="goPhase(0)">
+        <span class="nav-num">1</span> What is a token?
+        <span class="nav-time">5 min</span>
+      </button>
+      <button class="nav-item" onclick="goPhase(1)">
+        <span class="nav-num">2</span> Cost structure
+        <span class="nav-time">5 min</span>
+      </button>
+      <button class="nav-item" onclick="goPhase(2)">
+        <span class="nav-num">3</span> Context window
+        <span class="nav-time">5 min</span>
+      </button>
+      <button class="nav-item" onclick="goPhase(3)">
+        <span class="nav-num">4</span> Prompt lab
+        <span class="nav-time">8 min</span>
+      </button>
+      <button class="nav-item" onclick="goPhase(4)">
+        <span class="nav-num">5</span> ROI decisions
+        <span class="nav-time">4 min</span>
+      </button>
+      <button class="nav-item" onclick="goPhase(5)">
+        <span class="nav-num">6</span> Knowledge check
+        <span class="nav-time">3 min</span>
+      </button>
+    </div>
+
+    <div style="padding: 0 1rem; margin-top: 1.5rem;">
+      <div class="progress-bar-wrap" style="padding: 0;">
+        <div style="font-size: 11px; color: var(--text3); margin-bottom: 8px; font-weight: 500;">YOUR PROGRESS</div>
+        <div class="progress-track">
+          <div class="progress-fill" id="sidebar-progress" style="width: 0%"></div>
+        </div>
+        <div class="progress-meta">
+          <span id="progress-label">Module 1 of 6</span>
+          <span id="progress-pct">0%</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- PHASE 0: What is a token -->
+    <div class="phase visible" id="phase-0">
+      <p class="phase-eyebrow">Module 1 · 5 minutes</p>
+      <h1 class="phase-title">What exactly is a token?</h1>
+      <p class="phase-desc">Tokens are the atomic unit of all LLM computation. Every character you type — and every word the model returns — is measured and billed in tokens. Understanding this is the foundation of every AI cost decision.</p>
+
+      <div class="card">
+        <p class="card-title">Live token visualizer — hover over chips to see their type</p>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#7F77DD"></div> Full word</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#378ADD"></div> Subword</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#EF9F27"></div> Punctuation</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c5c4bf"></div> Space</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#639922"></div> Number</div>
+        </div>
+        <div class="token-visual" id="token-visual"></div>
+        <p style="font-size: 12px; color: var(--text3); margin-top: 10px;">Token count: <strong id="tok-count">0</strong> &nbsp;|&nbsp; Cost at $3/M tokens: <strong id="tok-cost">$0.000000</strong></p>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Tokenize your own text</p>
+        <textarea class="prompt-editor" id="custom-text" placeholder="Type anything to see its approximate token count..." oninput="tokenizeCustom()"></textarea>
+        <div style="display: flex; gap: 1.5rem; margin-top: 8px;">
+          <span style="font-size: 13px; color: var(--text2);">Tokens: <strong id="custom-count">0</strong></span>
+          <span style="font-size: 13px; color: var(--text2);">Characters per token: <strong id="char-ratio">—</strong></span>
+          <span style="font-size: 13px; color: var(--text2);">Cost at $3/M: <strong id="custom-cost">$0.00</strong></span>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        <p>Key insight: English text averages ~4 characters per token, or roughly 0.75 words per token. A 1,000-word executive report ≈ 1,330 tokens. At $3/M input tokens, that's less than half a cent — but scale to millions of daily queries and costs compound rapidly.</p>
+      </div>
+
+      <div class="metric-row">
+        <div class="metric">
+          <p class="metric-label">1 token ≈</p>
+          <p class="metric-value">¾</p>
+          <p class="metric-sub">of an English word</p>
+        </div>
+        <div class="metric">
+          <p class="metric-label">1,000 tokens ≈</p>
+          <p class="metric-value">750</p>
+          <p class="metric-sub">words of prose</p>
+        </div>
+        <div class="metric">
+          <p class="metric-label">Typical context limit</p>
+          <p class="metric-value">128K</p>
+          <p class="metric-sub">tokens per API call</p>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn" disabled>← Previous</button>
+        <span class="progress-text">Module 1 of 6</span>
+        <button class="btn primary" onclick="goPhase(1)">Next module →</button>
+      </div>
+    </div>
+
+    <!-- PHASE 1: Cost Structure -->
+    <div class="phase" id="phase-1">
+      <p class="phase-eyebrow">Module 2 · 5 minutes</p>
+      <h1 class="phase-title">The cost structure of an API call</h1>
+      <p class="phase-desc">Every LLM interaction has two cost vectors: input tokens (what you send) and output tokens (what you receive). Output tokens typically cost 3–5× more than input tokens because of how autoregressive generation works.</p>
+
+      <div class="card">
+        <p class="card-title">Live cost simulator</p>
+        <div class="slider-row">
+          <span class="slider-label">Input tokens</span>
+          <input type="range" min="100" max="50000" step="100" value="2000" id="in-tok" oninput="updateCost()">
+          <span class="slider-val" id="in-tok-val">2,000</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Output tokens</span>
+          <input type="range" min="50" max="4000" step="50" value="500" id="out-tok" oninput="updateCost()">
+          <span class="slider-val" id="out-tok-val">500</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Daily call volume</span>
+          <input type="range" min="1" max="100000" step="100" value="1000" id="vol" oninput="updateCost()">
+          <span class="slider-val" id="vol-val">1,000</span>
+        </div>
+
+        <div class="metric-row" style="margin-top: 1.25rem;">
+          <div class="metric">
+            <p class="metric-label">Cost per call</p>
+            <p class="metric-value" id="cost-per-call">$0.0014</p>
+            <p class="metric-sub">input + output</p>
+          </div>
+          <div class="metric">
+            <p class="metric-label">Daily spend</p>
+            <p class="metric-value" id="cost-daily">$1.35</p>
+            <p class="metric-sub">at current volume</p>
+          </div>
+          <div class="metric">
+            <p class="metric-label">Annual projection</p>
+            <p class="metric-value" id="cost-annual">$493</p>
+            <p class="metric-sub">365 days</p>
+          </div>
+        </div>
+
+        <div class="cost-bar-wrap">
+          <div class="cost-bar-label"><span>Input cost share</span><span id="in-share">—</span></div>
+          <div class="cost-bar"><div class="cost-bar-fill" id="in-bar" style="width:30%; background:#378ADD;"></div></div>
+        </div>
+        <div class="cost-bar-wrap">
+          <div class="cost-bar-label"><span>Output cost share</span><span id="out-share">—</span></div>
+          <div class="cost-bar"><div class="cost-bar-fill" id="out-bar" style="width:70%; background:#7F77DD;"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Model pricing comparison (approximate, per 1M tokens)</p>
+        <table class="data-table">
+          <thead>
+            <tr><th>Model tier</th><th>Example</th><th>Input</th><th>Output</th><th>Best for</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Frontier</td><td>Claude Opus</td><td>$15</td><td>$75</td><td>Complex reasoning, strategy</td></tr>
+            <tr><td>Mid-tier</td><td>Claude Sonnet</td><td>$3</td><td>$15</td><td>Analysis, coding, writing</td></tr>
+            <tr><td>Fast / Lightweight</td><td>Claude Haiku</td><td>$0.25</td><td>$1.25</td><td>Triage, classification, routing</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="insight-box">
+        <p><strong>Executive decision:</strong> Routing simpler tasks to a lightweight model and reserving frontier models for complex reasoning can reduce costs by <strong>80–95%</strong> with minimal quality drop. This is the single highest-leverage architectural decision in any AI deployment.</p>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn" onclick="goPhase(0)">← Previous</button>
+        <span class="progress-text">Module 2 of 6</span>
+        <button class="btn primary" onclick="goPhase(2)">Next module →</button>
+      </div>
+    </div>
+
+    <!-- PHASE 2: Context Window -->
+    <div class="phase" id="phase-2">
+      <p class="phase-eyebrow">Module 3 · 5 minutes</p>
+      <h1 class="phase-title">Context windows: the working memory limit</h1>
+      <p class="phase-desc">The context window is the model's working memory — it holds everything the model "sees" at once. Understanding how it fills shapes every enterprise architecture decision, from chatbot design to RAG pipelines.</p>
+
+      <div class="card">
+        <p class="card-title">Context window explorer — adjust each component</p>
+        <div class="slider-row">
+          <span class="slider-label">System prompt</span>
+          <input type="range" min="0" max="20000" step="500" value="2000" id="sys-tok" oninput="updateContext()">
+          <span class="slider-val" id="sys-val">2,000</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Chat history</span>
+          <input type="range" min="0" max="60000" step="1000" value="10000" id="hist-tok" oninput="updateContext()">
+          <span class="slider-val" id="hist-val">10,000</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Retrieved docs (RAG)</span>
+          <input type="range" min="0" max="40000" step="1000" value="5000" id="rag-tok" oninput="updateContext()">
+          <span class="slider-val" id="rag-val">5,000</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">User query</span>
+          <input type="range" min="10" max="2000" step="10" value="200" id="query-tok" oninput="updateContext()">
+          <span class="slider-val" id="query-val">200</span>
+        </div>
+
+        <div class="ctx-bar" id="ctx-bar"></div>
+        <div class="legend" id="ctx-legend"></div>
+
+        <div class="metric-row">
+          <div class="metric">
+            <p class="metric-label">Tokens used</p>
+            <p class="metric-value" id="ctx-used">17,200</p>
+            <p class="metric-sub">of 128K limit</p>
+          </div>
+          <div class="metric">
+            <p class="metric-label">Available for output</p>
+            <p class="metric-value" id="ctx-remain">110,800</p>
+            <p class="metric-sub">tokens remaining</p>
+          </div>
+          <div class="metric">
+            <p class="metric-label">Window utilization</p>
+            <p class="metric-value" id="ctx-pct">13%</p>
+            <p class="metric-sub">of 128K context</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        <p><strong>Architecture insight:</strong> A 5,000-token system prompt on 100K daily calls = 500M tokens/day in system prompt cost alone. At $3/M, that's <strong>$1,500/day — $547,500/year</strong> from your instruction text. Compressing prompts ruthlessly using structured formats is always worth the investment.</p>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn" onclick="goPhase(1)">← Previous</button>
+        <span class="progress-text">Module 3 of 6</span>
+        <button class="btn primary" onclick="goPhase(3)">Next module →</button>
+      </div>
+    </div>
+
+    <!-- PHASE 3: Prompt Lab -->
+    <div class="phase" id="phase-3">
+      <p class="phase-eyebrow">Module 4 · 8 minutes</p>
+      <h1 class="phase-title">Prompt engineering lab</h1>
+      <p class="phase-desc">Every token you remove from a prompt is money saved at scale. Compare verbose vs. optimized prompts and calculate your own savings in the sandbox below.</p>
+
+      <div class="card">
+        <p class="card-title">Before vs. after: prompt optimization in practice</p>
+        <div class="comparison-grid">
+          <div class="cmp-card bad">
+            <span class="cmp-tag bad">Unoptimized — 87 tokens</span>
+            <p class="cmp-text">Hello! I was wondering if you could please help me by analyzing this customer feedback and telling me what the main sentiment is, whether it is positive or negative, and also what the key themes are that appear in the feedback. Please be thorough.</p>
+            <p class="cmp-meta">Cost at $3/M: $0.000261</p>
+          </div>
+          <div class="cmp-card good">
+            <span class="cmp-tag good">Optimized — 21 tokens</span>
+            <p class="cmp-text">Analyze feedback. Return: sentiment (positive/negative/neutral), top 3 themes. Be concise.</p>
+            <p class="cmp-meta">Cost at $3/M: $0.000063 · <strong>76% savings</strong></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Your optimization sandbox</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <p style="font-size: 12px; color: var(--text2); margin-bottom: 6px; font-weight: 500;">Original prompt</p>
+            <textarea class="prompt-editor" id="orig-prompt" placeholder="Paste your verbose prompt here..." oninput="calcOptimization()"></textarea>
+            <p style="font-size: 12px; color: var(--text3); margin-top: 5px;">~<strong id="orig-tok">0</strong> tokens</p>
+          </div>
+          <div>
+            <p style="font-size: 12px; color: var(--text2); margin-bottom: 6px; font-weight: 500;">Optimized version</p>
+            <textarea class="prompt-editor" id="opt-prompt" placeholder="Type your optimized version here..." oninput="calcOptimization()"></textarea>
+            <p style="font-size: 12px; color: var(--text3); margin-top: 5px;">~<strong id="opt-tok">0</strong> tokens</p>
+          </div>
+        </div>
+        <div class="savings-panel">
+          <div class="savings-item">
+            <span class="savings-label">Tokens saved</span>
+            <span class="savings-val" id="opt-savings">—</span>
+          </div>
+          <div class="savings-item">
+            <span class="savings-label">Annual savings (10K calls/day)</span>
+            <span class="savings-val" id="opt-annual">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Optimization techniques — executive cheat sheet</p>
+        <div class="technique-grid">
+          <div class="technique-chip" style="background: var(--purple-light); color: #3C3489;">Use imperative verbs: "Summarize" not "Could you please summarize"</div>
+          <div class="technique-chip" style="background: var(--teal-light); color: var(--teal);">Use structured output: JSON/lists beat narrative explanations</div>
+          <div class="technique-chip" style="background: var(--amber-light); color: var(--amber);">Specify limits: "3 bullet points max" prevents output token bloat</div>
+          <div class="technique-chip" style="background: var(--green-light); color: var(--green);">Remove filler: delete "please", "certainly", "be sure to"</div>
+          <div class="technique-chip" style="background: var(--coral-light); color: var(--coral);">Use abbreviations: "pos/neg/neu" vs "positive/negative/neutral"</div>
+          <div class="technique-chip" style="background: var(--blue-light); color: var(--blue);">One good example beats 200 words of instruction — use few-shot</div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn" onclick="goPhase(2)">← Previous</button>
+        <span class="progress-text">Module 4 of 6</span>
+        <button class="btn primary" onclick="goPhase(4)">Next module →</button>
+      </div>
+    </div>
+
+    <!-- PHASE 4: ROI -->
+    <div class="phase" id="phase-4">
+      <p class="phase-eyebrow">Module 5 · 4 minutes</p>
+      <h1 class="phase-title">Token economics as strategic ROI decisions</h1>
+      <p class="phase-desc">Token spend is a capital allocation problem. The question is never "how do we reduce tokens?" — it's "where does token quality create the most business value?"</p>
+
+      <div class="card">
+        <p class="card-title">Strategic token allocation framework</p>
+        <table class="data-table">
+          <thead>
+            <tr><th>Use case</th><th>Token strategy</th><th>Recommended model</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Customer triage</td>
+              <td>Short input, binary output — minimize both</td>
+              <td><span class="pill pill-green">Haiku</span></td>
+            </tr>
+            <tr>
+              <td>Contract analysis</td>
+              <td>Long input (full doc), medium output — accept input cost</td>
+              <td><span class="pill pill-blue">Sonnet</span></td>
+            </tr>
+            <tr>
+              <td>Executive strategy</td>
+              <td>Premium quality required — invest in both vectors</td>
+              <td><span class="pill pill-purple">Opus</span></td>
+            </tr>
+            <tr>
+              <td>Code generation</td>
+              <td>Short prompt, long structured output — constrain with schema</td>
+              <td><span class="pill pill-blue">Sonnet</span></td>
+            </tr>
+            <tr>
+              <td>Sentiment analysis (bulk)</td>
+              <td>High volume, simple task — optimize input heavily</td>
+              <td><span class="pill pill-green">Haiku</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <p class="card-title">ROI calculator — prompt engineering investment</p>
+        <div class="slider-row">
+          <span class="slider-label">Engineer hours invested</span>
+          <input type="range" min="1" max="80" step="1" value="8" id="eng-hrs" oninput="calcROI()">
+          <span class="slider-val" id="eng-hrs-val">8h</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Token reduction achieved</span>
+          <input type="range" min="5" max="80" step="5" value="40" id="tok-reduce" oninput="calcROI()">
+          <span class="slider-val" id="tok-reduce-val">40%</span>
+        </div>
+        <div class="slider-row">
+          <span class="slider-label">Current monthly AI spend</span>
+          <input type="range" min="500" max="100000" step="500" value="10000" id="monthly-spend" oninput="calcROI()">
+          <span class="slider-val" id="monthly-spend-val">$10,000</span>
+        </div>
+
+        <div class="metric-row" style="margin-top: 1.25rem;">
+          <div class="metric">
+            <p class="metric-label">Monthly savings</p>
+            <p class="metric-value" id="roi-monthly">$4,000</p>
+            <p class="metric-sub">from optimization</p>
+          </div>
+          <div class="metric">
+            <p class="metric-label">Payback period</p>
+            <p class="metric-value" id="roi-payback">&lt;1 day</p>
+            <p class="metric-sub">at $150/eng hour</p>
+          </div>
+          <div class="metric">
+            <p class="metric-label">Year-1 net savings</p>
+            <p class="metric-value" id="roi-net">$46,800</p>
+            <p class="metric-sub">after engineering cost</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="insight-box">
+        <p><strong>Bottom line:</strong> Prompt engineering investment almost always has a payback period measured in days, not months. It is among the highest-return technical investments in any AI program — and it requires zero model retraining.</p>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn" onclick="goPhase(3)">← Previous</button>
+        <span class="progress-text">Module 5 of 6</span>
+        <button class="btn primary" onclick="goPhase(5)">Final module →</button>
+      </div>
+    </div>
+
+    <!-- PHASE 5: Knowledge Check -->
+    <div class="phase" id="phase-5">
+      <p class="phase-eyebrow">Module 6 · 3 minutes</p>
+      <h1 class="phase-title">Knowledge check</h1>
+      <p class="phase-desc">Five scenario-based questions to confirm your understanding of token economics. Each question unlocks after answering the previous.</p>
+
+      <div id="quiz-container"></div>
+
+      <div id="quiz-complete" style="display:none;">
+        <div class="card">
+          <div class="score-ring">
+            <div class="score-num" id="final-score">—</div>
+            <div class="score-label">out of 5 correct</div>
+          </div>
+          <p class="score-msg" id="score-msg"></p>
+          <div style="display: flex; gap: 10px; justify-content: center; padding-bottom: 1.5rem;">
+            <button class="btn" onclick="restartQuiz()">Retry quiz</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-bar">
+        <button class="btn" onclick="goPhase(4)">← Previous</button>
+        <span class="progress-text">Module 6 of 6 — Lab complete</span>
+        <button class="btn primary" disabled>Complete ✓</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+let currentPhase = 0;
+const totalPhases = 6;
+
+const sampleTokens = [
+  {text:"Strategic",type:"t-word"},{text:" ",type:"t-space"},
+  {text:"AI",type:"t-word"},{text:" ",type:"t-space"},
+  {text:"deploy",type:"t-sub"},{text:"ment",type:"t-sub"},
+  {text:" ",type:"t-space"},{text:"cost",type:"t-word"},
+  {text:"s",type:"t-sub"},{text:" ",type:"t-space"},
+  {text:"$",type:"t-punct"},{text:"3",type:"t-num"},
+  {text:".",type:"t-punct"},{text:"50",type:"t-num"},
+  {text:" ",type:"t-space"},{text:"per",type:"t-word"},
+  {text:" ",type:"t-space"},{text:"million",type:"t-word"},
+  {text:" ",type:"t-space"},{text:"token",type:"t-sub"},
+  {text:"s",type:"t-sub"},{text:".",type:"t-punct"}
+];
+
+function renderTokenVisual() {
+  const el = document.getElementById('token-visual');
+  el.innerHTML = sampleTokens.map(t =>
+    `<span class="token-chip ${t.type}" title="${t.type.replace('t-','')}">${t.text === ' ' ? '·' : t.text}</span>`
+  ).join('');
+  document.getElementById('tok-count').textContent = sampleTokens.length;
+  document.getElementById('tok-cost').textContent = '$' + (sampleTokens.length * 3 / 1000000).toFixed(6);
+}
+
+function estimateTokens(text) {
+  if (!text) return 0;
+  return Math.max(1, Math.round(text.length / 4));
+}
+
+function tokenizeCustom() {
+  const text = document.getElementById('custom-text').value;
+  const count = estimateTokens(text);
+  document.getElementById('custom-count').textContent = count;
+  document.getElementById('char-ratio').textContent = text.length > 0 ? (text.length / count).toFixed(1) : '—';
+  document.getElementById('custom-cost').textContent = '$' + (count * 3 / 1000000).toFixed(6);
+}
+
+function updateCost() {
+  const inTok = parseInt(document.getElementById('in-tok').value);
+  const outTok = parseInt(document.getElementById('out-tok').value);
+  const vol = parseInt(document.getElementById('vol').value);
+  const inRate = 3, outRate = 15;
+  const costPerCall = (inTok * inRate + outTok * outRate) / 1000000;
+  const daily = costPerCall * vol;
+  const annual = daily * 365;
+  document.getElementById('in-tok-val').textContent = inTok.toLocaleString();
+  document.getElementById('out-tok-val').textContent = outTok.toLocaleString();
+  document.getElementById('vol-val').textContent = vol.toLocaleString();
+  document.getElementById('cost-per-call').textContent = '$' + costPerCall.toFixed(5);
+  document.getElementById('cost-daily').textContent = '$' + daily.toFixed(2);
+  document.getElementById('cost-annual').textContent = '$' + Math.round(annual).toLocaleString();
+  const inCost = inTok * inRate / 1000000;
+  const outCost = outTok * outRate / 1000000;
+  const total = inCost + outCost;
+  const inPct = Math.round(inCost / total * 100);
+  const outPct = 100 - inPct;
+  document.getElementById('in-share').textContent = inPct + '%';
+  document.getElementById('out-share').textContent = outPct + '%';
+  document.getElementById('in-bar').style.width = inPct + '%';
+  document.getElementById('out-bar').style.width = outPct + '%';
+}
+
+function updateContext() {
+  const sys = parseInt(document.getElementById('sys-tok').value);
+  const hist = parseInt(document.getElementById('hist-tok').value);
+  const rag = parseInt(document.getElementById('rag-tok').value);
+  const query = parseInt(document.getElementById('query-tok').value);
+  document.getElementById('sys-val').textContent = sys.toLocaleString();
+  document.getElementById('hist-val').textContent = hist.toLocaleString();
+  document.getElementById('rag-val').textContent = rag.toLocaleString();
+  document.getElementById('query-val').textContent = query.toLocaleString();
+  const total = sys + hist + rag + query;
+  const limit = 128000;
+  const remain = Math.max(0, limit - total);
+  const pct = Math.min(100, Math.round(total / limit * 100));
+  document.getElementById('ctx-used').textContent = total.toLocaleString();
+  document.getElementById('ctx-remain').textContent = remain.toLocaleString();
+  document.getElementById('ctx-pct').textContent = pct + '%';
+  const segments = [
+    {label:'System prompt', val:sys, color:'#7F77DD'},
+    {label:'Chat history', val:hist, color:'#378ADD'},
+    {label:'RAG documents', val:rag, color:'#EF9F27'},
+    {label:'User query', val:query, color:'#1D9E75'},
+    {label:'Available', val:remain, color:'#D3D1C7'}
+  ];
+  document.getElementById('ctx-bar').innerHTML = segments.filter(s=>s.val>0).map(s=>
+    `<div style="flex:${s.val};background:${s.color};" title="${s.label}: ${s.val.toLocaleString()} tokens"></div>`
+  ).join('');
+  document.getElementById('ctx-legend').innerHTML = segments.filter(s=>s.val>0).map(s=>
+    `<div class="legend-item"><div class="legend-dot" style="background:${s.color}"></div><span>${s.label} (${s.val.toLocaleString()})</span></div>`
+  ).join('');
+}
+
+function calcOptimization() {
+  const orig = document.getElementById('orig-prompt').value;
+  const opt = document.getElementById('opt-prompt').value;
+  const origTok = estimateTokens(orig);
+  const optTok = estimateTokens(opt);
+  document.getElementById('orig-tok').textContent = origTok;
+  document.getElementById('opt-tok').textContent = optTok;
+  if (orig && opt && origTok > optTok) {
+    const saved = origTok - optTok;
+    const pct = Math.round(saved / origTok * 100);
+    const annual = Math.round(saved * 3 / 1000000 * 10000 * 365);
+    document.getElementById('opt-savings').textContent = saved + ' tokens (' + pct + '%)';
+    document.getElementById('opt-annual').textContent = '$' + annual.toLocaleString();
+  } else {
+    document.getElementById('opt-savings').textContent = '—';
+    document.getElementById('opt-annual').textContent = '—';
+  }
+}
+
+function calcROI() {
+  const hrs = parseInt(document.getElementById('eng-hrs').value);
+  const reduce = parseInt(document.getElementById('tok-reduce').value) / 100;
+  const spend = parseInt(document.getElementById('monthly-spend').value);
+  document.getElementById('eng-hrs-val').textContent = hrs + 'h';
+  document.getElementById('tok-reduce-val').textContent = Math.round(reduce * 100) + '%';
+  document.getElementById('monthly-spend-val').textContent = '$' + spend.toLocaleString();
+  const monthlySave = Math.round(spend * reduce);
+  const engCost = hrs * 150;
+  const paybackDays = engCost / (monthlySave / 30);
+  const netYear = monthlySave * 12 - engCost;
+  document.getElementById('roi-monthly').textContent = '$' + monthlySave.toLocaleString();
+  document.getElementById('roi-payback').textContent = paybackDays < 1 ? '<1 day' : Math.round(paybackDays) + ' days';
+  document.getElementById('roi-net').textContent = '$' + Math.round(netYear).toLocaleString();
+}
+
+const quizData = [
+  {
+    q: "Your company processes 50,000 customer support tickets per day using an LLM. Output averages 300 tokens. What is the HIGHEST leverage action to reduce costs?",
+    opts: ["Switch to a cheaper model tier for routine tickets","Reduce input token count by compressing prompts","Process tickets in batches instead of individually","Increase output token limits to improve quality"],
+    correct: 0,
+    feedback: "Model routing is highest leverage. Switching from Sonnet ($15/M output) to Haiku ($1.25/M) for routine triage saves ~92% on output costs — far more than any prompt compression alone."
+  },
+  {
+    q: "A 10,000-token system prompt is used on every API call, with 500,000 calls per day. At $3/M input tokens, what is the monthly system-prompt cost alone?",
+    opts: ["$450","$4,500","$45,000","$450,000"],
+    correct: 2,
+    feedback: "10,000 tokens × 500,000 calls = 5B tokens/day × 30 = 150B tokens/month. At $3/M = $45,000/month. This single insight often motivates a major prompt engineering investment."
+  },
+  {
+    q: "Why do output tokens typically cost 3–5× more than input tokens?",
+    opts: ["Output quality requires more expensive GPUs","The model generates output autoregressively — each token requires a full forward pass","Output is cached and billed at a premium","It is a commercial pricing decision with no technical basis"],
+    correct: 1,
+    feedback: "Autoregressive generation means every output token requires a full model forward pass (billions of parameters activated). Input tokens are processed in parallel — a fundamentally cheaper computation."
+  },
+  {
+    q: "You have a 128K context window. Your RAG pipeline retrieves 80K tokens of documents per query. What is the PRIMARY risk?",
+    opts: ["Exceeding compute limits and triggering API errors","Lost-in-the-middle degradation — models attend poorly to content in the middle of very long contexts","Higher latency due to larger payloads","Cost overruns from excessive token usage"],
+    correct: 1,
+    feedback: "Research shows LLMs exhibit 'lost-in-the-middle' bias — attending well to context at the start and end, but poorly to the middle. Retrieving 80K tokens doesn't mean all 80K tokens influence the answer equally."
+  },
+  {
+    q: "An engineer spends 16 hours optimizing prompts, reducing token usage by 35%. Monthly AI spend is $30,000. What is the approximate year-1 net ROI?",
+    opts: ["~$8,400","~$125,000","~$123,600","~$1,050,000"],
+    correct: 2,
+    feedback: "Monthly savings = $30K × 35% = $10,500. Annual savings = $126,000. Engineering cost = 16h × $150 = $2,400. Net ROI ≈ $123,600. Prompt optimization is among the highest-return investments in AI deployment."
+  }
+];
+
+let quizScore = 0;
+let quizAnswers = [];
+
+function buildQuiz() {
+  quizScore = 0;
+  quizAnswers = [];
+  const container = document.getElementById('quiz-container');
+  container.innerHTML = quizData.map((q, qi) => `
+    <div class="card" id="q-card-${qi}" style="${qi > 0 ? 'opacity:0.4;pointer-events:none;' : ''}">
+      <p style="font-size:11px;font-weight:600;color:var(--text3);margin-bottom:8px;letter-spacing:0.05em;text-transform:uppercase;">Question ${qi+1} of 5</p>
+      <p class="quiz-q">${q.q}</p>
+      <div class="quiz-opts">
+        ${q.opts.map((o, oi) => `<button class="quiz-opt" id="q${qi}-o${oi}" onclick="answerQ(${qi},${oi})">${o}</button>`).join('')}
+      </div>
+      <div class="quiz-feedback" id="q${qi}-fb"></div>
+    </div>
+  `).join('');
+  document.getElementById('quiz-complete').style.display = 'none';
+}
+
+function answerQ(qi, selected) {
+  const q = quizData[qi];
+  const card = document.getElementById(`q-card-${qi}`);
+  card.querySelectorAll('.quiz-opt').forEach(o => o.style.pointerEvents = 'none');
+  document.getElementById(`q${qi}-o${q.correct}`).classList.add('correct');
+  if (selected !== q.correct) document.getElementById(`q${qi}-o${selected}`).classList.add('wrong');
+  else quizScore++;
+  const fb = document.getElementById(`q${qi}-fb`);
+  fb.textContent = q.feedback;
+  fb.className = 'quiz-feedback show ' + (selected === q.correct ? 'fb-correct' : 'fb-wrong');
+  quizAnswers.push(selected);
+  if (qi + 1 < quizData.length) {
+    setTimeout(() => {
+      const next = document.getElementById(`q-card-${qi+1}`);
+      if (next) { next.style.opacity = '1'; next.style.pointerEvents = 'auto'; next.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+    }, 800);
+  } else {
+    setTimeout(showQuizResults, 800);
+  }
+}
+
+function showQuizResults() {
+  document.getElementById('quiz-complete').style.display = 'block';
+  document.getElementById('final-score').textContent = quizScore;
+  const msgs = [
+    'Keep studying — review the modules above and retake the quiz.',
+    'Good start — focus on the cost structure and context window modules.',
+    'Solid foundation — review output token economics for the gaps.',
+    'Strong understanding — you are ready to lead token optimization discussions.',
+    'Excellent grasp — you can govern AI cost architecture at a strategic level.',
+    'Perfect score — exceptional mastery of token economics.'
+  ];
+  document.getElementById('score-msg').textContent = msgs[quizScore] || '';
+  document.getElementById('quiz-complete').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function restartQuiz() { buildQuiz(); }
+
+function goPhase(n) {
+  document.querySelectorAll('.phase').forEach((p, i) => p.classList.toggle('visible', i === n));
+  document.querySelectorAll('.nav-item').forEach((b, i) => {
+    b.classList.remove('active','done');
+    if (i === n) b.classList.add('active');
+    else if (i < n) b.classList.add('done');
+  });
+  document.querySelectorAll('.nav-item.done .nav-num').forEach(el => {
+    el.textContent = '✓';
+  });
+  document.querySelectorAll('.nav-item:not(.done) .nav-num').forEach((el, i) => {
+    el.textContent = i + 1 > n ? i + 1 : el.textContent;
+  });
+  currentPhase = n;
+  const pct = Math.round((n / (totalPhases - 1)) * 100);
+  document.getElementById('sidebar-progress').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = 'Module ' + (n+1) + ' of ' + totalPhases;
+  document.getElementById('progress-pct').textContent = pct + '%';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+renderTokenVisual();
+updateCost();
+updateContext();
+calcROI();
+buildQuiz();
+</script>
+</body>
+</html>
