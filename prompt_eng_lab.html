@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Engineering Executive Lab — Main Lab</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#16161d;--ink2:#4a4a6a;--ink3:#9090b0;
+  --gold:#c9a84c;--gold2:#f0d080;--gold3:#fffbee;
+  --sur:#ffffff;--sur2:#f7f6f3;--sur3:#efece8;--bd:#e0dbd4;
+  --org0:#1e3a5f;--org0l:#e8f0fa;--org0b:#c0d4ef;
+  --org1:#2d5a1e;--org1l:#eaf5e8;--org1b:#b8deb0;
+  --org2:#5a1e4a;--org2l:#f5e8f3;--org2b:#ddb8d8;
+}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--sur2);color:var(--ink);min-height:100vh}
+.shell{max-width:900px;margin:0 auto;padding-bottom:60px}
+.top-bar{background:var(--ink);padding:40px 40px 0}
+.top-eyebrow{font-size:10px;font-weight:500;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:14px}
+.top-title{font-family:Georgia,serif;font-size:34px;color:#fff;line-height:1.18;margin-bottom:10px}
+.top-title em{color:var(--gold2);font-style:italic}
+.top-sub{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;max-width:580px;margin-bottom:24px}
+.top-chips{display:flex;gap:16px;flex-wrap:wrap;padding-bottom:28px}
+.chip{font-size:11px;color:rgba(255,255,255,0.45);display:flex;align-items:center;gap:6px}
+.chip-dot{width:5px;height:5px;border-radius:50%;background:var(--gold)}
+.download-bar{background:#2a3a5a;padding:10px 40px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.dl-label{font-size:11px;color:rgba(255,255,255,0.5);font-weight:500;letter-spacing:1px;text-transform:uppercase}
+.dl-btn{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:6px 14px;border-radius:20px;border:0.5px solid rgba(201,168,76,0.5);color:var(--gold2);cursor:pointer;background:transparent;text-decoration:none;transition:all 0.2s}
+.dl-btn:hover{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.org-switcher{background:var(--ink);border-top:0.5px solid rgba(255,255,255,0.08);padding:0 40px}
+.org-tabs{display:flex;gap:0}
+.org-tab{padding:14px 20px 12px;font-size:12px;font-weight:500;color:rgba(255,255,255,0.4);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.2s;white-space:nowrap}
+.org-tab.active{color:#fff;border-bottom-color:var(--gold)}
+.org-hero{padding:24px 40px;display:none}
+.org-hero.active{display:block}
+.org-banner{border-radius:10px;padding:20px 24px}
+.org-banner-0{background:var(--org0l);border:0.5px solid var(--org0b)}
+.org-banner-1{background:var(--org1l);border:0.5px solid var(--org1b)}
+.org-banner-2{background:var(--org2l);border:0.5px solid var(--org2b)}
+.org-name{font-size:11px;font-weight:500;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.org-name-0{color:#0c2240}.org-name-1{color:#1a3a10}.org-name-2{color:#3a0e2e}
+.org-tagline{font-family:Georgia,serif;font-size:20px;line-height:1.3;margin-bottom:8px}
+.org-tagline-0{color:var(--org0)}.org-tagline-1{color:var(--org1)}.org-tagline-2{color:var(--org2)}
+.org-desc{font-size:13px;color:var(--ink2);line-height:1.65}
+.org-people{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.person-chip{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.7);border:0.5px solid rgba(0,0,0,0.1);border-radius:20px;padding:5px 12px 5px 6px}
+.person-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500}
+.pa0{background:#1e3a5f;color:#b5d4f4}.pa1{background:#2d5a1e;color:#c0dd97}.pa2{background:#5a1e4a;color:#f4c0d1}
+.person-name{font-size:11px;font-weight:500;color:var(--ink)}
+.person-role{font-size:10px;color:var(--ink3)}
+.prog-wrap{background:rgba(0,0,0,0.06);height:2px;margin:0 40px}
+.prog-bar{height:2px;background:var(--gold);transition:width 0.4s ease}
+.nav-strip{display:flex;gap:0;padding:0 40px;overflow-x:auto;scrollbar-width:none;background:var(--sur2);border-bottom:0.5px solid var(--bd)}
+.nav-strip::-webkit-scrollbar{display:none}
+.npill{font-size:11px;font-weight:500;color:var(--ink3);padding:10px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s}
+.npill.active{color:var(--ink);border-bottom-color:var(--gold)}
+.npill:hover:not(.active){color:var(--ink2)}
+.mod{display:none;padding:32px 40px;animation:fi 0.3s ease}
+.mod.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.mod-label{font-size:10px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.mod-title{font-family:Georgia,serif;font-size:26px;color:var(--ink);line-height:1.2;margin-bottom:8px}
+.mod-intro{font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:6px;max-width:700px}
+.tmin{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3);background:var(--sur3);border:0.5px solid var(--bd);border-radius:20px;padding:4px 11px;margin-bottom:20px}
+.sec-head{font-size:12px;font-weight:500;color:var(--ink);margin:24px 0 12px;display:flex;align-items:center;gap:8px}
+.sec-tag{font-size:10px;font-weight:500;padding:2px 8px;border-radius:10px}
+.st-blue{background:#e8f0fa;color:#1e3a5f}.st-green{background:#eaf5e8;color:#2d5a1e}
+.st-purple{background:#f0eeff;color:#3c2a7a}.st-gold{background:var(--gold3);color:#7a5c10}
+.ex-block{background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;margin-bottom:14px;overflow:hidden}
+.ex-head{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;gap:12px;background:var(--sur)}
+.ex-head:hover{background:var(--sur2)}
+.ex-meta{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.ex-num{width:22px;height:22px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--ink);flex-shrink:0}
+.ex-who{font-size:12px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-task{font-size:11px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ex-caret{font-size:14px;color:var(--ink3);transition:transform 0.2s;flex-shrink:0}
+.ex-caret.open{transform:rotate(180deg)}
+.ex-body{display:none;padding:0 16px 16px;border-top:0.5px solid var(--bd)}
+.ex-body.open{display:block}
+.ex-context{font-size:12px;color:var(--ink3);font-style:italic;padding:10px 0 8px;border-bottom:0.5px solid var(--bd);margin-bottom:10px;line-height:1.6}
+.prompt-box{background:var(--sur3);border:0.5px solid var(--bd);border-radius:8px;padding:14px 16px;font-family:monospace;font-size:11.5px;line-height:1.85;color:var(--ink);white-space:pre-wrap;margin:10px 0;position:relative}
+.pb-label{position:absolute;top:8px;right:10px;font-size:9px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink3);font-family:system-ui}
+.why-box{background:#e8f0fa;border:0.5px solid #c0d4ef;border-radius:0 8px 8px 0;border-left:2px solid #2d5a8e;padding:10px 14px;font-size:12px;color:#1e3a5f;line-height:1.65;margin-top:4px}
+.fw-detail-panel{background:var(--ink);border-radius:10px;padding:24px 28px;margin-bottom:20px}
+.fw-dt{font-family:Georgia,serif;font-size:18px;color:#fff;margin-bottom:14px}
+.fw-row{display:grid;grid-template-columns:110px 1fr;border-top:0.5px solid rgba(255,255,255,0.07)}
+.fw-l{padding:12px 0;font-size:18px;font-family:Georgia,serif;color:var(--gold2)}
+.fw-r{padding:12px 0 12px 14px;font-size:12px;color:rgba(255,255,255,0.7);border-left:0.5px solid rgba(255,255,255,0.07);line-height:1.6}
+.fw-r strong{color:#fff;display:block;font-size:11px;font-weight:500;margin-bottom:2px}
+.cot-flow{margin:16px 0}
+.cot-row{display:flex;gap:0;position:relative}
+.cot-left{display:flex;flex-direction:column;align-items:center;width:32px;flex-shrink:0}
+.cot-circ{width:28px;height:28px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--ink)}
+.cot-ln{width:1px;background:var(--bd);flex:1;min-height:16px}
+.cot-right{flex:1;padding:2px 0 20px 14px}
+.cot-rlabel{font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);margin-bottom:4px}
+.cot-txt{font-size:12.5px;color:var(--ink2);line-height:1.7;background:var(--sur);border:0.5px solid var(--bd);border-radius:8px;padding:10px 14px}
+.cot-txt.final{border-left:2px solid var(--gold)}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:12px 0}
+.cmp-bad{background:#fdf0f0;border:0.5px solid #f0c0c0;border-radius:8px;padding:14px 16px;font-family:monospace;font-size:11.5px;color:#6a1a1a;line-height:1.7;white-space:pre-wrap}
+.cmp-good{background:#eaf5e8;border:0.5px solid #b0d8a8;border-radius:8px;padding:14px 16px;font-family:monospace;font-size:11.5px;color:#1a4a10;line-height:1.7;white-space:pre-wrap}
+.cmp-lbl{font-size:10px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:6px}
+.exer-box{background:var(--gold3);border:0.5px solid #e0c870;border-radius:10px;padding:20px 24px;margin:20px 0}
+.exer-title{font-size:10px;font-weight:500;letter-spacing:2px;color:#6a4c10;text-transform:uppercase;margin-bottom:8px}
+.exer-q{font-size:13px;color:#3a2a05;line-height:1.7;margin-bottom:12px}
+.exer-ta{width:100%;background:#fff;border:0.5px solid #e0c870;border-radius:6px;padding:12px 14px;font-family:inherit;font-size:12.5px;line-height:1.7;color:var(--ink);resize:vertical;min-height:90px;outline:none}
+.hint-btn{display:inline-flex;align-items:center;gap:5px;margin-top:10px;font-size:11px;font-weight:500;padding:7px 16px;border-radius:20px;border:0.5px solid #c9a84c;cursor:pointer;background:var(--ink);color:var(--gold);transition:all 0.2s}
+.hint-box{background:#fff;border:0.5px solid #e0c870;border-radius:6px;padding:12px 16px;margin-top:10px;font-size:12.5px;color:var(--ink2);line-height:1.7;display:none}
+.hint-box.show{display:block}
+.fw-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}
+.fw-card{background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:16px 18px;cursor:pointer;transition:all 0.2s;border-left:3px solid var(--bd)}
+.fw-card:hover,.fw-card.sel{border-left-color:var(--gold);background:var(--gold3);border-color:var(--gold)}
+.fw-acro{font-family:Georgia,serif;font-size:20px;color:var(--gold);margin-bottom:3px}
+.fw-nm{font-size:11px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.fw-ds{font-size:11px;color:var(--ink3);line-height:1.5}
+.fw-expand{background:var(--ink);border-radius:10px;padding:24px 28px;margin-top:8px;display:none}
+.fw-expand.open{display:block}
+.sum-table{width:100%;border-collapse:collapse;font-size:12.5px;margin:16px 0}
+.sum-table th{text-align:left;padding:9px 14px;background:var(--ink);color:rgba(255,255,255,0.6);font-size:10px;font-weight:500;letter-spacing:0.8px}
+.sum-table td{padding:11px 14px;border-bottom:0.5px solid var(--bd);color:var(--ink2);vertical-align:top;line-height:1.6}
+.sum-table td:first-child{font-weight:500;color:var(--ink);width:130px}
+.sum-table tr:hover td{background:var(--sur3)}
+.deep-p{background:var(--ink);border-radius:10px;padding:24px 28px;font-family:monospace;font-size:11px;line-height:1.95;color:rgba(255,255,255,0.78);margin:14px 0;white-space:pre-wrap}
+.tip-g{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.tip-c{background:var(--sur);border:0.5px solid var(--bd);border-radius:8px;padding:14px 16px}
+.tip-h{font-size:12px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.tip-b{font-size:11.5px;color:var(--ink2);line-height:1.6}
+.hl{border-radius:8px;padding:13px 17px;margin:12px 0;font-size:13px;line-height:1.65}
+.hl-i{background:#e8f0fa;border:0.5px solid #c0d4ef;color:#1e3a5f}
+.hl-w{background:#fdf0f0;border:0.5px solid #f0c0c0;color:#6a1a1a}
+.hl-s{background:#eaf5e8;border:0.5px solid #b0d8a8;color:#1a4a10}
+.nav-foot{display:flex;justify-content:space-between;align-items:center;margin-top:28px;padding-top:20px;border-top:0.5px solid var(--bd)}
+.nb{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:9px 20px;border-radius:20px;cursor:pointer;transition:all 0.2s;border:0.5px solid var(--bd);background:var(--sur);color:var(--ink)}
+.nb:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.nb.pri{background:var(--ink);color:#fff;border-color:var(--ink)}
+.nb.pri:hover{background:#2d4a7a}
+.nb-ct{font-size:11px;color:var(--ink3)}
+.fs-pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.fs-box{border-radius:10px;padding:16px 18px;font-size:12.5px;font-family:monospace;line-height:1.7;white-space:pre-wrap}
+.fs-box.before{background:#fdf0f0;border:0.5px solid #f0c0c0;color:#5a1515}
+.fs-box.after{background:#eaf5e8;border:0.5px solid #b0d8a8;color:#155a25}
+.fs-label{font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;display:block;font-family:system-ui}
+</style>
+</head>
+<body>
+<div class="shell">
+<div class="top-bar">
+  <div class="top-eyebrow">Executive Learning Lab · 60 Minutes · Edition 2.0</div>
+  <div class="top-title">Prompt Engineering<br><em>in the Real World</em></div>
+  <div class="top-sub">Follow three organizations across Healthcare, Retail, and Finance as every business function learns to prompt AI with precision — using real scenarios, real people, and real stakes.</div>
+  <div class="top-chips">
+    <div class="chip"><div class="chip-dot"></div>3 Industry Storylines</div>
+    <div class="chip"><div class="chip-dot"></div>8 Modules</div>
+    <div class="chip"><div class="chip-dot"></div>40+ Prompt Examples</div>
+    <div class="chip"><div class="chip-dot"></div>Live Exercises</div>
+  </div>
+</div>
+
+<div class="download-bar">
+  <span class="dl-label">Download all labs:</span>
+  <a class="dl-btn" href="01-main-lab.html" download>Main Lab</a>
+  <a class="dl-btn" href="02-solutions.html" download>Solutions</a>
+  <a class="dl-btn" href="03-evaluation.html" download>Evaluation</a>
+  <a class="dl-btn" href="04-complete-bundle.html" download>Complete Bundle</a>
+</div>
+
+<div class="org-switcher">
+  <div class="org-tabs">
+    <div class="org-tab active" onclick="setOrg(0)">MedCore Health</div>
+    <div class="org-tab" onclick="setOrg(1)">Verdant Retail</div>
+    <div class="org-tab" onclick="setOrg(2)">Nexus Capital</div>
+  </div>
+</div>
+
+<div class="org-hero active" id="oh0">
+  <div class="org-banner org-banner-0">
+    <div class="org-name org-name-0">Domain: Healthcare · 3,200 Employees · $480M Revenue</div>
+    <div class="org-tagline org-tagline-0">MedCore Health — Transforming Regional Hospital Networks with Digital Care</div>
+    <div class="org-desc">A multi-hospital system operating 6 hospitals and 40 clinics. Every example shows a real MedCore team member using the prompt technique being taught.</div>
+    <div class="org-people">
+      <div class="person-chip"><div class="person-avatar pa0">SK</div><div><div class="person-name">Sunita Kapoor</div><div class="person-role">Chief Medical Officer</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa0">RJ</div><div><div class="person-name">Raj Johnson</div><div class="person-role">VP Finance</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa0">ML</div><div><div class="person-name">Maya Lim</div><div class="person-role">HR Director</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa0">DT</div><div><div class="person-name">Daniel Torres</div><div class="person-role">Head of Marketing</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa0">PV</div><div><div class="person-name">Priya Varma</div><div class="person-role">Director of Operations</div></div></div>
+    </div>
+  </div>
+</div>
+<div class="org-hero" id="oh1">
+  <div class="org-banner org-banner-1">
+    <div class="org-name org-name-1">Domain: Retail · 8,500 Employees · $1.2B Revenue</div>
+    <div class="org-tagline org-tagline-1">Verdant Retail — Sustainable Fashion for the Modern Consumer</div>
+    <div class="org-desc">A fast-growing sustainable fashion retailer with 220 stores and a booming e-commerce business embedding AI into merchandising, supply chain, and brand content.</div>
+    <div class="org-people">
+      <div class="person-chip"><div class="person-avatar pa1">AC</div><div><div class="person-name">Aisha Carter</div><div class="person-role">Chief Merchandising Officer</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa1">TO</div><div><div class="person-name">Tom Okafor</div><div class="person-role">VP Supply Chain</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa1">LW</div><div><div class="person-name">Lena Wolff</div><div class="person-role">Brand Director</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa1">NS</div><div><div class="person-name">Nina Shah</div><div class="person-role">Head of CX</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa1">BK</div><div><div class="person-name">Ben Kim</div><div class="person-role">Analytics Lead</div></div></div>
+    </div>
+  </div>
+</div>
+<div class="org-hero" id="oh2">
+  <div class="org-banner org-banner-2">
+    <div class="org-name org-name-2">Domain: Financial Services · 1,800 Employees · $320M Revenue</div>
+    <div class="org-tagline org-tagline-2">Nexus Capital — Mid-Market Private Equity & Wealth Advisory</div>
+    <div class="org-desc">A boutique PE and wealth management firm managing $4.2B AUM. Using AI to accelerate deal sourcing, portfolio reporting, investor relations, and compliance.</div>
+    <div class="org-people">
+      <div class="person-chip"><div class="person-avatar pa2">EV</div><div><div class="person-name">Elena Vasquez</div><div class="person-role">Managing Partner</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa2">JM</div><div><div class="person-name">James Malik</div><div class="person-role">VP Deal Sourcing</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa2">CR</div><div><div class="person-name">Clara Reyes</div><div class="person-role">Portfolio Director</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa2">AF</div><div><div class="person-name">Amos Ferreira</div><div class="person-role">Compliance Lead</div></div></div>
+      <div class="person-chip"><div class="person-avatar pa2">SW</div><div><div class="person-name">Sophie Wang</div><div class="person-role">Investor Relations</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="prog-wrap"><div class="prog-bar" id="prog" style="width:12.5%"></div></div>
+<div class="nav-strip">
+  <div class="npill active" onclick="goMod(0)">Intro</div>
+  <div class="npill" onclick="goMod(1)">CREATE</div>
+  <div class="npill" onclick="goMod(2)">RTF</div>
+  <div class="npill" onclick="goMod(3)">Frameworks</div>
+  <div class="npill" onclick="goMod(4)">Zero-Shot</div>
+  <div class="npill" onclick="goMod(5)">Few-Shot</div>
+  <div class="npill" onclick="goMod(6)">Chain-of-Thought</div>
+  <div class="npill" onclick="goMod(7)">Deep Prompts</div>
+</div>
+
+<!-- MODULE 0 -->
+<div class="mod active" id="m0">
+  <div class="mod-label">Introduction</div>
+  <div class="mod-title">Why Prompt Engineering is a Business Skill</div>
+  <div class="mod-intro">AI outputs are only as good as the instructions they receive. In this lab, you'll follow MedCore Health, Verdant Retail, and Nexus Capital — three organizations whose teams are learning to prompt with precision, structure, and strategic intent.</div>
+  <div class="tmin">⏱ 5 min</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
+    <div style="background:var(--org0l);border:0.5px solid var(--org0b);border-radius:8px;padding:14px 16px"><div style="font-size:11px;font-weight:500;color:#0c2240;margin-bottom:4px">MedCore Health</div><div style="font-size:12px;color:#1e3a5f;line-height:1.55">Healthcare system using AI for clinical ops, HR, finance &amp; patient comms</div></div>
+    <div style="background:var(--org1l);border:0.5px solid var(--org1b);border-radius:8px;padding:14px 16px"><div style="font-size:11px;font-weight:500;color:#1a3a10;margin-bottom:4px">Verdant Retail</div><div style="font-size:12px;color:#2d5a1e;line-height:1.55">Sustainable fashion brand scaling content, supply chain &amp; CX with AI</div></div>
+    <div style="background:var(--org2l);border:0.5px solid var(--org2b);border-radius:8px;padding:14px 16px"><div style="font-size:11px;font-weight:500;color:#3a0e2e;margin-bottom:4px">Nexus Capital</div><div style="font-size:12px;color:#5a1e4a;line-height:1.55">PE firm applying AI to deal flow, portfolio ops &amp; investor reporting</div></div>
+  </div>
+  <div class="compare-grid">
+    <div><div class="cmp-lbl" style="color:#6a1a1a">Unstructured (common)</div><div class="cmp-bad">Summarize this report.</div></div>
+    <div><div class="cmp-lbl" style="color:#1a4a10">Engineered (powerful)</div><div class="cmp-good">You are MedCore's CFO. Summarize the Q3 hospital operations report in 4 bullets — revenue, cost overruns, staffing ratios, and one forward risk. Audience: Board of Directors. Max 120 words. Flag any metric that missed target by >10%.</div></div>
+  </div>
+  <div class="tip-g">
+    <div class="tip-c"><div class="tip-h">Direction</div><div class="tip-b">Prompts tell the model what role to play, what task to perform, and what constraints to observe.</div></div>
+    <div class="tip-c"><div class="tip-h">Precision</div><div class="tip-b">Vague inputs yield vague outputs. Structure produces consistent, high-quality results every time.</div></div>
+    <div class="tip-c"><div class="tip-h">Efficiency</div><div class="tip-b">The right prompt eliminates back-and-forth, saving hours across an organization each week.</div></div>
+    <div class="tip-c"><div class="tip-h">Scale</div><div class="tip-b">Prompt templates become reusable assets — shared, refined, and embedded in team workflows.</div></div>
+  </div>
+  <div class="nav-foot"><div></div><div class="nb-ct">Module 1 of 8</div><button class="nb pri" onclick="goMod(1)">Begin Lab →</button></div>
+</div>
+
+<!-- MODULE 1: CREATE -->
+<div class="mod" id="m1">
+  <div class="mod-label">Module 1 of 7</div>
+  <div class="mod-title">The CREATE Framework</div>
+  <div class="mod-intro">CREATE is a six-part framework for complex, high-stakes prompts. Character · Request · Examples · Adjustments · Type · Extras. Each component removes ambiguity and gives the model everything it needs to produce expert-grade output.</div>
+  <div class="tmin">⏱ 10 min</div>
+  <div class="fw-detail-panel">
+    <div class="fw-dt">C · R · E · A · T · E — Every letter explained</div>
+    <div class="fw-row"><div class="fw-l">C</div><div class="fw-r"><strong>Character / Role</strong>Who is the AI? Persona, expertise, experience level, and communication style.</div></div>
+    <div class="fw-row"><div class="fw-l">R</div><div class="fw-r"><strong>Request / Task</strong>The exact action needed. Use a verb + object + scope.</div></div>
+    <div class="fw-row"><div class="fw-l">E</div><div class="fw-r"><strong>Examples / Context</strong>Background data, reference documents, or example outputs that calibrate the response.</div></div>
+    <div class="fw-row"><div class="fw-l">A</div><div class="fw-r"><strong>Adjustments / Constraints</strong>Guardrails: word limits, excluded topics, regulatory boundaries, tone restrictions.</div></div>
+    <div class="fw-row"><div class="fw-l">T</div><div class="fw-r"><strong>Type of Output</strong>Format specification: bullet list, table, memo, JSON, slide outline, email.</div></div>
+    <div class="fw-row"><div class="fw-l">E</div><div class="fw-r"><strong>Extras / Evaluation</strong>Meta-instructions: confidence rating, flag assumptions, ask clarifying questions.</div></div>
+  </div>
+
+  <div class="sec-head">MedCore Health — CREATE Examples <span class="sec-tag st-blue">Healthcare</span></div>
+  <div id="ex-c-mc"></div>
+  <div class="sec-head" style="margin-top:20px">Verdant Retail — CREATE Examples <span class="sec-tag st-green">Retail</span></div>
+  <div id="ex-c-vr"></div>
+  <div class="sec-head" style="margin-top:20px">Nexus Capital — CREATE Examples <span class="sec-tag st-purple">Finance</span></div>
+  <div id="ex-c-nx"></div>
+
+  <div class="exer-box">
+    <div class="exer-title">✏ Exercise — Build a CREATE Prompt</div>
+    <div class="exer-q">Choose your organization and write a full CREATE prompt for a challenge they face. Address all 6 components explicitly.</div>
+    <textarea class="exer-ta" placeholder="C: Character / Role&#10;R: Request&#10;E: Examples / Context&#10;A: Adjustments&#10;T: Type of output&#10;E: Extras"></textarea>
+    <button class="hint-btn" onclick="toggleHint('h1')">Reveal Model Answer</button>
+    <div class="hint-box" id="h1">C: You are MedCore's Chief People Officer with 20 years of hospital workforce management experience.<br>R: Develop a nurse retention strategy for ICU units where turnover hit 28% in 2024 — 14pts above benchmark.<br>E: Exit data: burnout 41%, scheduling 33%, pay gap 26%. Competitor hired 60 ICU nurses away.<br>A: Actionable within 6 months. No options over $2M capital. No hiring freezes.<br>T: Prioritized action plan: 3 actions in 30 days, 3 in 90 days, 1 structural change at 180 days.<br>E: Rate confidence per recommendation. Flag policy assumptions.</div>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goMod(0)">← Back</button><div class="nb-ct">Module 2 of 8</div><button class="nb pri" onclick="goMod(2)">Next: RTF →</button></div>
+</div>
+
+<!-- MODULE 2: RTF -->
+<div class="mod" id="m2">
+  <div class="mod-label">Module 2 of 7</div>
+  <div class="mod-title">The RTF Framework</div>
+  <div class="mod-intro">RTF is the executive's speed formula: Role · Task · Format. Use it for everyday professional tasks where you need a quality output fast.</div>
+  <div class="tmin">⏱ 7 min</div>
+  <div class="fw-detail-panel">
+    <div class="fw-dt">R · T · F — The 60-second professional prompt</div>
+    <div class="fw-row"><div class="fw-l">R</div><div class="fw-r"><strong>Role</strong>Act as a [title] with expertise in [domain]. Sets the knowledge base and voice.</div></div>
+    <div class="fw-row"><div class="fw-l">T</div><div class="fw-r"><strong>Task</strong>Draft / Analyze / Create / Summarize [specific thing] given [context]. Be precise.</div></div>
+    <div class="fw-row"><div class="fw-l">F</div><div class="fw-r"><strong>Format</strong>Return as [structure] with [sections/length]. Define what you want to read.</div></div>
+  </div>
+  <div class="sec-head">MedCore Health — RTF Examples <span class="sec-tag st-blue">Healthcare</span></div>
+  <div id="ex-r-mc"></div>
+  <div class="sec-head" style="margin-top:20px">Verdant Retail — RTF Examples <span class="sec-tag st-green">Retail</span></div>
+  <div id="ex-r-vr"></div>
+  <div class="sec-head" style="margin-top:20px">Nexus Capital — RTF Examples <span class="sec-tag st-purple">Finance</span></div>
+  <div id="ex-r-nx"></div>
+  <div class="hl hl-i">RTF vs CREATE: Use RTF for routine, time-pressured tasks. Switch to CREATE when the task has multiple dimensions, high stakes, or needs precise calibration.</div>
+  <div class="exer-box">
+    <div class="exer-title">✏ Exercise — RTF in 90 Seconds</div>
+    <div class="exer-q">Verdant's Head of CX Nina Shah needs talking points for a press call about viral complaint thread on damaged eco-packaging. Write her RTF prompt.</div>
+    <textarea class="exer-ta" placeholder="R: Role — T: Task — F: Format"></textarea>
+    <button class="hint-btn" onclick="toggleHint('h2')">Reveal Model Answer</button>
+    <div class="hint-box" id="h2">R: Act as a senior PR strategist specializing in consumer brand crisis communications and sustainability narratives.<br><br>T: Prepare talking points for Nina Shah, Verdant's Head of CX, speaking to a journalist about a viral tweet claiming eco-packaging arrived damaged. Verdant's position: investigating, sustainability standards apply end-to-end, affected customers are being prioritized.<br><br>F: 5 talking points, each 2 sentences. Open with empathy, end with forward commitment. Avoid defensive language. Avoid "eco-friendly" — use "sustainable packaging standards."</div>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goMod(1)">← Back</button><div class="nb-ct">Module 3 of 8</div><button class="nb pri" onclick="goMod(3)">Next: Frameworks →</button></div>
+</div>
+
+<!-- MODULE 3: ALL FRAMEWORKS -->
+<div class="mod" id="m3">
+  <div class="mod-label">Module 3 of 7</div>
+  <div class="mod-title">All Prompt Frameworks</div>
+  <div class="mod-intro">Beyond CREATE and RTF, specialized frameworks serve different output types. Click any to explore its structure.</div>
+  <div class="tmin">⏱ 10 min</div>
+  <div class="fw-grid">
+    <div class="fw-card" id="fwc0" onclick="toggleFW(0)"><div class="fw-acro">RISEN</div><div class="fw-nm">Role · Instructions · Steps · End Goal · Narrowing</div><div class="fw-ds">Best for: step-by-step workflows, SOPs, process documentation</div></div>
+    <div class="fw-card" id="fwc1" onclick="toggleFW(1)"><div class="fw-acro">COSTAR</div><div class="fw-nm">Context · Objective · Style · Tone · Audience · Response</div><div class="fw-ds">Best for: brand content, marketing, internal communications</div></div>
+    <div class="fw-card" id="fwc2" onclick="toggleFW(2)"><div class="fw-acro">TRACE</div><div class="fw-nm">Task · Role · Audience · Constraints · Examples</div><div class="fw-ds">Best for: training materials, audience-specific deliverables</div></div>
+    <div class="fw-card" id="fwc3" onclick="toggleFW(3)"><div class="fw-acro">PARA</div><div class="fw-nm">Problem · Action · Result · Ask</div><div class="fw-ds">Best for: consulting asks, problem-solving, advisory prompts</div></div>
+  </div>
+  <div class="fw-expand" id="fwpanel"><div id="fwcontent"></div></div>
+  <div class="sec-head" style="margin-top:20px">Framework selection guide <span class="sec-tag st-gold">Reference</span></div>
+  <table class="sum-table">
+    <thead><tr><th>Framework</th><th>Best Use Case</th><th>Org Example</th></tr></thead>
+    <tbody>
+      <tr><td>RTF</td><td>Quick professional tasks, emails, summaries</td><td>Verdant's Lena drafting a brand post</td></tr>
+      <tr><td>CREATE</td><td>Complex, multi-dimensional, high-stakes</td><td>MedCore's Sunita on nurse retention strategy</td></tr>
+      <tr><td>RISEN</td><td>Process workflows, SOPs, step-by-step plans</td><td>Nexus's Amos on compliance audit procedures</td></tr>
+      <tr><td>COSTAR</td><td>Brand voice, content, marketing materials</td><td>Verdant's Daniel on campaign messaging</td></tr>
+      <tr><td>TRACE</td><td>Training materials, onboarding docs</td><td>MedCore's Maya on nurse onboarding guide</td></tr>
+      <tr><td>PARA</td><td>Problem-solving, advisory, consulting asks</td><td>Nexus's Clara on portfolio company turnaround</td></tr>
+    </tbody>
+  </table>
+  <div class="exer-box">
+    <div class="exer-title">✏ Exercise — Pick the Right Framework</div>
+    <div class="exer-q">Nexus Capital's Amos Ferreira needs a step-by-step AML checklist for new portfolio company onboarding. Which framework fits best? Write the prompt using that framework.</div>
+    <textarea class="exer-ta" placeholder="Identify the framework and write the prompt…"></textarea>
+    <button class="hint-btn" onclick="toggleHint('h3')">Reveal Model Answer</button>
+    <div class="hint-box" id="h3">Best framework: RISEN (step-by-step process task).<br><br>R: Act as a senior compliance officer at a PE firm specializing in AML under SEC, FinCEN, and FATF frameworks.<br>I: Create an AML onboarding checklist for new portfolio companies acquired by Nexus Capital.<br>S: Step 1 — Beneficial ownership verification. Step 2 — PEP/sanctions screening. Step 3 — Source of funds documentation. Step 4 — CDD file assembly. Step 5 — Ongoing monitoring setup. Step 6 — Designate compliance liaison within 30 days.<br>E: A one-page laminated checklist a portfolio company CFO can self-execute on Day 1 of acquisition close.<br>N: Limit to US-domiciled companies under $500M. Exclude cryptocurrency AML rules.</div>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goMod(2)">← Back</button><div class="nb-ct">Module 4 of 8</div><button class="nb pri" onclick="goMod(4)">Next: Zero-Shot →</button></div>
+</div>
+
+<!-- MODULE 4: ZERO SHOT -->
+<div class="mod" id="m4">
+  <div class="mod-label">Module 4 of 7</div>
+  <div class="mod-title">Zero-Shot Prompting</div>
+  <div class="mod-intro">Zero-shot prompts give no examples — the model relies entirely on its training. They work for well-defined, common tasks. The key is being specific about task, constraints, and format.</div>
+  <div class="tmin">⏱ 7 min</div>
+  <div class="sec-head">MedCore Health — Zero-Shot Examples <span class="sec-tag st-blue">Healthcare</span></div>
+  <div id="ex-z-mc"></div>
+  <div class="sec-head" style="margin-top:20px">Verdant Retail — Zero-Shot Examples <span class="sec-tag st-green">Retail</span></div>
+  <div id="ex-z-vr"></div>
+  <div class="sec-head" style="margin-top:20px">Nexus Capital — Zero-Shot Examples <span class="sec-tag st-purple">Finance</span></div>
+  <div id="ex-z-nx"></div>
+  <div class="compare-grid" style="margin-top:16px">
+    <div><div class="cmp-lbl" style="color:#6a1a1a">Weak zero-shot</div><div class="cmp-bad">Analyze this contract.</div></div>
+    <div><div class="cmp-lbl" style="color:#1a4a10">Strong zero-shot</div><div class="cmp-good">You are a healthcare attorney specializing in vendor contracts. Review this MSA and list all clauses that create liability risk for MedCore. Format: numbered list sorted by severity (High/Med/Low). For each: cite the clause, name the risk type. [PASTE CONTRACT]</div></div>
+  </div>
+  <div class="hl hl-w">Zero-shot struggles with highly specialized formatting or niche domain calibration. When output is inconsistent — add few-shot examples.</div>
+  <div class="exer-box">
+    <div class="exer-title">✏ Exercise — Zero-Shot Prompt</div>
+    <div class="exer-q">Nexus Capital's Sophie Wang needs to draft a quarterly LP update email covering portfolio performance. Write a precise zero-shot prompt — no examples.</div>
+    <textarea class="exer-ta" placeholder="Write your zero-shot prompt. Be specific about role, task, context, constraints, and output format…"></textarea>
+    <button class="hint-btn" onclick="toggleHint('h4')">Reveal Model Answer</button>
+    <div class="hint-box" id="h4">You are a seasoned investor relations professional at a PE firm managing $4.2B AUM. Draft a Q3 2024 LP update email on behalf of Sophie Wang at Nexus Capital.<br><br>Context: Blended MOIC 2.1x. 3 companies with EBITDA growth >15%. 2 underperforming. One exit at 3.4x. New acquisition closed in September.<br><br>Constraints: Professional, confident, transparent — not promotional. Acknowledge underperformers directly. No vague reassurances. Max 380 words.<br><br>Format: Subject line (2 options) + 4-paragraph email: (1) Overall health, (2) Highlights, (3) Challenges and actions, (4) Q4 outlook and LP call invite.</div>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goMod(3)">← Back</button><div class="nb-ct">Module 5 of 8</div><button class="nb pri" onclick="goMod(5)">Next: Few-Shot →</button></div>
+</div>
+
+<!-- MODULE 5: FEW SHOT -->
+<div class="mod" id="m5">
+  <div class="mod-label">Module 5 of 7</div>
+  <div class="mod-title">Few-Shot Prompting</div>
+  <div class="mod-intro">Few-shot prompting provides 2–5 input-output examples before the actual task. Examples teach format, tone, reasoning style, and domain vocabulary — showing the model exactly what you expect.</div>
+  <div class="tmin">⏱ 10 min</div>
+  <div class="sec-head">MedCore Health — Few-Shot Examples <span class="sec-tag st-blue">Healthcare</span></div>
+  <div id="ex-f-mc"></div>
+  <div class="sec-head" style="margin-top:20px">Verdant Retail — Few-Shot Examples <span class="sec-tag st-green">Retail</span></div>
+  <div id="ex-f-vr"></div>
+  <div class="sec-head" style="margin-top:20px">Nexus Capital — Few-Shot Examples <span class="sec-tag st-purple">Finance</span></div>
+  <div id="ex-f-nx"></div>
+  <div class="hl hl-i">Pro tip: Two excellent, diverse examples outperform five mediocre ones. Choose examples that represent edge cases and variation — not just the easy, obvious cases.</div>
+  <div class="exer-box">
+    <div class="exer-title">✏ Exercise — Few-Shot Prompt</div>
+    <div class="exer-q">Verdant's Brand Director Lena Wolff wants Claude to write product descriptions in her voice — warm, direct, sustainability-focused, no buzzwords. Write a 2-shot prompt, then ask for a linen blazer description.</div>
+    <textarea class="exer-ta" placeholder="Example 1: Product + Description&#10;Example 2: Product + Description&#10;Now write: Linen blazer description…" style="min-height:130px"></textarea>
+    <button class="hint-btn" onclick="toggleHint('h5')">Reveal Model Answer</button>
+    <div class="hint-box" id="h5">Write Verdant product descriptions matching my exact voice.<br><br>Example 1 — Organic cotton tee:<br>"Made from 100% GOTS-certified organic cotton. Soft enough to sleep in, structured enough for Mondays. No dyes you can't pronounce. A tee built to last 10 years, not 10 washes."<br><br>Example 2 — Recycled wool coat:<br>"This coat began as six wool sweaters. We unraveled them, re-spun the fiber, and wove something better. The weight of something that has already lived a life. Designed for another 20 years."<br><br>Rules: Short sentences. One tactile detail. One sourcing fact. No buzzwords (eco-friendly, sustainable, planet, green). Under 60 words.<br><br>Now write for: Unlined linen blazer, Belgian linen, no synthetic blends, wrinkle-resistant.</div>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goMod(4)">← Back</button><div class="nb-ct">Module 6 of 8</div><button class="nb pri" onclick="goMod(6)">Next: Chain-of-Thought →</button></div>
+</div>
+
+<!-- MODULE 6: COT -->
+<div class="mod" id="m6">
+  <div class="mod-label">Module 6 of 7</div>
+  <div class="mod-title">Chain-of-Thought Prompting</div>
+  <div class="mod-intro">CoT prompts ask the model to show its reasoning step-by-step before giving a final answer. This dramatically improves accuracy on complex reasoning and strategic decisions.</div>
+  <div class="tmin">⏱ 8 min</div>
+  <div class="sec-head">MedCore — CoT in action: ICU staffing crisis <span class="sec-tag st-blue">Healthcare</span></div>
+  <div class="cot-flow">
+    <div class="cot-row"><div class="cot-left"><div class="cot-circ">P</div><div class="cot-ln"></div></div><div class="cot-right"><div class="cot-rlabel">Prompt (Priya Varma, Director of Operations)</div><div class="cot-txt">MedCore's North Campus ICU is 40% understaffed this weekend due to a flu outbreak. We have 18 critical patients. Think through this situation step by step before recommending an action plan.</div></div></div>
+    <div class="cot-row"><div class="cot-left"><div class="cot-circ">1</div><div class="cot-ln"></div></div><div class="cot-right"><div class="cot-rlabel">Step 1 — Assess immediate risk</div><div class="cot-txt">18 critical patients with 40% staffing shortfall means current nurse-to-patient ratios likely violate ICU safety standards (typically 1:2). Patient safety is the primary constraint.</div></div></div>
+    <div class="cot-row"><div class="cot-left"><div class="cot-circ">2</div><div class="cot-ln"></div></div><div class="cot-right"><div class="cot-rlabel">Step 2 — Identify available resources</div><div class="cot-txt">Options: (a) call-in nurses from South Campus ICU, (b) activate float pool, (c) request agency nurses (48hr lead time — too slow), (d) temporarily transfer stable patients to step-down units.</div></div></div>
+    <div class="cot-row"><div class="cot-left"><div class="cot-circ">3</div><div class="cot-ln"></div></div><div class="cot-right"><div class="cot-rlabel">Step 3 — Evaluate constraints</div><div class="cot-txt">South Campus transfer disrupts their coverage. Float pool: likely limited for ICU-certified nurses. Patient transfer requires physician approval and bed availability in step-down.</div></div></div>
+    <div class="cot-row"><div class="cot-left"><div class="cot-circ">✓</div></div><div class="cot-right"><div class="cot-rlabel">Recommendation</div><div class="cot-txt final">Immediate: (1) Activate float pool for ICU-certified nurses. (2) Request physician review — transfer 4–6 most stable patients to step-down. (3) Place South Campus on standby. Escalate to CMO if float pool yields fewer than 4 nurses.</div></div></div>
+  </div>
+  <div class="sec-head">CoT examples across organizations <span class="sec-tag st-gold">All Domains</span></div>
+  <div id="ex-cot-all"></div>
+  <div class="tip-g">
+    <div class="tip-c"><div class="tip-h">"Think step by step"</div><div class="tip-b">The classic CoT trigger. Simple, highly effective.</div></div>
+    <div class="tip-c"><div class="tip-h">"Before answering, list your assumptions"</div><div class="tip-b">Forces explicit assumption identification — critical for ambiguous situations.</div></div>
+    <div class="tip-c"><div class="tip-h">"Walk me through your reasoning"</div><div class="tip-b">Produces narrative-style chains — good for executive communication.</div></div>
+    <div class="tip-c"><div class="tip-h">"Show your work, then conclude"</div><div class="tip-b">Separates analysis from recommendation — ideal when reasoning IS the value.</div></div>
+  </div>
+  <div class="exer-box">
+    <div class="exer-title">✏ Exercise — Chain-of-Thought</div>
+    <div class="exer-q">Nexus Capital's Managing Partner Elena Vasquez must decide whether to inject $8M more into a struggling portfolio company (B2B logistics SaaS with 60% revenue from one customer). Write a CoT prompt that makes Claude reason through this systematically.</div>
+    <textarea class="exer-ta" placeholder="Include a CoT trigger. Structure the prompt so Claude reasons through each dimension before reaching a conclusion…"></textarea>
+    <button class="hint-btn" onclick="toggleHint('h6')">Reveal Model Answer</button>
+    <div class="hint-box" id="h6">You are a senior PE operating partner. Before giving any recommendation, think through this decision step by step.<br><br>Step 1: Quantify the 60% customer concentration risk — valuation discount, churn downside.<br>Step 2: Evaluate what $8M achieves in 12–18 months for this company.<br>Step 3: Examine the no-injection scenario — liquidation value, covenant risk.<br>Step 4: Assess management — execution problem or structural market problem?<br>Step 5: Model exit scenarios at current vs. post-injection trajectory. Fund II is in year 6 of 10.<br><br>Context: $6M ARR, 60% from Walmart, NRR 84%, EBITDA -$400K. Nexus invested $14M 18 months ago. FMV ~$10M.<br><br>Only after completing all steps: Invest / Partial / Do Not Invest + top 3 reasons + the single assumption that reverses your answer.</div>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goMod(5)">← Back</button><div class="nb-ct">Module 7 of 8</div><button class="nb pri" onclick="goMod(7)">Next: Deep Prompts →</button></div>
+</div>
+
+<!-- MODULE 7: DEEP PROMPTS -->
+<div class="mod" id="m7">
+  <div class="mod-label">Module 7 of 7</div>
+  <div class="mod-title">Detailed Long-Form Prompts</div>
+  <div class="mod-intro">For mission-critical work — board decks, strategic plans, legal reviews, M&A memos — long-form prompts combine frameworks, rich context, explicit constraints, and output schemas.</div>
+  <div class="tmin">⏱ 8 min</div>
+  <div class="sec-head">MedCore — Full long-form prompt: Digital transformation roadmap <span class="sec-tag st-blue">Healthcare</span></div>
+  <div class="deep-p"><span style="color:rgba(255,255,255,0.35);font-style:italic"># ROLE</span>
+<span style="color:var(--gold2)">CHARACTER:</span> <span style="color:rgba(255,255,255,0.92)">You are a Principal-level healthcare IT consultant, ex-Deloitte Digital Health practice. You have led EHR migrations for 8 hospital systems and advised on HIPAA-compliant cloud architecture.</span>
+
+<span style="color:rgba(255,255,255,0.35);font-style:italic"># TASK</span>
+<span style="color:var(--gold2)">REQUEST:</span> <span style="color:rgba(255,255,255,0.92)">Create a 3-year digital transformation roadmap for MedCore Health transitioning from legacy on-premise EHR (Epic v2018) to a cloud-native, interoperable care platform.</span>
+
+<span style="color:rgba(255,255,255,0.35);font-style:italic"># CONTEXT</span>
+<span style="color:var(--gold2)">CONTEXT:</span> <span style="color:rgba(255,255,255,0.92)">- 3,200 staff. $480M revenue. 6 hospitals, 40 clinics.
+- Current: Epic on-premise + 14 point solutions (siloed).
+- 22% of clinical staff report documentation taking >3 hrs/shift.
+- Goal: Reduce documentation burden by 40%, improve care coordination.
+- Budget: $22M over 3 years. 12 internal IT engineers available.</span>
+
+<span style="color:rgba(255,255,255,0.35);font-style:italic"># CONSTRAINTS</span>
+<span style="color:var(--gold2)">ADJUSTMENTS:</span> <span style="color:rgba(255,255,255,0.92)">- Must maintain HIPAA and ONC compliance throughout.
+- Cannot have EHR downtime >2 hours during any migration window.
+- Prioritize clinician experience over administrative efficiency.
+- All vendors must have SOC 2 Type II certification.</span>
+
+<span style="color:rgba(255,255,255,0.35);font-style:italic"># OUTPUT</span>
+<span style="color:var(--gold2)">TYPE:</span> <span style="color:rgba(255,255,255,0.92)">Section 1: Executive summary (150 words)
+Section 2: Current state gap analysis (table)
+Section 3: 3-phase roadmap — Year 1 / Year 2 / Year 3
+Section 4: Governance and ownership model
+Section 5: KPIs — baseline, Year 1 target, Year 3 target</span>
+
+<span style="color:rgba(255,255,255,0.35);font-style:italic"># META</span>
+<span style="color:var(--gold2)">EXTRAS:</span> <span style="color:rgba(255,255,255,0.92)">- Flag every assumption with [ASSUMPTION]
+- If recommending a technology category, name 2 specific vendors
+- Rate overall risk: Low / Medium / High with justification
+- End with 3 questions you'd ask MedCore's CIO before finalizing</span></div>
+
+  <div style="background:var(--ink);border-radius:10px;padding:24px 28px;margin-top:20px">
+    <div style="font-family:Georgia,serif;font-size:18px;color:#fff;margin-bottom:14px">Lab Complete — Key Takeaways</div>
+    <table class="sum-table" style="font-size:12px">
+      <thead><tr><th>Technique</th><th>Use When</th><th>Seen At</th></tr></thead>
+      <tbody>
+        <tr><td style="color:var(--gold2)">CREATE</td><td style="color:rgba(255,255,255,0.7)">Complex, multi-dimensional, high-stakes tasks</td><td style="color:rgba(255,255,255,0.5)">MedCore CMO, Nexus MD</td></tr>
+        <tr><td style="color:var(--gold2)">RTF</td><td style="color:rgba(255,255,255,0.7)">Everyday professional tasks needing speed</td><td style="color:rgba(255,255,255,0.5)">All 3 orgs, all functions</td></tr>
+        <tr><td style="color:var(--gold2)">RISEN/COSTAR/TRACE/PARA</td><td style="color:rgba(255,255,255,0.7)">Match framework to output type</td><td style="color:rgba(255,255,255,0.5)">Nexus Compliance, Verdant Brand</td></tr>
+        <tr><td style="color:var(--gold2)">Zero-Shot</td><td style="color:rgba(255,255,255,0.7)">Well-defined common tasks, fast turnarounds</td><td style="color:rgba(255,255,255,0.5)">MedCore Finance, Verdant Merch</td></tr>
+        <tr><td style="color:var(--gold2)">Few-Shot</td><td style="color:rgba(255,255,255,0.7)">Style calibration, classification, tone matching</td><td style="color:rgba(255,255,255,0.5)">Verdant Brand, MedCore HR</td></tr>
+        <tr><td style="color:var(--gold2)">Chain-of-Thought</td><td style="color:rgba(255,255,255,0.7)">Complex decisions requiring transparent reasoning</td><td style="color:rgba(255,255,255,0.5)">Nexus PE decisions, MedCore Ops</td></tr>
+        <tr><td style="color:var(--gold2)">Long-Form</td><td style="color:rgba(255,255,255,0.7)">Mission-critical deliverables, board materials</td><td style="color:rgba(255,255,255,0.5)">All 3 orgs at leadership level</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goMod(6)">← Back</button><div class="nb-ct">Lab Complete</div><button class="nb pri" onclick="goMod(0)">Restart Lab ↺</button></div>
+</div>
+</div>
+
+<script>
+let curOrg=0,curMod=0,openFW=null;
+function setOrg(i){curOrg=i;document.querySelectorAll('.org-tab').forEach((t,j)=>t.classList.toggle('active',j===i));document.querySelectorAll('.org-hero').forEach((h,j)=>h.classList.toggle('active',j===i));}
+function goMod(n){curMod=n;document.querySelectorAll('.mod').forEach((m,i)=>m.classList.toggle('active',i===n));document.querySelectorAll('.npill').forEach((p,i)=>p.classList.toggle('active',i===n));document.getElementById('prog').style.width=((n+1)/8*100)+'%';window.scrollTo({top:0,behavior:'smooth'});}
+function toggleHint(id){const el=document.getElementById(id);el.classList.toggle('show');}
+const fwData=[
+  {title:'RISEN',rows:[['R','Role','Act as MedCore\'s Chief Compliance Officer with expertise in Joint Commission standards.'],['I','Instructions','Create a standard operating procedure for handling a patient data breach.'],['S','Steps','Step 1: Contain. Step 2: Assess scope. Step 3: Notify Privacy Officer within 1 hour. Step 4: Document. Step 5: Notify affected patients per HIPAA.'],['E','End Goal','A laminated one-page SOP clinic managers can follow without legal support.'],['N','Narrowing','Limit to breaches <500 records. Exclude ransomware scenarios.']]},
+  {title:'COSTAR',rows:[['C','Context','Verdant Retail is launching its first collection from deadstock fabric.'],['O','Objective','Create a campaign message that drives excitement and explains the deadstock concept simply.'],['S','Style','Editorial, warm, slightly poetic — like Kinfolk meets sustainability manifesto.'],['T','Tone','Hopeful and direct. Never say "eco-friendly" or "green."'],['A','Audience','Urban women aged 28–42 who care about quality and ethics but are busy.'],['R','Response','Three campaign headline options + one 80-word launch paragraph for website hero.']]},
+  {title:'TRACE',rows:[['T','Task','Create a new employee onboarding guide for junior analysts joining Nexus Capital\'s deal team.'],['R','Role','Head of Talent Development with 15 years of PE firm training experience.'],['A','Audience','MBA graduates aged 22–26 with strong finance skills but no PE deal experience.'],['C','Constraints','Max 12 pages. No jargon without explanation. Must include a PE glossary.'],['E','Examples','Reference Goldman Sachs and KKR analyst orientation programs.']]},
+  {title:'PARA',rows:[['P','Problem','MedCore\'s ED has 4.2 hour average wait time — 2.1 hours above national benchmark.'],['A','Action','Added 2 triage nurses, implemented fast-track lane for low-acuity patients. Wait times fell 18 minutes.'],['R','Result','Still 1.9 hours above benchmark. Bottleneck appears at triage-to-physician handoff.'],['A','Ask','Identify the 3 most likely root causes of the handoff bottleneck and recommend interventions.']]}
+];
+function toggleFW(i){const cards=document.querySelectorAll('.fw-card');const panel=document.getElementById('fwpanel');const content=document.getElementById('fwcontent');if(openFW===i){cards[i].classList.remove('sel');panel.classList.remove('open');openFW=null;return;}cards.forEach(c=>c.classList.remove('sel'));cards[i].classList.add('sel');const d=fwData[i];content.innerHTML=`<div class="fw-dt">${d.title}</div>`+d.rows.map(r=>`<div class="fw-row"><div class="fw-l">${r[0]}</div><div class="fw-r"><strong>${r[1]}</strong>${r[2]}</div></div>`).join('');panel.classList.add('open');openFW=i;}
+function mkEx(num,who,task,ctx,prompt,ptype,why,cid){const c=document.getElementById(cid);if(!c)return;const id=`ex${cid}_${num}`;const d=document.createElement('div');d.className='ex-block';d.innerHTML=`<div class="ex-head" onclick="toggleEx('${id}')"><div class="ex-meta"><div class="ex-num">${num}</div><div><div class="ex-who">${who}</div><div class="ex-task">${task}</div></div></div><div class="ex-caret" id="car_${id}">▾</div></div><div class="ex-body" id="${id}"><div class="ex-context">${ctx}</div><div class="prompt-box">${prompt}<span class="pb-label">${ptype}</span></div>${why?`<div class="why-box">${why}</div>`:''}</div>`;c.appendChild(d);}
+function toggleEx(id){const body=document.getElementById(id);const car=document.getElementById('car_'+id);const open=body.classList.toggle('open');car.classList.toggle('open',open);}
+
+const examples={
+  'ex-c-mc':[
+    [1,'Sunita Kapoor · CMO','Nurse burnout strategy','Sunita is preparing a board presentation on clinical staff retention after ICU turnover hit 28%.','C: You are MedCore\'s Chief People Officer with 20 yrs of hospital workforce experience.\nR: Develop a nurse retention strategy for ICU units where turnover is 28% — 14pts above benchmark.\nE: Exit data: burnout 41%, scheduling 33%, pay gap 26%. Competitor hired 60 ICU nurses away.\nA: Actionable within 6 months. No options >$2M capital. No hiring freezes.\nT: Prioritized action plan: 3 actions in 30 days, 3 in 90 days, 1 structural change at 180 days.\nE: Rate confidence per recommendation. Flag policy assumptions.','CREATE','All 6 components work together: role sets clinical expertise, examples give real data, adjustments prevent off-topic solutions.'],
+    [2,'Raj Johnson · VP Finance','Q3 cost overrun analysis','MedCore\'s Q3 financials show $4.2M in unexpected labor cost overruns across 3 hospitals.','C: Act as a healthcare CFO with expertise in hospital cost accounting and labor variance analysis.\nR: Analyze MedCore\'s Q3 labor cost overruns ($4.2M across North, Central, South campuses).\nE: North: $1.8M (OT). Central: $1.6M (agency). South: $0.8M (unknown). Budget: $38M total.\nA: Focus only on correctable root causes. Exclude fringe benefits.\nT: Table — Campus | Root Cause | $ Impact | Fix | Owner.\nE: Flag data gaps. Rate each fix by ease (Easy/Medium/Hard).','CREATE','The examples component is doing heavy lifting — real numbers prevent generic advice.'],
+    [3,'Maya Lim · HR Director','Performance improvement plan','A senior nurse manager has received 4 patient complaints and 2 peer complaints in 90 days.','C: You are an HR business partner specializing in healthcare workforce management and employment law.\nR: Draft a 60-day Performance Improvement Plan for a senior nurse manager with documented conduct issues.\nE: Issues: 4 patient complaints (communication), 2 peer complaints (tone). No prior formal action.\nA: Must comply with MedCore\'s union agreement. No language implying pre-determination.\nT: PIP document: Issue summary, Expectations, Weekly milestones, Consequences, Sign-off block.\nE: Flag any clause that union counsel should review before delivery.','CREATE','The adjustments component is critical — union compliance changes what language is acceptable.'],
+    [4,'Daniel Torres · Marketing','Patient education campaign','MedCore is launching a diabetes prevention program targeting at-risk patients aged 45–65.','C: You are a healthcare marketing director with expertise in patient engagement and health literacy.\nR: Create a 3-month community outreach campaign for MedCore\'s diabetes prevention program.\nE: Target: 2,000 at-risk patients. Channels: rural clinics, faith communities, local radio. Similar program achieved 34% enrollment.\nA: All content at 6th-grade reading level. No medical jargon. Must comply with HIPAA marketing rules.\nT: Month-by-month plan: Channel, Message, Tactic, KPI. Plus one 60-second radio script.\nE: Flag any tactic requiring legal/compliance review.','CREATE',''],
+    [5,'Priya Varma · Operations','Weekend staffing protocol','MedCore needs a new emergency staffing protocol after last weekend\'s ICU understaffing incident.','C: You are a hospital operations expert who has designed emergency staffing protocols for 12 health systems.\nR: Design a weekend emergency ICU staffing protocol activatable within 2 hours of a shortage alert.\nE: Last incident: 40% understaffed, 18 critical patients, float pool insufficient, agency 48hr lead time.\nA: Must work with union contract shift rules. Cannot mandate >16 consecutive hours.\nT: Decision flowchart (text-based) + one-page laminated quick reference card for charge nurses.\nE: Identify the single most likely failure point and how to mitigate it.','CREATE','']
+  ],
+  'ex-c-vr':[
+    [1,'Aisha Carter · CMO','New season merchandise plan','Verdant is planning its Spring 2026 collection and needs a buy plan for sustainable materials.','C: Act as a Chief Merchandising Officer at a sustainable fashion retailer with 15 yrs buying experience.\nR: Develop a Spring 2026 merchandise buy plan focusing on deadstock and natural fiber categories.\nE: Spring 2025: Linen +42% YoY. Deadstock sold out in 3 weeks. Conventional cotton -12%.\nA: Total open-to-buy: $8.2M. No synthetics. Prioritize GOTS or Bluesign certified suppliers.\nT: Category buy plan: Category | Units | Budget | Supplier | Risk Rating. Plus top 3 category bets.\nE: Flag supply chain risks per category. Rate confidence in each projection.','CREATE',''],
+    [2,'Tom Okafor · VP Supply Chain','Supplier risk assessment','Verdant\'s top fabric supplier in Vietnam accounts for 38% of supply and is showing delivery delays.','C: You are a VP of Supply Chain with expertise in textile sourcing risk management.\nR: Assess the risk of 38% supply concentration with Vietnam supplier Thanh Phu Textiles and develop a mitigation plan.\nE: 3 late deliveries in 2024 (avg 12 days late). Alternatives: Portugal (25% higher cost), India (quality concerns).\nA: Any solution must maintain GOTS/Bluesign certification. Cannot increase landed cost by >15%.\nT: Risk matrix (Likelihood x Impact) + 3 mitigation options with cost, lead time, quality tradeoffs.\nE: Recommend which option to pursue. Flag assumptions about tariff scenarios.','CREATE',''],
+    [3,'Lena Wolff · Brand','Sustainability report narrative','Verdant must publish its annual sustainability report for investors and customers.','C: You are a sustainability communications director who writes ESG reports for fashion brands.\nR: Write the executive narrative for Verdant\'s 2024 Sustainability Report.\nE: 2024: Carbon -18% vs 2022. Water use -22%. 94% sustainable materials (up from 81%). Living wage 100% tier-1.\nA: Honest and specific — no vague promises. Do not claim certifications we don\'t have. Max 600 words.\nT: 4 sections: What we committed to, What we achieved, Where we fell short, What\'s next.\nE: Flag any claim that should be verified by our legal/ESG team.','CREATE',''],
+    [4,'Nina Shah · Head of CX','Customer complaint response framework','Verdant is getting 400+ monthly complaints about damaged eco-packaging during shipping.','C: Act as a CX strategy director who has redesigned complaint resolution at 3 major e-commerce retailers.\nR: Design a tiered customer complaint response framework for Verdant\'s damaged packaging issue.\nE: 420 complaints/month. Root cause: 60% carrier damage, 30% packing process, 10% defects. NPS impact: -14 points.\nA: Framework must work with our Zendesk setup. SLAs realistic for a team of 22 agents.\nT: 3-tier framework: Tier 1 (agent), Tier 2 (lead), Tier 3 (manager). Each: trigger, script, offer, SLA.\nE: Estimate NPS recovery potential per tier. Flag any requiring legal approval.','CREATE',''],
+    [5,'Ben Kim · Analytics','Sales performance deep dive','Holiday season sales underperformed by $4M vs forecast across e-commerce channels.','C: You are a retail analytics director with expertise in e-commerce performance attribution.\nR: Diagnose why Verdant\'s 2024 holiday e-commerce revenue missed forecast by $4M.\nE: Traffic on target (+3%). Conversion dropped 3.2% to 2.4%. AOV held at $118. Knitwear -$1.6M, Outerwear -$1.2M.\nA: Focus on conversion rate analysis. Exclude external macroeconomic factors.\nT: Root cause analysis tree + 3 testable hypotheses with recommended A/B tests.\nE: Rank hypotheses by confidence. Flag any requiring data I haven\'t provided.','CREATE','']
+  ],
+  'ex-c-nx':[
+    [1,'Elena Vasquez · MD','Quarterly LP update','Nexus must communicate Q3 portfolio performance to 40 limited partners.','C: You are a Managing Director at a PE firm with 20 yrs experience in LP communications.\nR: Draft a Q3 2024 LP update letter covering portfolio performance, notable events, and Q4 outlook.\nE: Portfolio: 12 companies. MOIC 2.1x. 3 companies EBITDA growth >15%. 2 underperforming. 1 exit at 3.4x. 1 new acquisition.\nA: Confident and transparent — not promotional. No vague reassurances. Max 400 words.\nT: Letter format: Opening summary, Highlights, Challenges, Q4 pipeline, LP call invite.\nE: Flag any disclosure requiring legal review before sending.','CREATE',''],
+    [2,'James Malik · Deal Sourcing','Target company evaluation','Nexus is evaluating a B2B logistics software company as a potential acquisition target.','C: Act as a VP of Business Development at a PE firm specializing in B2B software investments.\nR: Evaluate LogiFlow Inc. as a potential Nexus Capital acquisition target in the $25–40M EV range.\nE: LogiFlow: $8M ARR, 78% GM, 92% retention, 60% revenue from one customer (Walmart). 34 employees. Founded 2019.\nA: Focus on: concentration risk, growth levers, competitive moat, team quality. Exclude valuation modeling.\nT: Investment memo: Opportunity summary, Strengths (3), Risks (3), Diligence questions (5), Preliminary recommendation.\nE: Rate conviction: High/Medium/Low. Flag the single most important risk to resolve.','CREATE',''],
+    [3,'Clara Reyes · Portfolio','Turnaround plan request','A Nexus portfolio company is 30% below plan after 18 months.','C: You are an operating partner at a PE firm with 15 yrs experience leading B2B SaaS turnarounds.\nR: Design a 90-day turnaround plan for ProcureOS, a manufacturing SaaS company 30% below revenue plan.\nE: ProcureOS: $6M ARR (target $8.6M). NRR: 87% (target 110%). Pipeline 40% below historical. CEO: 9 months in role.\nA: Plan must be executable by existing 28-person team. No recommendations requiring new fundraising.\nT: 90-day plan: Week 1–2 (diagnostic), Month 1 (stabilize), Month 2 (accelerate), Month 3 (validate).\nE: Identify the one thing that, if not fixed in 30 days, makes the rest of the plan fail.','CREATE',''],
+    [4,'Amos Ferreira · Compliance','AML policy documentation','Nexus must update its AML policy documentation for an SEC examination in 60 days.','C: You are a Chief Compliance Officer at a PE firm with deep expertise in SEC, FinCEN, and FATF frameworks.\nR: Rewrite Nexus Capital\'s AML/KYC policy to reflect 2024 FinCEN beneficial ownership requirements.\nE: Current policy: written 2021. Missing: updated CDD requirements, new beneficial ownership thresholds, SAR filing timelines.\nA: Must pass SEC staff review. Plain language where possible. Legal citations must use official CFR format.\nT: Policy document: Scope, Definitions, Procedures, Training Requirements, Annual Review trigger.\nE: Flag every section requiring review by outside counsel.','CREATE',''],
+    [5,'Sophie Wang · IR','Annual meeting agenda','Nexus\'s annual LP meeting is in 8 weeks — Sophie needs to design the full day agenda.','C: Act as a seasoned investor relations director who has run annual LP meetings for PE firms for 12 years.\nR: Design a full-day agenda for Nexus Capital\'s 2025 Annual LP Meeting — 40 attendees, NYC, 8 hours.\nE: Attendees: pension funds, family offices, endowments. Theme: "Operational value creation in uncertain markets."\nA: No presentations longer than 20 minutes. Ample Q&A. One working session. Build in networking time.\nT: Full agenda with: Time, Session title, Presenter, Format, Objective.\nE: Recommend one session format that would make this meeting memorable vs. standard LP days.','CREATE','']
+  ],
+  'ex-r-mc':[
+    [1,'Raj Johnson · VP Finance','Monthly financial dashboard briefing','Raj needs a brief for department heads who are not finance-trained.','R: Act as a healthcare CFO communicating to non-financial department heads.\nT: Summarize MedCore\'s October results — revenue $41.2M (target $43M), labor costs 2.1% over budget, supply on plan, EBITDA $6.8M.\nF: 3-bullet summary. Plain language. Bold the one most important action each department head should take.','RTF','RTF works here — the task is bounded, the format is clear, and the role calibrates language level.'],
+    [2,'Maya Lim · HR','Job posting — ICU Charge Nurse','MedCore is urgently hiring to address turnover.','R: Act as a healthcare talent acquisition specialist who writes job postings that attract top ICU nurses.\nT: Write a job posting for an ICU Charge Nurse at MedCore North Campus. Salary: $92K–$108K. Benefits: 4-day week pilot, $5K sign-on, tuition support.\nF: 3-section posting: Role overview (2 sentences), What you\'ll do (5 bullets), Why MedCore (3 differentiators). Max 280 words. No hospital jargon.','RTF',''],
+    [3,'Daniel Torres · Marketing','Patient newsletter intro paragraph','Monthly newsletter going to 80,000 registered MedCore patients.','R: Act as a healthcare communications writer who specializes in warm, accessible patient-facing content.\nT: Write the opening paragraph for MedCore\'s November patient newsletter. Theme: winter wellness and flu prevention. Mention same-day flu shots, no appointment needed.\nF: 80 words max. 7th-grade reading level. Friendly, not clinical. No jargon.','RTF',''],
+    [4,'Sunita Kapoor · CMO','Board update on patient safety','Quarterly safety metrics update for the Board of Trustees.','R: Act as a CMO presenting patient safety performance to a hospital Board of Trustees.\nT: Draft a 3-minute verbal board update on Q3 patient safety. HAI rate: 1.2/1,000 (benchmark 1.8). Falls: 2.1/1,000 (target 2.0). CLABSI: 0 this quarter.\nF: Headline result, 2 highlights, 1 area of focus, 1 action. 200 words max. Confident tone.','RTF',''],
+    [5,'Priya Varma · Ops','Meeting agenda — department heads','Weekly operational sync for 12 department heads across 3 campuses.','R: Act as a hospital operations director who runs efficient, outcome-focused leadership meetings.\nT: Create an agenda for a 60-minute weekly all-hands for MedCore\'s 12 department heads. Standing items: census update, staffing flags, capital projects. This week add: flu outbreak response, weekend ICU protocol roll-out.\nF: Time-boxed agenda. Each item: time allotted, presenter, decision needed (yes/no). No item over 10 minutes.','RTF','']
+  ],
+  'ex-r-vr':[
+    [1,'Lena Wolff · Brand','Instagram caption for new collection','Spring deadstock collection launch day post.','R: Act as Verdant\'s Brand Director who writes witty, warm, sustainability-focused social copy.\nT: Write an Instagram caption for the launch of our Spring Deadstock Collection — 24 pieces made from rescued fabric. Photo shows a model in a rust-colored linen jacket.\nF: 3 sentences max. First sentence hooks with the deadstock story. End with a soft CTA. No hashtags in caption body. No buzzwords.','RTF',''],
+    [2,'Tom Okafor · Supply Chain','Supplier meeting prep email','Pre-meeting email before renegotiating contract with Thanh Phu Textiles.','R: Act as a VP of Supply Chain who is a skilled commercial negotiator in textile manufacturing.\nT: Write a pre-meeting email to Thanh Phu Textiles ahead of our annual contract renegotiation. Our position: we need on-time delivery SLAs strengthened (85% → 95%) and a 6% price reduction in exchange for a 3-year volume commitment.\nF: 3 paragraphs: relationship acknowledgment, agenda preview, our expectations. Professional, direct, not adversarial. Max 200 words.','RTF',''],
+    [3,'Nina Shah · CX','Apology email template — damaged order','Standardized response for the 420 monthly damaged packaging complaints.','R: Act as a CX director at a premium sustainable fashion brand who writes empathetic, on-brand customer communications.\nT: Write an apology email template for customers who received a damaged order. Include: acknowledgment, apology, resolution offer (full replacement + free return label), and brand values reinforcement.\nF: Email with subject line. Under 150 words. Warm, genuine, not robotic. No discount codes — Verdant doesn\'t cheapen with discounts.','RTF',''],
+    [4,'Ben Kim · Analytics','Weekly trading report for executive team','Monday morning KPI report for Aisha and the leadership team.','R: Act as a retail analytics manager presenting trading data to a CMO and leadership team.\nT: Write the executive summary for Verdant\'s Week 47 trading report. Online: $2.1M (target $1.9M, +10.5%). Stores: $1.4M (target $1.5M, -6.7%). Top product: Wool coat sold out. Worst: Cashmere scarf 28% sell-through. Returns: 8.2%.\nF: 5-sentence executive summary. Bold the headline number. Flag the one issue requiring a leadership decision this week.','RTF',''],
+    [5,'Aisha Carter · CMO','New buyer interview debrief','Summary of interviews with 3 candidates for Senior Buyer role.','R: Act as a Talent Partner helping a CMO evaluate candidates for a senior buying role.\nT: Summarize the interview debrief for 3 Senior Buyer candidates: Candidate A (strong trend instinct, weak data skills), Candidate B (excellent analytics, limited sustainable sourcing experience), Candidate C (solid all-round, lower salary ask, less dynamic in interview).\nF: Comparison table: Candidate | Strengths | Weaknesses | Fit for Verdant | Hire recommendation (Yes/Maybe/No) + one paragraph overall recommendation.','RTF','']
+  ],
+  'ex-r-nx':[
+    [1,'James Malik · Deal Sourcing','Deal pipeline update email','Weekly deal memo for Elena and the investment committee.','R: Act as a VP of Deal Sourcing at a mid-market PE firm writing for a Managing Partner and IC.\nT: Write a deal pipeline update email. 3 active targets: LogiFlow (LOI stage, $30M EV), Apex Logistics (initial meeting, promising), CleanRoute (passed — too early stage). 2 new inbound from banker contacts.\nF: Structured email: Headline pipeline count, Table (Company | Stage | EV | Next step), 2-sentence editorial comment on the week\'s quality.','RTF',''],
+    [2,'Amos Ferreira · Compliance','Policy exception request memo','An investment team member wants to co-invest through a personal LLC.','R: Act as a compliance officer at a PE firm reviewing a policy exception request.\nT: Draft a compliance memo evaluating whether David Park\'s request to co-invest personally in the LogiFlow deal via a personal LLC conflicts with Nexus\'s conflict of interest policy.\nF: Memo format: Request summary, Policy reference, Analysis (2 paragraphs), Determination (Approved/Denied/Approved with conditions), Required disclosures if approved.','RTF',''],
+    [3,'Clara Reyes · Portfolio','100-day plan kickoff email','Email to ProcureOS CEO after acquisition close.','R: Act as an operating partner at a PE firm expert at post-acquisition onboarding and value creation.\nT: Write a kickoff email from Clara Reyes to ProcureOS CEO Michael Chen. Tone: collaborative partner, not acquirer. Focus: first 100-day priorities — listening tour, commercial pipeline review, financial hygiene, quick wins. Board call in Week 3.\nF: Email with subject line. 4 short paragraphs. Warm opening. Clear on expectations without being directive. 220 words max.','RTF',''],
+    [4,'Sophie Wang · IR','FAQ document for new LP','A new pension fund LP is asking basic questions about Nexus\'s fund structure.','R: Act as an investor relations director at a PE firm writing for a sophisticated institutional investor new to Nexus.\nT: Create a 10-question FAQ for new LPs covering: fund structure, fee model, investment thesis, portfolio construction, reporting cadence, and liquidity.\nF: Q&A format. Each answer: 2–4 sentences. Plain but sophisticated language. No promotional language.','RTF',''],
+    [5,'Elena Vasquez · MD','Board recruitment brief','Nexus is adding an independent board member to ProcureOS.','R: Act as an executive search advisor specializing in PE-backed company board recruitment.\nT: Write a board recruitment brief for an independent board member for ProcureOS (manufacturing SaaS, $6M ARR, PE-backed). Ideal: operator background, SaaS go-to-market expertise, scaled vertical SaaS to $25M+ ARR.\nF: 1-page brief: Company overview (3 sentences), Board role, Ideal candidate profile (5 criteria), Compensation, Timeline.','RTF','']
+  ],
+  'ex-z-mc':[
+    [1,'Raj Johnson · Finance','Quick vendor contract risk scan','Raj needs a fast first-pass review of a new lab equipment vendor contract.','You are a healthcare attorney specializing in vendor contracts. Review the following vendor agreement and identify all clauses that create financial risk for MedCore. For each: cite the clause, name the risk type (liability cap, auto-renewal, indemnification, IP ownership, payment terms), and rate severity High/Medium/Low. Return as a numbered list sorted by severity. [PASTE CONTRACT]','Zero-Shot','Zero-shot works here because contract risk identification is a common, well-trained task.'],
+    [2,'Maya Lim · HR','Exit interview theme analysis','Maya has 200 exit interview responses and wants themes extracted.','You are an HR analyst specializing in employee sentiment analysis. Read the following 200 exit interview responses and identify the top 5 recurring themes. For each theme: name it, estimate what % of responses mention it, and quote 2 representative phrases (paraphrased). Return as a structured summary with a one-paragraph executive recommendation. [PASTE DATA]','Zero-Shot',''],
+    [3,'Daniel Torres · Marketing','Email subject line optimization','Testing 5 subject lines for a flu vaccine campaign to 80K patients.','You are an email marketing expert specializing in healthcare patient communications. Evaluate these 5 email subject lines for MedCore\'s flu vaccine reminder campaign. Rate each 1–10 on: clarity, urgency, click-worthiness, and healthcare appropriateness. Return as a table. Then recommend the best one with a one-sentence rationale. Subject lines: [LIST THEM]','Zero-Shot',''],
+    [4,'Sunita Kapoor · CMO','Translate clinical data into patient language','Sunita needs a one-pager that patients can understand.','You are a health literacy specialist. Rewrite the following clinical summary for a patient with a 6th-grade reading level. Use short sentences, no medical abbreviations, and no jargon. If a medical term is unavoidable, define it in parentheses. Target length: 150 words. [PASTE CLINICAL SUMMARY]','Zero-Shot',''],
+    [5,'Priya Varma · Ops','Shift schedule conflict detection','Priya needs to spot conflicts in next week\'s shift schedule before it goes live.','You are a hospital operations coordinator. Review the following ICU shift schedule for next week and identify: (1) any nurse scheduled for >16 consecutive hours, (2) any shift with below-minimum nurse-to-patient ratios (ICU standard: 1:2), (3) any nurse working their 7th consecutive day. Flag each violation with the nurse name, shift date/time, and specific rule violated. [PASTE SCHEDULE]','Zero-Shot','']
+  ],
+  'ex-z-vr':[
+    [1,'Ben Kim · Analytics','Sales by category last 30 days','Quick classification task on weekly sales data.','You are a retail analyst. Classify the following 30-day sales performance data by category: Outperforming (>10% above plan), On-track (within ±5%), Underperforming (>10% below plan). Return as a table: Category | Actual Sales | Plan | % Variance | Classification. Sort by variance descending. [PASTE DATA]','Zero-Shot',''],
+    [2,'Lena Wolff · Brand','Competitive ad copy analysis','Verdant wants to understand how competitors position sustainability.','You are a brand strategist specializing in sustainable fashion. Analyze the following 10 competitor ad copy examples and identify: (1) Most common sustainability claims, (2) Most common emotional triggers, (3) Language patterns to avoid (overused/greenwashing risk), (4) One white space opportunity Verdant could own. Return as a structured analysis. [PASTE AD COPY]','Zero-Shot',''],
+    [3,'Tom Okafor · Supply Chain','Inbound shipment delay impact','A shipment from Portugal is delayed 3 weeks — Tom needs to know the financial impact.','You are a supply chain analyst. Calculate the financial impact of a 3-week delay to Shipment POR-2024-119 (2,400 units of Belgian linen, avg retail $180, planned to arrive Nov 1 for holiday launch). Assume: 30% of units are pre-sold, 70% speculative inventory, holiday sell-through probability drops 15% per week of delay. Return: lost revenue estimate, markdowns required, and one recommended mitigation.','Zero-Shot',''],
+    [4,'Nina Shah · CX','Return reason coding','Nina needs to categorize 500 free-text return reasons for a CX report.','You are a customer experience analyst. Read the following 500 customer return reason comments and assign each to: Size/Fit Issue, Quality Not as Expected, Changed Mind, Damaged on Arrival, Wrong Item Received, Other. Return a summary table: Category | Count | % of total. Then write one paragraph on the most actionable finding for Verdant\'s CX team. [PASTE RETURN DATA]','Zero-Shot',''],
+    [5,'Aisha Carter · CMO','Trend report synthesis','Aisha needs a 5-minute read on fashion trends for the Spring 2026 planning session.','You are a fashion trend analyst specializing in sustainable and conscious fashion markets. Synthesize the following 4 trend reports into a single executive brief for Verdant\'s Spring 2026 planning session. Focus on: color direction, material trends, silhouette shifts, and sustainability expectations. Max 400 words. Flag any trend that conflicts between reports. [PASTE REPORTS]','Zero-Shot','']
+  ],
+  'ex-z-nx':[
+    [1,'James Malik · Deal Sourcing','Market sizing for logistics SaaS','James needs a quick market sizing for the IC meeting tomorrow.','You are a market research analyst specializing in B2B logistics software. Provide a market sizing estimate for the US mid-market manufacturing logistics software market (target: manufacturers with $10M–$500M revenue). Include: TAM, SAM, SOM with methodology, and 3 key market drivers. Note all assumptions clearly.','Zero-Shot',''],
+    [2,'Amos Ferreira · Compliance','Regulatory change impact summary','New FinCEN rule — Amos needs to brief the IC.','You are a financial compliance expert specializing in PE regulatory requirements. Summarize the regulatory implications of the FinCEN Corporate Transparency Act beneficial ownership requirements for: (1) Nexus Capital as a PE fund, (2) Nexus\'s portfolio companies. Identify the 3 most urgent compliance actions. Plain language — for a non-lawyer investment committee.','Zero-Shot',''],
+    [3,'Clara Reyes · Portfolio','Portfolio company board meeting agenda','ProcureOS board meeting in 72 hours — Clara needs a draft agenda.','You are an operating partner at a PE firm who designs effective portfolio company board meetings. Draft a 2-hour board meeting agenda for ProcureOS, a manufacturing SaaS company (PE-backed, $6M ARR, 90-day post-acquisition). Standing items: financial review, commercial pipeline, operational KPIs. This meeting add: 100-day plan review, strategic discussion on potential vertical expansion.\n\nFormat: time-boxed agenda, each item with: time, presenter, format (update/discussion/decision), desired outcome.','Zero-Shot',''],
+    [4,'Sophie Wang · IR','LP FAQ response draft','A large pension LP sent 12 questions after reviewing the quarterly report.','You are an investor relations professional at a PE firm. Draft responses to the following 12 LP questions from a pension fund investor. Tone: confident, transparent, no over-promising. For any question requiring data you don\'t have, indicate what data would be used to answer it. Questions: [PASTE 12 QUESTIONS]','Zero-Shot',''],
+    [5,'Elena Vasquez · MD','Competing fund landscape summary','Elena is presenting at a placement agent roadshow and needs a competitive positioning brief.','You are a PE fund positioning strategist. Summarize the competitive landscape for mid-market B2B software-focused PE funds with $200M–$600M AUM. For each major competitor category: name 2–3 representative firms, their typical check size, sector focus, and value-add model. Then identify 2 positioning angles that would differentiate Nexus Capital. Return as a structured brief. Max 350 words.','Zero-Shot','']
+  ],
+  'ex-f-mc':[
+    [1,'Maya Lim · HR','Patient complaint classification','Classifying 300 HR grievance tickets by type for quarterly reporting.','Classify HR grievance tickets by category. Use these examples:\n\nExample 1 — "My manager scheduled me for a double shift without 72 hours notice, violating our agreement."\nOutput: Scheduling Violation | High | Immediate review required\n\nExample 2 — "A colleague made a comment about my accent in front of patients."\nOutput: Workplace Harassment | High | HR investigation required\n\nExample 3 — "The break room microwave has been broken for 3 weeks."\nOutput: Facilities Issue | Low | Facilities ticket\n\nNow classify these 300 grievance tickets using the same format. Flag any requiring same-day HR response. [PASTE TICKETS]','Few-Shot','The 3 examples establish output format, priority logic, and tone. The model will classify 300 tickets consistently.'],
+    [2,'Daniel Torres · Marketing','Patient email tone matching','MedCore wants all patient emails to sound like they came from the same voice.','Write patient communications in MedCore\'s exact brand voice.\n\nExample 1 — Appointment reminder:\n"Hi [Name], your appointment with Dr. Kapoor is this Thursday at 2 PM at our North Campus. Parking is free in Lot C. If anything changes, just give us a call — we\'re easy to reach. See you soon."\n\nExample 2 — Lab results ready:\n"Good news — your lab results are ready in MyMedCore. Dr. Johnson has reviewed them and will go over everything at your next visit. No action needed right now."\n\nNow write: A notification that MedCore\'s South Campus urgent care is closed this Saturday due to a facilities issue, directing patients to East Campus (4 miles away, open 8AM–8PM).','Few-Shot',''],
+    [3,'Sunita Kapoor · CMO','Clinical case summary formatting','Standardizing weekly case summaries across 6 hospitals for board review.','Format clinical case summaries in the following standard structure:\n\nExample 1:\nPatient: 67F | Admission: Pneumonia | LOS: 4 days | Outcome: Discharged to home | Lesson: Early PT intervention reduced LOS by est. 1.5 days vs. cohort average.\n\nExample 2:\nPatient: 45M | Admission: MI (STEMI) | LOS: 3 days | Outcome: Discharged with cardiac rehab referral | Lesson: Door-to-balloon time 52 min — within 90-min benchmark.\n\nNow reformat these 12 unstructured clinical notes into the same structure. [PASTE NOTES]','Few-Shot',''],
+    [4,'Raj Johnson · Finance','Budget variance commentary','Automating monthly variance explanations for 14 cost centers.','Write monthly budget variance explanations in the voice of MedCore\'s finance team.\n\nExample 1 — Input: Labor $280K over budget.\nOutput: "Labor exceeded budget by $280K driven primarily by ICU overtime (60%) and agency nurse utilization at North Campus (40%). We expect normalization in November as the float pool is now fully staffed."\n\nExample 2 — Input: Supply costs $42K under budget.\nOutput: "Supply costs came in $42K favorable, primarily from the new GPO contract renegotiated in August. This run rate saving should be sustainable through Q4 if procedure volumes remain stable."\n\nNow write variance commentary for these 5 cost centers: [PASTE VARIANCE DATA]','Few-Shot',''],
+    [5,'Priya Varma · Ops','Incident report standardization','All adverse event reports must follow the same structure before going to risk management.','Reformat incident reports into MedCore\'s standard structure.\n\nExample 1 — Raw: "Nurse dropped medication cup in Room 214. No patient harm. Mopped up."\nFormatted: Date/Time: [to be filled] | Type: Medication spill | Location: Room 214 | Patient harm: None | Immediate action: Area cleaned | Reportable: No | Follow-up: Remind staff of medication handling SOP.\n\nExample 2 — Raw: "Patient attempted to get out of bed without calling for help. Fell. No injury."\nFormatted: Date/Time: [to be filled] | Type: Patient fall | Location: [to be filled] | Patient harm: None | Immediate action: Assessment done, family notified | Reportable: Yes — falls protocol | Follow-up: Bed alarm audit for this unit.\n\nNow reformat these 8 raw incident reports. [PASTE REPORTS]','Few-Shot','']
+  ],
+  'ex-f-vr':[
+    [1,'Lena Wolff · Brand','Product description library','Verdant needs 40 new product descriptions for the spring catalog.','Write Verdant product descriptions matching our exact voice.\n\nExample 1 — Organic cotton tee:\n"Made from 100% GOTS-certified organic cotton grown without pesticides. Soft enough to sleep in, structured enough for Mondays. No dyes you can\'t pronounce. Just a tee built to last 10 years, not 10 washes."\n\nExample 2 — Recycled wool coat:\n"This coat began as six wool sweaters. We unraveled them, re-spun the fiber, and wove something better. The weight of something that has already lived a life. Designed for another 20 years of Tuesdays."\n\nRules: Short sentences. One tactile detail. One sourcing fact. No buzzwords (eco-friendly, sustainable, planet, green, conscious). Under 60 words.\n\nNow write descriptions for: [PASTE 40 PRODUCTS]','Few-Shot',''],
+    [2,'Ben Kim · Analytics','Weekly trading commentary','Automating the narrative that accompanies Ben\'s weekly numbers dashboard.','Write Verdant trading commentaries in this exact voice.\n\nExample 1 — Input: Knitwear +18% vs plan. Driver: new merino launch. Risk: inventory thin.\nCommentary: "Knitwear is the story of the week — the merino launch is outperforming every comparable in our history. Enjoy it while it lasts: we have 3 weeks of inventory at current velocity."\n\nExample 2 — Input: Accessories -22% vs plan. Driver: delayed shipment.\nCommentary: "Accessories are a miss this week and it\'s a supply chain story, not a demand one. The Portugal shipment is running 18 days late. Hold your judgment on the category until we see how customers respond when stock arrives."\n\nNow write commentaries for these 6 categories: [PASTE DATA]','Few-Shot',''],
+    [3,'Nina Shah · CX','Customer recovery email personalization','Writing recovery emails that feel personal, not templated.','Write customer recovery emails in Verdant\'s voice.\n\nExample 1 — Damaged packaging, first complaint:\nSubject: We didn\'t get this right — here\'s what we\'re doing\n"Hi [Name], your order arrived looking nothing like what we sent. That\'s on us, and we\'re sorry. A replacement is on its way with overnight shipping — no action needed on your end."\n\nExample 2 — Wrong item sent, returning customer:\nSubject: Wrong order — fixed, and then some\n"Hi [Name], this is not the order you placed, and after [X] years shopping with us, you deserve better than this. Your correct order ships today. Keep the wrong item — donate it if you can find a good home for it."\n\nNow write recovery emails for these 5 scenarios: [PASTE SCENARIOS]','Few-Shot',''],
+    [4,'Tom Okafor · Supply Chain','Supplier scorecard commentary','Quarterly scorecard comments for 12 supplier reviews.','Write quarterly supplier performance commentary.\n\nExample 1 — OTD 91% (target 95%), quality 98.2%.\nCommentary: "Thanh Phu delivered strong quality but delivery consistency needs attention. At 91% OTD vs. our 95% target, 3 late shipments created downstream disruptions. Recommend a joint root cause session in January."\n\nExample 2 — OTD 97%, quality 99.1%. Offered early delivery on 2 lines.\nCommentary: "Biella Textile continues to be a standout supplier — 97% OTD, near-perfect quality, and proactive communication. This is the benchmark relationship."\n\nNow write commentaries for 12 suppliers: [PASTE SCORECARD DATA]','Few-Shot',''],
+    [5,'Aisha Carter · CMO','Buy plan justification memos','Aisha needs to document rationale for each category decision for the board.','Write merchandise buy plan justifications in this style.\n\nExample 1 — Deadstock category, $1.2M buy:\n"Deadstock is our highest-velocity category two quarters running — sell-through averaged 94% vs. a 75% target. We are increasing the buy by 40% to $1.2M. Supply is the constraint, not demand."\n\nExample 2 — Conventional cotton, $0 buy (exiting):\n"We are exiting conventional cotton in Spring 2026. The category underperformed by 22% in 2024 and conflicts with our GOTS sourcing commitment. The open-to-buy is being reallocated to linen and deadstock."\n\nNow write justification memos for these 8 category decisions: [PASTE DECISIONS]','Few-Shot','']
+  ],
+  'ex-f-nx':[
+    [1,'James Malik · Deal Sourcing','Deal screening notes','Standardizing first-pass IC notes for 20 new inbound opportunities.','Write first-pass deal screening notes in this standard format.\n\nExample 1 — LogiFlow, $8M ARR, 78% GM, 92% retention, 60% concentration.\nScreen note: "LogiFlow — Positive first impression. Strong unit economics and retention de-risk the model. The Walmart concentration (60%) is the thesis-defining risk — a diligence question, not a deal-breaker. Recommend IC introduction call. Preliminary EV range: $28–35M."\n\nExample 2 — CleanRoute, $1.2M ARR, pre-profit, strong tech, immature GTM.\nScreen note: "CleanRoute — Too early for Nexus. The technology story is compelling but $1.2M ARR is below our minimum threshold. Pass with a note to revisit at $4M+ ARR."\n\nNow write screen notes for these 8 new inbound opportunities: [PASTE DATA]','Few-Shot',''],
+    [2,'Clara Reyes · Portfolio','100-day progress update emails','Standardizing weekly check-in emails from portfolio company CEOs to Clara.','Write portfolio company CEO weekly update emails in this format.\n\nExample 1 — ProcureOS, Week 4:\n"Week 4 update: Pipeline — added 3 new enterprise prospects, total qualified pipeline now $2.1M. Team — completed listening tour, identified 2 at-risk mid-level managers. Finance — Q3 close confirmed at $1.4M revenue, in line with revised forecast. One flag: our largest customer (31% of ARR) is delaying renewal conversation to January."\n\nExample 2 — ProcureOS, Week 8:\n"Week 8 update: Pipeline — first new logo since acquisition close signed ($180K ACV). Champagne moment. Team — at-risk managers both engaged. Finance — October revenue $490K, pacing to hit Q4 plan."\n\nNow write update emails for weeks 3, 5, and 7 given this context: [PASTE CONTEXT]','Few-Shot',''],
+    [3,'Sophie Wang · IR','LP question response templates','Preparing standard responses to the 8 most common LP questions.','Write LP response emails in Nexus Capital\'s investor relations voice.\n\nExample 1 — LP question: "Why did Fund II take 7 years to fully deploy?"\nResponse: "Fund II deployment spanned 7 years, reflecting our disciplined approach to entry multiples. We passed on 34 opportunities that met our sector criteria but not our valuation discipline. The resulting portfolio has a blended entry multiple of 7.2x EBITDA vs. a peer median of 9.8x."\n\nExample 2 — LP question: "What is your plan for the ProcureOS situation?"\nResponse: "ProcureOS is 30% below its original revenue plan, which we disclosed in the Q3 report. We have installed an operating partner, revised the go-to-market, and replaced the head of sales. We do not believe this affects the fund\'s overall return profile."\n\nNow draft responses to these 8 common LP questions: [PASTE QUESTIONS]','Few-Shot',''],
+    [4,'Amos Ferreira · Compliance','Compliance training scenario writing','Amos needs 20 realistic training scenarios for the annual compliance workshop.','Write compliance training scenarios in this format.\n\nExample 1:\nScenario: A junior analyst receives a WhatsApp message from a deal contact sharing non-public information about a potential acquisition target, prefaced with "just between us."\nQuestion: What should the analyst do?\nAnswer: Do not engage with or use the information. Report immediately to the CCO. Document the communication. Do not delete the WhatsApp message.\n\nExample 2:\nScenario: An operating partner at a portfolio company asks you to run a background check on a competitor\'s CEO through "a contact who works there."\nQuestion: Is this acceptable?\nAnswer: No. Obtaining non-public competitive intelligence through improper channels violates Nexus\'s information handling policy. Escalate to compliance before engaging.\n\nNow create 20 training scenarios covering: insider trading, FCPA, conflicts of interest, and data privacy. [PASTE TOPIC LIST]','Few-Shot',''],
+    [5,'Elena Vasquez · MD','Board presentation narrative slides','Standardizing the narrative text on Nexus board slides.','Write PE board presentation slide narratives in this voice.\n\nExample 1 — Portfolio Overview:\n"Nexus Fund III is performing at the top quartile of our vintage. Our 12 portfolio companies represent $68M in deployed capital at a blended MOIC of 2.1x unrealized. Three companies are on track for exits in the next 18 months at multiples we believe will validate our operational value creation thesis."\n\nExample 2 — Risk Slide:\n"Two portfolio companies, ProcureOS and MetroHVAC, are operating below plan. We have taken direct action in both: installing operating partners, revising go-to-markets, and in ProcureOS replacing the commercial leadership. We are not in distress territory in either case."\n\nNow write slide narratives for these 6 slides: [PASTE SLIDE TOPICS AND DATA]','Few-Shot','']
+  ],
+  'ex-cot-all':[
+    [1,'Raj Johnson · MedCore Finance','Build vs buy EMR decision','MedCore must decide whether to build a custom patient scheduling module or buy a SaaS product.','You are a healthcare IT strategist. Before giving a recommendation, think through this build vs. buy decision step by step:\n\nStep 1: Define functional requirements for the scheduling module.\nStep 2: Evaluate the build option — cost, timeline, maintenance burden, internal capability.\nStep 3: Evaluate the buy option — 3 vendors, fit to MedCore\'s Epic environment, licensing cost.\nStep 4: Assess strategic risk — what if patient volume doubles in 3 years?\nStep 5: Consider the hidden costs on both sides.\n\nContext: MedCore processes 4,200 appointments/week across 40 clinics. Epic native scheduler lacks multi-location optimization. Build estimate: $1.1M over 14 months. Top SaaS option: $180K/year.\n\nAfter completing all steps, deliver a clear Build / Buy / Hybrid recommendation with your top 3 reasons.','Chain-of-Thought','Step-by-step reasoning prevents the model from defaulting to a superficial cost comparison.'],
+    [2,'Aisha Carter · Verdant CMO','Deadstock expansion or B Corp certification?','$500K to allocate between two strategic initiatives.','You are a chief strategy officer at a sustainable fashion retailer. Think through this capital allocation decision step by step.\n\nStep 1: Understand what each initiative delivers (deadstock scale-up vs. B Corp certification).\nStep 2: Assess customer impact — which does our core buyer care about more?\nStep 3: Evaluate operational complexity — what does each require from our team?\nStep 4: Analyze competitive differentiation — who among our peers is doing what?\nStep 5: Model the financial return — revenue impact vs. cost over 24 months.\n\nBudget: $500K. Timeline: results needed within 18 months. Verdant\'s current positioning: strong on materials, less known for systemic certification.\n\nAfter all 5 steps, recommend how to allocate the $500K with a clear rationale.','Chain-of-Thought',''],
+    [3,'Elena Vasquez · Nexus','Exit timing for top performer','LogiTech Solutions is at 2.8x MOIC — should Nexus exit now or hold for 4.0x?','You are a seasoned PE investment professional. Before making an exit timing recommendation, reason through this systematically:\n\nStep 1: Assess current value — what factors support the 2.8x MOIC?\nStep 2: Model the path to 4.0x — what would need to be true?\nStep 3: Assess downside risk — what scenarios result in value destruction?\nStep 4: Consider fund dynamics — what is Nexus Fund II\'s remaining life? What do LPs need?\nStep 5: Evaluate the M&A market — is the current buyer market favorable?\n\nContext: LogiTech $22M ARR, 28% growth, 82% GM, strategic acquirer interest from 2 logistics platforms. Fund II is in year 7 of 10-year life.\n\nAfter all steps: Exit Now / Hold 12 months / Hold 24 months + top conviction points + the one scenario that would change your mind.','Chain-of-Thought',''],
+    [4,'Tom Okafor · Verdant','Near-shoring production decision','Verdant is considering moving 25% of production from Vietnam to Portugal.','You are a global supply chain strategist. Think through the near-shoring decision step by step.\n\nStep 1: Quantify the risk being solved — what is the cost of the current Vietnam concentration risk?\nStep 2: Calculate the cost of near-shoring — landed cost increase, transition costs, quality ramp-up time.\nStep 3: Assess the upside beyond risk reduction — speed to market, marketing story, carbon reduction.\nStep 4: Evaluate customer willingness to pay — would customers accept a 5–8% price increase for "Made in Europe"?\nStep 5: Model the break-even point for the transition investment.\n\nContext: Vietnam = 38% of supply, avg 18-day transit. Portugal option: 25% higher unit cost, 4-day transit, GOTS certified.\n\nRecommend: proceed / do not proceed / pilot 10% first. Include top 3 reasons and the key assumption that most affects this decision.','Chain-of-Thought',''],
+    [5,'Clara Reyes · Nexus','CEO replacement decision at portfolio company','ProcureOS CEO is underperforming — when do you replace vs. coach?','You are an operating partner at a PE firm with deep experience in CEO assessment. Before recommending, think step by step:\n\nStep 1: Define what "underperforming" means here — skill gap, will gap, or context mismatch?\nStep 2: Assess what the CEO has done well — what would be lost by replacing?\nStep 3: Evaluate urgency — how much time does ProcureOS have before underperformance becomes structural?\nStep 4: Assess the talent market — how long does CEO search take in this sector?\nStep 5: Consider team impact — what happens to 28 people if the founder-CEO is replaced 9 months post-acquisition?\n\nContext: Michael Chen, 44, technical founder, 9 months post-acquisition. Revenue 30% below plan. Pipeline thin. Product roadmap is excellent. Commercial leadership is weak — misses 3 of 4 sales forecasts.\n\nAfter all steps: Coach / Replace / Hire commercial co-leader + top 3 reasons + earliest decision checkpoint.','Chain-of-Thought','']
+  ]
+};
+
+Object.entries(examples).forEach(([cid,exs])=>{exs.forEach(ex=>mkEx(...ex,cid));});
+</script>
+</body>
+</html>
