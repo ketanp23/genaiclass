@@ -1,0 +1,753 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--ink:#16161d;--ink2:#4a4a6a;--ink3:#9090b0;
+--gold:#c9a84c;--gold2:#f0d080;--gold3:#fffbee;
+--sur:#ffffff;--sur2:#f7f6f3;--sur3:#efece8;
+--bd:#e0dbd4;
+--red2:#fdf0f0;--red-t:#6a1a1a;--red-b:#f0c0c0;
+--grn2:#eaf5e8;--grn-t:#1a4a10;--grn-b:#b0d8a8;
+--blu2:#e8f0fa;--blu-t:#1e3a5f;--blu-b:#c0d4ef;
+--amb2:#faeeda;--amb-t:#633806;--amb-b:#e8cc80;
+--pur2:#f0eeff;--pur-t:#3c2a7a;--pur-b:#c8c0f0;
+}
+body{font-family:var(--font-sans,system-ui,sans-serif);background:var(--sur2);color:var(--ink)}
+.shell{max-width:900px;margin:0 auto;padding-bottom:60px}
+
+.top-bar{background:var(--ink);padding:40px 40px 32px}
+.eyebrow{font-size:10px;font-weight:500;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:12px}
+.top-title{font-family:var(--font-serif,Georgia,serif);font-size:32px;color:#fff;line-height:1.2;margin-bottom:8px}
+.top-title em{color:var(--gold2);font-style:italic}
+.top-sub{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;max-width:600px;margin-bottom:20px}
+.top-chips{display:flex;gap:20px;flex-wrap:wrap}
+.chip{font-size:11px;color:rgba(255,255,255,0.45);display:flex;align-items:center;gap:6px}
+.chip-dot{width:5px;height:5px;border-radius:50%;background:var(--gold)}
+
+.nav-strip{display:flex;padding:0 40px;overflow-x:auto;scrollbar-width:none;background:var(--sur2);border-bottom:0.5px solid var(--bd)}
+.nav-strip::-webkit-scrollbar{display:none}
+.npill{font-size:11px;font-weight:500;color:var(--ink3);padding:10px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s}
+.npill.active{color:var(--ink);border-bottom-color:var(--gold)}
+.npill:hover:not(.active){color:var(--ink2)}
+
+.prog-wrap{background:rgba(0,0,0,0.06);height:2px;margin:0 40px}
+.prog-bar{height:2px;background:var(--gold);transition:width 0.4s}
+
+.mod{display:none;padding:32px 40px;animation:fi 0.3s ease}
+.mod.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.sec-label{font-size:10px;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.sec-title{font-family:var(--font-serif,Georgia,serif);font-size:24px;color:var(--ink);margin-bottom:8px;line-height:1.2}
+.sec-intro{font-size:14px;color:var(--ink2);line-height:1.7;margin-bottom:6px;max-width:700px}
+.tmin{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--ink3);background:var(--sur3);border:0.5px solid var(--bd);border-radius:20px;padding:4px 11px;margin-bottom:22px}
+
+.dim-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+.dim-card{background:var(--sur);border:0.5px solid var(--bd);border-radius:12px;padding:18px 20px;cursor:pointer;transition:all 0.18s;border-left:3px solid var(--bd)}
+.dim-card:hover,.dim-card.sel{border-left-color:var(--gold);background:var(--gold3)}
+.dim-n{font-size:11px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.dim-title{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.dim-q{font-size:12px;color:var(--ink3);line-height:1.5;font-style:italic}
+.dim-detail{background:var(--ink);border-radius:10px;padding:22px 26px;margin-top:6px;display:none}
+.dim-detail.open{display:block;animation:fi 0.22s ease}
+.dd-title{font-family:var(--font-serif,Georgia,serif);font-size:17px;color:#fff;margin-bottom:14px}
+.dd-levels{display:flex;flex-direction:column;gap:8px}
+.dd-row{display:grid;grid-template-columns:80px 1fr;gap:12px;border-top:0.5px solid rgba(255,255,255,0.07);padding-top:8px}
+.dd-score{font-size:13px;font-weight:500;padding:2px 0}
+.s-hi{color:#97C459}
+.s-md{color:#FAC775}
+.s-lo{color:#F09595}
+.dd-desc{font-size:12px;color:rgba(255,255,255,0.7);line-height:1.6}
+
+.eval-card{background:var(--sur);border:0.5px solid var(--bd);border-radius:12px;padding:20px 24px;margin-bottom:16px}
+.eval-head{font-size:13px;font-weight:500;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.eval-tag{font-size:10px;font-weight:500;padding:2px 9px;border-radius:10px}
+.et-b{background:var(--blu2);color:var(--blu-t)}
+.et-g{background:var(--grn2);color:var(--grn-t)}
+.et-r{background:var(--red2);color:var(--red-t)}
+.et-gold{background:var(--gold3);color:var(--amb-t)}
+.et-p{background:var(--pur2);color:var(--pur-t)}
+
+.score-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.score-pill{font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px}
+.sp-g{background:var(--grn2);color:var(--grn-t);border:0.5px solid var(--grn-b)}
+.sp-a{background:var(--amb2);color:var(--amb-t);border:0.5px solid var(--amb-b)}
+.sp-r{background:var(--red2);color:var(--red-t);border:0.5px solid var(--red-b)}
+
+.prompt-box{background:var(--sur3);border:0.5px solid var(--bd);border-radius:8px;padding:14px 16px;font-family:var(--font-mono,monospace);font-size:11.5px;line-height:1.85;color:var(--ink);white-space:pre-wrap;margin:10px 0;position:relative}
+.pb-lbl{position:absolute;top:8px;right:10px;font-size:9px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;color:var(--ink3);font-family:var(--font-sans,system-ui)}
+
+.dim-scores{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:12px 0}
+.ds-cell{border-radius:8px;padding:10px 8px;text-align:center;border:0.5px solid var(--bd)}
+.ds-label{font-size:10px;color:var(--ink3);margin-bottom:4px;line-height:1.3}
+.ds-score{font-size:18px;font-weight:500}
+.ds-g{background:var(--grn2);border-color:var(--grn-b)}
+.ds-g .ds-score{color:var(--grn-t)}
+.ds-a{background:var(--amb2);border-color:var(--amb-b)}
+.ds-a .ds-score{color:var(--amb-t)}
+.ds-r{background:var(--red2);border-color:var(--red-b)}
+.ds-r .ds-score{color:var(--red-t)}
+.ds-total{background:var(--ink);border-color:var(--ink)}
+.ds-total .ds-label{color:rgba(255,255,255,0.5)}
+.ds-total .ds-score{color:var(--gold2)}
+
+.verdict{border-radius:8px;padding:12px 16px;font-size:13px;line-height:1.65;margin:8px 0}
+.v-g{background:var(--grn2);border:0.5px solid var(--grn-b);color:var(--grn-t)}
+.v-a{background:var(--amb2);border:0.5px solid var(--amb-b);color:var(--amb-t)}
+.v-r{background:var(--red2);border:0.5px solid var(--red-b);color:var(--red-t)}
+
+.improve-box{background:var(--sur3);border:0.5px solid var(--bd);border-radius:8px;padding:14px 18px;margin-top:8px}
+.ib-title{font-size:10px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);margin-bottom:8px}
+.ib-item{display:flex;gap:8px;margin-bottom:7px;font-size:12.5px;color:var(--ink2);line-height:1.55;align-items:flex-start}
+.ib-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.ib-dot-r{background:#A32D2D}
+.ib-dot-g{background:#2d5a1e}
+
+.scorer-wrap{background:var(--sur);border:0.5px solid var(--bd);border-radius:12px;padding:24px 28px;margin:20px 0}
+.scorer-title{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:4px}
+.scorer-sub{font-size:12px;color:var(--ink3);margin-bottom:20px}
+.scorer-dim{margin-bottom:18px}
+.sd-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.sd-name{font-size:12px;font-weight:500;color:var(--ink)}
+.sd-val{font-size:13px;font-weight:500;color:var(--gold);min-width:30px;text-align:right}
+.sd-bar-wrap{background:var(--sur3);border-radius:4px;height:8px;overflow:hidden}
+.sd-bar{height:8px;border-radius:4px;background:var(--gold);transition:width 0.3s}
+.sd-options{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.sd-opt{font-size:11px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--bd);cursor:pointer;background:var(--sur);color:var(--ink2);transition:all 0.15s}
+.sd-opt.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+.total-display{background:var(--ink);border-radius:10px;padding:20px 24px;margin-top:20px;display:flex;align-items:center;gap:24px}
+.total-score-big{font-family:var(--font-serif,Georgia,serif);font-size:48px;color:var(--gold2);line-height:1}
+.total-label{font-size:12px;color:rgba(255,255,255,0.45);margin-top:4px}
+.total-right{flex:1}
+.total-grade{font-size:22px;font-weight:500;color:#fff;margin-bottom:4px}
+.total-verdict{font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6}
+.total-bar-wrap{background:rgba(255,255,255,0.1);border-radius:4px;height:6px;margin-top:12px;overflow:hidden}
+.total-bar{height:6px;border-radius:4px;background:var(--gold);transition:width 0.5s}
+
+.checklist-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.cl-item{display:flex;gap:10px;align-items:flex-start;background:var(--sur);border:0.5px solid var(--bd);border-radius:8px;padding:12px 14px}
+.cl-check{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
+.cl-y{background:var(--grn2);color:var(--grn-t)}
+.cl-n{background:var(--red2);color:var(--red-t)}
+.cl-text{font-size:12px;color:var(--ink2);line-height:1.5}
+.cl-text strong{display:block;font-size:11.5px;font-weight:500;color:var(--ink);margin-bottom:2px}
+
+.compare-strip{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+.cs-box{border-radius:8px;padding:14px 16px;font-family:var(--font-mono,monospace);font-size:11.5px;color:var(--ink);line-height:1.75;white-space:pre-wrap}
+.cs-lbl{font-size:10px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:7px;font-family:var(--font-sans,system-ui)}
+.cs-bad{background:var(--red2);border:0.5px solid var(--red-b)}
+.cs-lbl-r{color:var(--red-t)}
+.cs-good{background:var(--grn2);border:0.5px solid var(--grn-b)}
+.cs-lbl-g{color:var(--grn-t)}
+.cs-bad .prompt-text{color:var(--red-t)}
+.cs-good .prompt-text{color:var(--grn-t)}
+
+.fw-table{width:100%;border-collapse:collapse;font-size:12px;margin:14px 0}
+.fw-table th{text-align:left;padding:8px 12px;background:var(--ink);color:rgba(255,255,255,0.6);font-size:10px;font-weight:500;letter-spacing:0.8px}
+.fw-table td{padding:10px 12px;border-bottom:0.5px solid var(--bd);color:var(--ink2);vertical-align:top;line-height:1.55}
+.fw-table td:first-child{font-weight:500;color:var(--ink);width:130px}
+.fw-table tr:hover td{background:var(--sur3)}
+
+.nav-foot{display:flex;justify-content:space-between;align-items:center;margin-top:28px;padding-top:20px;border-top:0.5px solid var(--bd)}
+.nb{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:9px 20px;border-radius:20px;cursor:pointer;transition:all 0.2s;border:0.5px solid var(--bd);background:var(--sur);color:var(--ink)}
+.nb:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.nb.pri{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.nb.pri:hover{background:#b8960a}
+.nb-ct{font-size:11px;color:var(--ink3)}
+
+.hl{border-radius:8px;padding:12px 16px;margin:12px 0;font-size:13px;line-height:1.65}
+.hl-i{background:var(--blu2);border:0.5px solid var(--blu-b);color:var(--blu-t)}
+.hl-s{background:var(--grn2);border:0.5px solid var(--grn-b);color:var(--grn-t)}
+.hl-w{background:var(--red2);border:0.5px solid var(--red-b);color:var(--red-t)}
+</style>
+
+<h2 class="sr-only">Prompt Evaluation — a complete framework for scoring, diagnosing, and improving AI prompts across 5 dimensions</h2>
+
+<div class="shell">
+
+<div class="top-bar">
+  <div class="eyebrow">Prompt Engineering Lab · Evaluation Module</div>
+  <div class="top-title">How to Evaluate<br><em>Any Prompt</em></div>
+  <div class="top-sub">A structured framework for scoring prompt quality across 5 dimensions — with live scoring tools, worked examples from all three organizations, and a reusable evaluation checklist.</div>
+  <div class="top-chips">
+    <div class="chip"><div class="chip-dot"></div>5 evaluation dimensions</div>
+    <div class="chip"><div class="chip-dot"></div>Live interactive scorer</div>
+    <div class="chip"><div class="chip-dot"></div>Before/after examples</div>
+    <div class="chip"><div class="chip-dot"></div>Reusable checklist</div>
+  </div>
+</div>
+
+<div class="prog-wrap"><div class="prog-bar" id="prog" style="width:20%"></div></div>
+
+<div class="nav-strip">
+  <div class="npill active" onclick="goMod(0)">Why evaluate</div>
+  <div class="npill" onclick="goMod(1)">5 Dimensions</div>
+  <div class="npill" onclick="goMod(2)">Live scorer</div>
+  <div class="npill" onclick="goMod(3)">Worked examples</div>
+  <div class="npill" onclick="goMod(4)">Checklist</div>
+</div>
+
+<!-- MODULE 0: WHY EVALUATE -->
+<div class="mod active" id="m0">
+  <div class="sec-label">Section 1 of 5</div>
+  <div class="sec-title">Why prompt evaluation matters</div>
+  <div class="sec-intro">Writing a prompt is easy. Knowing whether it's a good prompt — before you get a bad output — is the skill. Prompt evaluation is the discipline of assessing a prompt's design quality independently of its output, so you can diagnose and improve before wasting time on iteration.</div>
+  <div class="tmin">⏱ 5 min</div>
+
+  <div class="hl hl-i">Core principle: A well-evaluated prompt predicts output quality. A poorly designed prompt produces unpredictable results regardless of the model's capability.</div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:20px 0">
+    <div style="background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:16px 18px">
+      <div style="font-size:22px;font-weight:500;color:var(--gold);margin-bottom:6px">Before</div>
+      <div style="font-size:12px;font-weight:500;color:var(--ink);margin-bottom:4px">Evaluate the prompt</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.6">Catch structural flaws — missing context, vague roles, absent constraints — before they produce bad output.</div>
+    </div>
+    <div style="background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:16px 18px">
+      <div style="font-size:22px;font-weight:500;color:var(--gold);margin-bottom:6px">During</div>
+      <div style="font-size:12px;font-weight:500;color:var(--ink);margin-bottom:4px">Compare variants</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.6">When testing two versions of a prompt, evaluation criteria help you choose the better one systematically, not by gut feel.</div>
+    </div>
+    <div style="background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:16px 18px">
+      <div style="font-size:22px;font-weight:500;color:var(--gold);margin-bottom:6px">After</div>
+      <div style="font-size:12px;font-weight:500;color:var(--ink);margin-bottom:4px">Diagnose failures</div>
+      <div style="font-size:12px;color:var(--ink2);line-height:1.6">When an output disappoints, evaluation pinpoints which dimension of the prompt failed — so the fix is targeted, not random.</div>
+    </div>
+  </div>
+
+  <div style="font-size:13px;font-weight:500;color:var(--ink);margin:22px 0 12px">The evaluation mindset shift</div>
+
+  <div class="compare-strip">
+    <div class="cs-box cs-bad">
+      <div class="cs-lbl cs-lbl-r">Without evaluation</div><span style="color:var(--red-t)">"That response wasn't great. Let me try again with different wording and hope it's better."</span>
+    </div>
+    <div class="cs-box cs-good">
+      <div class="cs-lbl cs-lbl-g">With evaluation</div><span style="color:var(--grn-t)">"The role was too vague and I gave no format specification. I'll fix those two dimensions and the output quality will improve predictably."</span>
+    </div>
+  </div>
+
+  <div style="background:var(--ink);border-radius:10px;padding:20px 24px;margin-top:20px">
+    <div style="font-size:12px;font-weight:500;color:var(--gold2);margin-bottom:12px">The 5 evaluation dimensions — overview</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:grid;grid-template-columns:28px 140px 1fr;gap:12px;align-items:center;padding:8px 0;border-top:0.5px solid rgba(255,255,255,0.07)">
+        <div style="font-size:15px;font-weight:500;color:var(--gold2)">1</div>
+        <div style="font-size:12px;font-weight:500;color:#fff">Clarity</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55)">Is the task unambiguously stated? Could two readers interpret it differently?</div>
+      </div>
+      <div style="display:grid;grid-template-columns:28px 140px 1fr;gap:12px;align-items:center;padding:8px 0;border-top:0.5px solid rgba(255,255,255,0.07)">
+        <div style="font-size:15px;font-weight:500;color:var(--gold2)">2</div>
+        <div style="font-size:12px;font-weight:500;color:#fff">Specificity</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55)">Does it include real data, named roles, and precise constraints — or vague placeholders?</div>
+      </div>
+      <div style="display:grid;grid-template-columns:28px 140px 1fr;gap:12px;align-items:center;padding:8px 0;border-top:0.5px solid rgba(255,255,255,0.07)">
+        <div style="font-size:15px;font-weight:500;color:var(--gold2)">3</div>
+        <div style="font-size:12px;font-weight:500;color:#fff">Constraint quality</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55)">Are boundaries hard and enforceable, or soft and easily ignored?</div>
+      </div>
+      <div style="display:grid;grid-template-columns:28px 140px 1fr;gap:12px;align-items:center;padding:8px 0;border-top:0.5px solid rgba(255,255,255,0.07)">
+        <div style="font-size:15px;font-weight:500;color:var(--gold2)">4</div>
+        <div style="font-size:12px;font-weight:500;color:#fff">Output definition</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55)">Is the expected format, structure, and length precisely described?</div>
+      </div>
+      <div style="display:grid;grid-template-columns:28px 140px 1fr;gap:12px;align-items:center;padding:8px 0;border-top:0.5px solid rgba(255,255,255,0.07)">
+        <div style="font-size:15px;font-weight:500;color:var(--gold2)">5</div>
+        <div style="font-size:12px;font-weight:500;color:#fff">Context sufficiency</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.55)">Does the model have everything it needs to respond without guessing?</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-foot"><div></div><div class="nb-ct">Section 1 of 5</div><button class="nb pri" onclick="goMod(1)">Next: 5 Dimensions →</button></div>
+</div>
+
+<!-- MODULE 1: 5 DIMENSIONS -->
+<div class="mod" id="m1">
+  <div class="sec-label">Section 2 of 5</div>
+  <div class="sec-title">The 5 evaluation dimensions</div>
+  <div class="sec-intro">Every prompt can be assessed across five independent dimensions. Each dimension has a 4-point scale — from 0 (critical failure) to 4 (exemplary). Click any dimension to explore what each score level looks like in practice.</div>
+  <div class="tmin">⏱ 8 min</div>
+
+  <div class="dim-grid" id="dimGrid">
+    <div class="dim-card" id="dc0" onclick="toggleDim(0)">
+      <div class="dim-n" style="color:#185FA5">Dimension 1</div>
+      <div class="dim-title">Clarity</div>
+      <div class="dim-q">"Could two different people read this prompt and expect the same output?"</div>
+    </div>
+    <div class="dim-card" id="dc1" onclick="toggleDim(1)">
+      <div class="dim-n" style="color:#3B6D11">Dimension 2</div>
+      <div class="dim-title">Specificity</div>
+      <div class="dim-q">"Are there real numbers, named roles, and concrete details — or vague placeholders?"</div>
+    </div>
+    <div class="dim-card" id="dc2" onclick="toggleDim(2)">
+      <div class="dim-n" style="color:#854F0B">Dimension 3</div>
+      <div class="dim-title">Constraint quality</div>
+      <div class="dim-q">"Are the boundaries hard and binary, or soft and advisory?"</div>
+    </div>
+    <div class="dim-card" id="dc3" onclick="toggleDim(3)">
+      <div class="dim-n" style="color:#534AB7">Dimension 4</div>
+      <div class="dim-title">Output definition</div>
+      <div class="dim-q">"Would the model know exactly what artifact to produce and how to structure it?"</div>
+    </div>
+    <div class="dim-card" id="dc4" onclick="toggleDim(4)" style="grid-column:1/-1">
+      <div class="dim-n" style="color:#993C1D">Dimension 5</div>
+      <div class="dim-title">Context sufficiency</div>
+      <div class="dim-q">"Does the model have everything it needs to answer without having to guess or invent facts?"</div>
+    </div>
+  </div>
+
+  <div class="dim-detail" id="dimPanel"></div>
+
+  <div style="margin-top:24px">
+    <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:12px">Dimension weights by task type</div>
+    <table class="fw-table">
+      <thead><tr><th>Task type</th><th>Most critical dimension</th><th>Least critical</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Strategic decisions</td><td>Context sufficiency</td><td>Output definition</td><td>Without rich context, the model reasons on assumptions, not facts</td></tr>
+        <tr><td>Content & communications</td><td>Specificity</td><td>Constraint quality</td><td>Tone and voice live in the details — vague requests produce generic copy</td></tr>
+        <tr><td>Process & SOPs</td><td>Constraint quality</td><td>Context sufficiency</td><td>Scope creep is the biggest failure mode in procedural prompts</td></tr>
+        <tr><td>Classification & analysis</td><td>Output definition</td><td>Context sufficiency</td><td>Inconsistent format is the #1 complaint — define structure precisely</td></tr>
+        <tr><td>Creative & brand work</td><td>Specificity</td><td>Constraint quality</td><td>Examples and voice rules outperform restrictions for creative tasks</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="nav-foot"><button class="nb" onclick="goMod(0)">← Why evaluate</button><div class="nb-ct">Section 2 of 5</div><button class="nb pri" onclick="goMod(2)">Next: Live scorer →</button></div>
+</div>
+
+<!-- MODULE 2: LIVE SCORER -->
+<div class="mod" id="m2">
+  <div class="sec-label">Section 3 of 5</div>
+  <div class="sec-title">Live prompt scorer</div>
+  <div class="sec-intro">Rate any prompt across all 5 dimensions using this interactive scorer. Select the score that best describes your prompt on each dimension. The total and grade update in real time.</div>
+  <div class="tmin">⏱ 8 min — use on your own prompts</div>
+
+  <div class="scorer-wrap">
+    <div class="scorer-title">Rate your prompt across 5 dimensions</div>
+    <div class="scorer-sub">For each dimension, select 0–4. Hover each option to see what it means.</div>
+
+    <div class="scorer-dim">
+      <div class="sd-head">
+        <div class="sd-name">1. Clarity — task unambiguously stated</div>
+        <div class="sd-val" id="sv0">—</div>
+      </div>
+      <div class="sd-bar-wrap"><div class="sd-bar" id="sb0" style="width:0%"></div></div>
+      <div class="sd-options">
+        <div class="sd-opt" title="Task is so vague it could mean anything" onclick="setScore(0,0)">0 — No task</div>
+        <div class="sd-opt" title="Task hinted but requires interpretation" onclick="setScore(0,1)">1 — Implied</div>
+        <div class="sd-opt" title="Task stated but some ambiguity remains" onclick="setScore(0,2)">2 — Mostly clear</div>
+        <div class="sd-opt" title="Task is clear with verb + object + scope" onclick="setScore(0,3)">3 — Clear</div>
+        <div class="sd-opt" title="Task is unambiguous with measurable scope" onclick="setScore(0,4)">4 — Exemplary</div>
+      </div>
+    </div>
+
+    <div class="scorer-dim">
+      <div class="sd-head">
+        <div class="sd-name">2. Specificity — real data, named roles, concrete details</div>
+        <div class="sd-val" id="sv1">—</div>
+      </div>
+      <div class="sd-bar-wrap"><div class="sd-bar" id="sb1" style="width:0%"></div></div>
+      <div class="sd-options">
+        <div class="sd-opt" title="All generic — no data, no role, no names" onclick="setScore(1,0)">0 — Generic</div>
+        <div class="sd-opt" title="Some context but no real data" onclick="setScore(1,1)">1 — Vague context</div>
+        <div class="sd-opt" title="Has some specifics but missing key data" onclick="setScore(1,2)">2 — Partial data</div>
+        <div class="sd-opt" title="Has real numbers and named role" onclick="setScore(1,3)">3 — Data-driven</div>
+        <div class="sd-opt" title="Rich with specific data, names, and domain context" onclick="setScore(1,4)">4 — Exemplary</div>
+      </div>
+    </div>
+
+    <div class="scorer-dim">
+      <div class="sd-head">
+        <div class="sd-name">3. Constraint quality — hard, binary, enforceable boundaries</div>
+        <div class="sd-val" id="sv2">—</div>
+      </div>
+      <div class="sd-bar-wrap"><div class="sd-bar" id="sb2" style="width:0%"></div></div>
+      <div class="sd-options">
+        <div class="sd-opt" title="No constraints — anything goes" onclick="setScore(2,0)">0 — None</div>
+        <div class="sd-opt" title="Soft preferences only — 'be practical'" onclick="setScore(2,1)">1 — Soft only</div>
+        <div class="sd-opt" title="Some hard limits but major gaps" onclick="setScore(2,2)">2 — Partial</div>
+        <div class="sd-opt" title="Hard constraints with numbers and rules" onclick="setScore(2,3)">3 — Strong</div>
+        <div class="sd-opt" title="Comprehensive — includes what NOT to do" onclick="setScore(2,4)">4 — Exemplary</div>
+      </div>
+    </div>
+
+    <div class="scorer-dim">
+      <div class="sd-head">
+        <div class="sd-name">4. Output definition — format, structure, length specified</div>
+        <div class="sd-val" id="sv3">—</div>
+      </div>
+      <div class="sd-bar-wrap"><div class="sd-bar" id="sb3" style="width:0%"></div></div>
+      <div class="sd-options">
+        <div class="sd-opt" title="No format guidance at all" onclick="setScore(3,0)">0 — None</div>
+        <div class="sd-opt" title="Type named but structure not specified" onclick="setScore(3,1)">1 — Type only</div>
+        <div class="sd-opt" title="Structure outlined but length missing" onclick="setScore(3,2)">2 — Partial</div>
+        <div class="sd-opt" title="Format, structure, and length all defined" onclick="setScore(3,3)">3 — Defined</div>
+        <div class="sd-opt" title="Section purposes named, length, and examples of structure" onclick="setScore(3,4)">4 — Exemplary</div>
+      </div>
+    </div>
+
+    <div class="scorer-dim">
+      <div class="sd-head">
+        <div class="sd-name">5. Context sufficiency — model has everything it needs</div>
+        <div class="sd-val" id="sv4">—</div>
+      </div>
+      <div class="sd-bar-wrap"><div class="sd-bar" id="sb4" style="width:0%"></div></div>
+      <div class="sd-options">
+        <div class="sd-opt" title="Model must invent most facts" onclick="setScore(4,0)">0 — No context</div>
+        <div class="sd-opt" title="Some background but key facts missing" onclick="setScore(4,1)">1 — Thin</div>
+        <div class="sd-opt" title="Most context present but gaps remain" onclick="setScore(4,2)">2 — Adequate</div>
+        <div class="sd-opt" title="Rich context — model can answer without guessing" onclick="setScore(4,3)">3 — Rich</div>
+        <div class="sd-opt" title="Complete context with assumptions flagged" onclick="setScore(4,4)">4 — Exemplary</div>
+      </div>
+    </div>
+
+    <div class="total-display">
+      <div>
+        <div class="total-score-big" id="totalScore">0</div>
+        <div class="total-label">out of 20</div>
+      </div>
+      <div class="total-right">
+        <div class="total-grade" id="totalGrade">Not yet scored</div>
+        <div class="total-verdict" id="totalVerdict">Select scores for all 5 dimensions above to evaluate your prompt.</div>
+        <div class="total-bar-wrap"><div class="total-bar" id="totalBar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div id="scorerFeedback" style="margin-top:16px;display:none">
+      <div class="improve-box">
+        <div class="ib-title">Dimension-level feedback</div>
+        <div id="feedbackItems"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hl hl-s">Calibration tip: Score prompts from the lab's worked examples before scoring your own. This builds calibration — the ability to distinguish a 2 from a 3 on any dimension — which is the hardest part of prompt evaluation.</div>
+
+  <div class="nav-foot"><button class="nb" onclick="goMod(1)">← 5 Dimensions</button><div class="nb-ct">Section 3 of 5</div><button class="nb pri" onclick="goMod(3)">Next: Worked examples →</button></div>
+</div>
+
+<!-- MODULE 3: WORKED EXAMPLES -->
+<div class="mod" id="m3">
+  <div class="sec-label">Section 4 of 5</div>
+  <div class="sec-title">Evaluated prompts — worked examples</div>
+  <div class="sec-intro">See the evaluation framework applied to real prompts from MedCore, Verdant, and Nexus — one weak prompt, one mid-level prompt, and one exemplary prompt per organization. Study the scores and the specific improvements made at each level.</div>
+  <div class="tmin">⏱ 10 min</div>
+
+  <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:12px">MedCore Health — three levels of the same prompt</div>
+  <div style="font-size:12px;color:var(--ink3);margin-bottom:16px;font-style:italic">Scenario: Raj Johnson (VP Finance) needs help analyzing Q3 labor cost overruns</div>
+
+  <div class="eval-card">
+    <div class="eval-head"><span class="eval-tag et-r">Level 1 — Weak</span> Raj's first attempt</div>
+    <div class="prompt-box">Help me analyze our Q3 labor costs. We went over budget.
+<span class="pb-lbl">Weak prompt</span></div>
+    <div class="dim-scores">
+      <div class="ds-cell ds-r"><div class="ds-label">Clarity</div><div class="ds-score">1</div></div>
+      <div class="ds-cell ds-r"><div class="ds-label">Specificity</div><div class="ds-score">0</div></div>
+      <div class="ds-cell ds-r"><div class="ds-label">Constraints</div><div class="ds-score">0</div></div>
+      <div class="ds-cell ds-r"><div class="ds-label">Output def.</div><div class="ds-score">0</div></div>
+      <div class="ds-cell ds-r"><div class="ds-label">Context</div><div class="ds-score">0</div></div>
+      <div class="ds-cell ds-total"><div class="ds-label">Total</div><div class="ds-score">1/20</div></div>
+    </div>
+    <div class="verdict v-r">Diagnosis: This prompt will produce a generic list of labor cost management tips that applies to any organization anywhere. Raj will need 5+ rounds of follow-up questions to get anything useful.</div>
+    <div class="improve-box" style="margin-top:8px">
+      <div class="ib-title">What's missing</div>
+      <div class="ib-item"><div class="ib-dot ib-dot-r"></div>No role — the model doesn't know it's talking to a healthcare CFO</div>
+      <div class="ib-item"><div class="ib-dot ib-dot-r"></div>No numbers — "went over budget" could mean $100 or $100M</div>
+      <div class="ib-item"><div class="ib-dot ib-dot-r"></div>No format — what does "analysis" look like? A table? A paragraph? A list?</div>
+      <div class="ib-item"><div class="ib-dot ib-dot-r"></div>No constraints — no scope, no exclusions, no target audience for the output</div>
+    </div>
+  </div>
+
+  <div class="eval-card">
+    <div class="eval-head"><span class="eval-tag et-gold">Level 2 — Mid-level</span> After one revision</div>
+    <div class="prompt-box">You are a healthcare CFO. Analyze MedCore's Q3 labor cost overruns. We had $4.2M in overruns across 3 hospitals. North campus: $1.8M overtime, Central: $1.6M agency nurses, South: $0.8M unknown. Budget was $38M total labor. Give me a table of root causes and fixes.
+<span class="pb-lbl">Mid-level prompt</span></div>
+    <div class="dim-scores">
+      <div class="ds-cell ds-g"><div class="ds-label">Clarity</div><div class="ds-score">3</div></div>
+      <div class="ds-cell ds-g"><div class="ds-label">Specificity</div><div class="ds-score">3</div></div>
+      <div class="ds-cell ds-a"><div class="ds-label">Constraints</div><div class="ds-score">1</div></div>
+      <div class="ds-cell ds-a"><div class="ds-label">Output def.</div><div class="ds-score">2</div></div>
+      <div class="ds-cell ds-a"><div class="ds-label">Context</div><div class="ds-score">2</div></div>
+      <div class="ds-cell ds-total"><div class="ds-label">Total</div><div class="ds-score">11/20</div></div>
+    </div>
+    <div class="verdict v-a">Diagnosis: Substantially better — real data and a role produce a useful output. But constraints are nearly absent (the model might recommend options Raj can't implement), and the output format is underspecified ("a table" of what exactly?).</div>
+    <div class="improve-box" style="margin-top:8px">
+      <div class="ib-title">What to fix next</div>
+      <div class="ib-item"><div class="ib-dot ib-dot-r"></div>Add hard constraints: "Focus only on correctable causes, not seasonal demand. Exclude fringe benefits."</div>
+      <div class="ib-item"><div class="ib-dot ib-dot-r"></div>Define the table columns: "Campus | Root Cause | $ Impact | Fix | Owner | Ease (Easy/Med/Hard)"</div>
+      <div class="ib-item"><div class="ib-dot ib-dot-r"></div>Add audience context: "This analysis is for a board presentation — no jargon, executive-ready language"</div>
+    </div>
+  </div>
+
+  <div class="eval-card">
+    <div class="eval-head"><span class="eval-tag et-g">Level 3 — Exemplary</span> After full evaluation and refinement</div>
+    <div class="prompt-box">Act as a healthcare CFO with expertise in hospital cost accounting and labor variance analysis. Analyze MedCore's Q3 labor cost overruns ($4.2M across 3 campuses). Data: North $1.8M (primarily OT), Central $1.6M (agency nurses), South $0.8M (cause unknown). Total Q3 labor budget: $38M.
+
+Constraints: Focus only on correctable root causes — not seasonal census spikes. Exclude fringe benefits variance. Do not recommend options requiring union renegotiation (contract locked until March 2025).
+
+Output: Table with columns — Campus | Root Cause | $ Impact | Recommended Fix | Owner | Implementation ease (Easy/Med/Hard).
+
+Extras: Flag any data gap that prevents a confident diagnosis. Rate your confidence in the South Campus analysis separately — we have least visibility there.
+<span class="pb-lbl">Exemplary prompt</span></div>
+    <div class="dim-scores">
+      <div class="ds-cell ds-g"><div class="ds-label">Clarity</div><div class="ds-score">4</div></div>
+      <div class="ds-cell ds-g"><div class="ds-label">Specificity</div><div class="ds-score">4</div></div>
+      <div class="ds-cell ds-g"><div class="ds-label">Constraints</div><div class="ds-score">4</div></div>
+      <div class="ds-cell ds-g"><div class="ds-label">Output def.</div><div class="ds-score">4</div></div>
+      <div class="ds-cell ds-g"><div class="ds-label">Context</div><div class="ds-score">3</div></div>
+      <div class="ds-cell ds-total"><div class="ds-label">Total</div><div class="ds-score">19/20</div></div>
+    </div>
+    <div class="verdict v-g">Result: This prompt produces a board-ready analysis table with specific, actionable recommendations — each with a named owner and difficulty rating. Raj can take this directly to the CFO presentation with minimal editing.</div>
+    <div class="improve-box" style="margin-top:8px">
+      <div class="ib-title">What makes this exemplary</div>
+      <div class="ib-item"><div class="ib-dot ib-dot-g"></div>Constraints are hard and specific: "union renegotiation excluded" removes an entire class of recommendations the model would otherwise default to</div>
+      <div class="ib-item"><div class="ib-dot ib-dot-g"></div>Output columns are pre-defined — the model fills the table structure Raj designed, producing consistent formatting</div>
+      <div class="ib-item"><div class="ib-dot ib-dot-g"></div>The extras flag a known data weakness (South Campus) — turning a gap into a visible uncertainty rather than a hidden assumption</div>
+      <div class="ib-item"><div class="ib-dot ib-dot-g"></div>Context score is 3, not 4 — perfect score would require actual shift data and census records, which Raj hasn't provided yet</div>
+    </div>
+  </div>
+
+  <div style="font-size:13px;font-weight:500;color:var(--ink);margin:24px 0 12px">Verdant Retail — evaluation of a brand prompt</div>
+  <div style="font-size:12px;color:var(--ink3);margin-bottom:16px;font-style:italic">Scenario: Lena Wolff (Brand Director) asking for product descriptions</div>
+
+  <div class="eval-card">
+    <div class="eval-head"><span class="eval-tag et-r">Level 1</span> vs <span class="eval-tag et-g">Level 3</span> — Direct comparison</div>
+    <div class="compare-strip" style="margin-top:10px">
+      <div>
+        <div class="cs-lbl cs-lbl-r" style="font-size:10px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:7px">Score: 3/20</div>
+        <div class="cs-box cs-bad"><span style="color:var(--red-t)">Write a product description for our new linen blazer. Make it sound sustainable.</span></div>
+      </div>
+      <div>
+        <div class="cs-lbl cs-lbl-g" style="font-size:10px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:7px">Score: 18/20</div>
+        <div class="cs-box cs-good"><span style="color:var(--grn-t)">Write Verdant product descriptions in our exact brand voice.
+
+Example 1 — Organic tee: "Made from 100% GOTS-certified organic cotton... No dyes you can't pronounce. A tee built to last 10 years."
+
+Voice rules: Short sentences. One tactile detail. One sourcing fact. No words: eco-friendly, sustainable, planet, green, conscious. Under 60 words.
+
+Write for: Unlined linen blazer, Belgian linen, no synthetic blends, wrinkle-resistant.</span></div>
+      </div>
+    </div>
+    <div class="dim-scores" style="margin-top:12px">
+      <div class="ds-cell ds-r"><div class="ds-label">Weak — Clarity</div><div class="ds-score">2</div></div>
+      <div class="ds-cell ds-r"><div class="ds-label">Weak — Specificity</div><div class="ds-score">0</div></div>
+      <div class="ds-cell ds-r"><div class="ds-label">Weak — Constraints</div><div class="ds-score">0</div></div>
+      <div class="ds-cell ds-r"><div class="ds-label">Weak — Output</div><div class="ds-score">0</div></div>
+      <div class="ds-cell ds-r"><div class="ds-label">Weak — Context</div><div class="ds-score">1</div></div>
+      <div class="ds-cell ds-total"><div class="ds-label">Weak total</div><div class="ds-score">3/20</div></div>
+    </div>
+    <div class="dim-scores">
+      <div class="ds-cell ds-g"><div class="ds-label">Strong — Clarity</div><div class="ds-score">4</div></div>
+      <div class="ds-cell ds-g"><div class="ds-label">Strong — Specificity</div><div class="ds-score">4</div></div>
+      <div class="ds-cell ds-g"><div class="ds-label">Strong — Constraints</div><div class="ds-score">3</div></div>
+      <div class="ds-cell ds-g"><div class="ds-label">Strong — Output</div><div class="ds-score">4</div></div>
+      <div class="ds-cell ds-g"><div class="ds-label">Strong — Context</div><div class="ds-score">3</div></div>
+      <div class="ds-cell ds-total"><div class="ds-label">Strong total</div><div class="ds-score">18/20</div></div>
+    </div>
+    <div class="verdict v-g" style="margin-top:10px">Key insight: The weak prompt says "make it sound sustainable" — the single vaguest instruction possible for a brand that explicitly avoids the word "sustainable." The strong prompt bans the word and provides an example of what Verdant's actual voice sounds like. Same task, completely different output quality.</div>
+  </div>
+
+  <div style="font-size:13px;font-weight:500;color:var(--ink);margin:24px 0 12px">Nexus Capital — evaluation of a CoT prompt</div>
+  <div style="font-size:12px;color:var(--ink3);margin-bottom:16px;font-style:italic">Scenario: Elena Vasquez deciding on a portfolio company capital injection</div>
+
+  <div class="eval-card">
+    <div class="eval-head"><span class="eval-tag et-p">Finance · CoT evaluation</span> Weak vs exemplary</div>
+    <div class="compare-strip" style="margin-top:10px">
+      <div>
+        <div class="cs-lbl cs-lbl-r" style="font-size:10px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:7px">Score: 5/20</div>
+        <div class="cs-box cs-bad"><span style="color:var(--red-t)">Should we inject more money into our struggling portfolio company? It has one big customer. Think about it and give me a recommendation.</span></div>
+      </div>
+      <div>
+        <div class="cs-lbl cs-lbl-g" style="font-size:10px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:7px">Score: 19/20</div>
+        <div class="cs-box cs-good"><span style="color:var(--grn-t)">You are a PE operating partner. Before recommending, reason step by step: Step 1: Quantify the 60% customer concentration risk. Step 2: Evaluate what $8M achieves in 12-18mo. Step 3: Model the no-injection scenario. Step 4: Assess if this is execution vs. structural. Step 5: Model exit scenarios at current vs. post-injection trajectory.
+
+Context: $6M ARR, 60% from Walmart, NRR 84% (was 110%), EBITDA -$400K (was +$200K). Nexus invested $14M 18mo ago. FMV ~$10M. Fund II: year 6 of 10.
+
+Only after all steps: Invest / Partial / Do Not Invest + top 3 reasons + the one assumption that reverses your answer.</span></div>
+      </div>
+    </div>
+    <div class="verdict v-a" style="margin-top:10px">The weak prompt scores 5/20 primarily because it has a hint of a task (1pt Clarity) and minimal context (1pt). The strong prompt earns 19/20 — the only missing point is that it doesn't include a confidence rating instruction. The difference in output quality is not 4x — it is more like 20x.</div>
+  </div>
+
+  <div class="nav-foot"><button class="nb" onclick="goMod(2)">← Live scorer</button><div class="nb-ct">Section 4 of 5</div><button class="nb pri" onclick="goMod(4)">Next: Checklist →</button></div>
+</div>
+
+<!-- MODULE 4: CHECKLIST -->
+<div class="mod" id="m4">
+  <div class="sec-label">Section 5 of 5</div>
+  <div class="sec-title">The prompt evaluation checklist</div>
+  <div class="sec-intro">Before sending any high-stakes prompt, run it through this 20-question checklist. It takes 90 seconds and catches the most common design flaws before they produce disappointing outputs.</div>
+  <div class="tmin">⏱ 5 min</div>
+
+  <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:14px">Dimension 1: Clarity (4 checks)</div>
+  <div class="checklist-grid">
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Task has a verb</strong>Analyze, Draft, Create, Evaluate, Summarize — not "help me with" or "tell me about"</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Scope is bounded</strong>The task has a start and end — not open-ended "anything useful you can think of"</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>No pronoun ambiguity</strong>"It," "they," "the situation" — replaced with specific nouns throughout</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>One primary task</strong>Multiple tasks in one prompt split focus — separate into distinct prompts if needed</div></div>
+  </div>
+
+  <div style="font-size:13px;font-weight:500;color:var(--ink);margin:18px 0 14px">Dimension 2: Specificity (4 checks)</div>
+  <div class="checklist-grid">
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Role has expertise, not just title</strong>"CFO specializing in healthcare cost accounting" vs. "a CFO"</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>At least one real number</strong>A metric, percentage, dollar amount, or count — not "significant" or "substantial"</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Named entities where relevant</strong>Org names, person names, product names — not "our company" or "the team"</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>No placeholder language</strong>"[Insert context here]" replaced with actual context — or flagged as a known gap</div></div>
+  </div>
+
+  <div style="font-size:13px;font-weight:500;color:var(--ink);margin:18px 0 14px">Dimension 3: Constraint quality (4 checks)</div>
+  <div class="checklist-grid">
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>At least one hard exclusion</strong>"Do not recommend X" or "Exclude Y from scope" — a binary rule, not a preference</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Budget / word / time limits are numbers</strong>"Under 300 words" not "keep it brief." "$2M cap" not "realistic budget"</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Tone direction is specific</strong>"No jargon, 7th grade reading level" not "easy to understand." "Confident, not promotional" not "professional"</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Regulatory / legal constraints named</strong>For healthcare, finance, legal, HR — cite the specific rules that apply (HIPAA, union contract, SEC)</div></div>
+  </div>
+
+  <div style="font-size:13px;font-weight:500;color:var(--ink);margin:18px 0 14px">Dimension 4: Output definition (4 checks)</div>
+  <div class="checklist-grid">
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Format is named</strong>Table, memo, email, JSON, bulleted list, numbered list, narrative — not just "an answer"</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Sections or columns are defined</strong>For tables: column names. For documents: section titles. For emails: paragraph purposes</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Length is specified</strong>Word count, page limit, or item count — prevents the model from deciding how long is "right"</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Audience is named</strong>Who reads this output? Board? LP? Patient? Customer? This changes vocabulary, depth, and tone</div></div>
+  </div>
+
+  <div style="font-size:13px;font-weight:500;color:var(--ink);margin:18px 0 14px">Dimension 5: Context sufficiency (4 checks)</div>
+  <div class="checklist-grid">
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>No fact the model must invent</strong>Any statistic, name, or event the model needs but wasn't given — will be fabricated</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Decision alternatives are stated</strong>For recommendations — the options being considered are explicit, not left to the model</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Known gaps are flagged</strong>If you're missing data, say "I don't have X — flag any assumption you make about it"</div></div>
+    <div class="cl-item"><div class="cl-check cl-y">✓</div><div class="cl-text"><strong>Meta-instructions are present</strong>At least one of: confidence rating, assumption flagging, follow-up questions, uncertainty flags</div></div>
+  </div>
+
+  <div class="hl hl-i" style="margin-top:20px">Score interpretation: 17–20 checks passed = send with confidence. 13–16 = revise before sending high-stakes prompts. Below 13 = significant redesign needed before use in a professional context.</div>
+
+  <div style="background:var(--ink);border-radius:10px;padding:22px 26px;margin-top:20px">
+    <div style="font-family:var(--font-serif,Georgia,serif);font-size:18px;color:#fff;margin-bottom:14px">The one-question evaluation shortcut</div>
+    <div style="font-size:14px;color:rgba(255,255,255,0.7);line-height:1.75;margin-bottom:14px">When you don't have time for a full 20-check evaluation, ask yourself one question:</div>
+    <div style="background:rgba(201,168,76,0.12);border:0.5px solid var(--gold);border-radius:8px;padding:16px 20px;font-family:var(--font-serif,Georgia,serif);font-size:17px;color:var(--gold2);line-height:1.5;text-align:center;margin-bottom:14px">"If I gave this prompt to a new employee on their first day, would they produce the output I actually need?"</div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.7">If the answer is no — they'd need to ask clarifying questions — then so will the AI. Every clarification the model must make internally becomes a guess. Every guess is a potential failure point. The checklist converts guesses into explicit instructions.</div>
+  </div>
+
+  <div style="background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:20px 24px;margin-top:16px">
+    <div style="font-size:13px;font-weight:500;color:var(--ink);margin-bottom:14px">Evaluation summary — what we covered</div>
+    <table class="fw-table">
+      <thead><tr><th>Section</th><th>Key takeaway</th></tr></thead>
+      <tbody>
+        <tr><td>Why evaluate</td><td>Evaluation predicts output quality before you run the prompt — turning iteration from random to systematic</td></tr>
+        <tr><td>5 Dimensions</td><td>Clarity, Specificity, Constraint quality, Output definition, Context sufficiency — each scored 0–4</td></tr>
+        <tr><td>Live scorer</td><td>Any prompt can be scored in under 2 minutes — use it before sending high-stakes AI requests</td></tr>
+        <tr><td>Worked examples</td><td>A 1/20 and a 19/20 prompt on the same task produce outputs that are an order of magnitude apart in quality</td></tr>
+        <tr><td>Checklist</td><td>20 binary checks, 90 seconds — the fastest way to catch design flaws before they become output failures</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="nav-foot"><button class="nb" onclick="goMod(3)">← Worked examples</button><div class="nb-ct">Section 5 of 5</div><button class="nb pri" onclick="goMod(0)">Restart section ↺</button></div>
+</div>
+
+</div>
+
+<script>
+const scores=[null,null,null,null,null];
+const dimData=[
+  {title:'Dimension 1: Clarity — is the task unambiguously stated?',levels:[
+    {s:'0 — No task',c:'s-lo',d:'The prompt contains no identifiable task. It might be a question, a topic, or a vague gesture at a subject area. The model must invent what to do.'},
+    {s:'1 — Implied task',c:'s-md',d:'A task is suggested but requires interpretation. "Help me with our Q3 report" — help how? Analyze? Summarize? Rewrite? Two people would expect different outputs.'},
+    {s:'2 — Mostly clear',c:'s-md',d:'The task is stated but one or more dimensions remain ambiguous. "Summarize our Q3 financials" — for whom? In what format? How long?'},
+    {s:'3 — Clear',c:'s-hi',d:'Task has verb + object + scope. "Summarize MedCore\'s Q3 labor variance in 3 bullets for the CFO" — unambiguous. One reader, one expected output.'},
+    {s:'4 — Exemplary',c:'s-hi',d:'Task is precise with measurable outcomes. "Identify and rank the top 3 correctable root causes of MedCore\'s $4.2M Q3 labor overrun, with estimated $ impact per cause."'}
+  ]},
+  {title:'Dimension 2: Specificity — real data, named roles, concrete details',levels:[
+    {s:'0 — Generic',c:'s-lo',d:'No specific data, no named role, no organizational context. Applies to any company anywhere. "Help me reduce costs" — this could be any business in any industry.'},
+    {s:'1 — Vague context',c:'s-md',d:'Some organizational context but no real data. "We\'re a healthcare company and our labor costs are too high" — which healthcare company? How high?'},
+    {s:'2 — Partial data',c:'s-md',d:'Some specifics but key facts missing. Role is named but generic ("CFO"). Some numbers present but incomplete. Model can help but may misfire on specifics.'},
+    {s:'3 — Data-driven',c:'s-hi',d:'Real numbers, named role with expertise, organizational context. "Act as MedCore\'s CFO — analyze $4.2M Q3 overrun across 3 campuses (North $1.8M OT, Central $1.6M agency)."'},
+    {s:'4 — Exemplary',c:'s-hi',d:'Rich with specific data, named individuals, historical benchmarks, competitive context, and domain-specific terminology. Reads like a briefing document, not a generic question.'}
+  ]},
+  {title:'Dimension 3: Constraint quality — hard, binary, enforceable limits',levels:[
+    {s:'0 — None',c:'s-lo',d:'No constraints at all. The model has complete freedom — which means it will default to its own judgment about scope, length, tone, and approach. Often fine for casual tasks; dangerous for professional ones.'},
+    {s:'1 — Soft only',c:'s-md',d:'Preferences stated as suggestions: "keep it practical," "be realistic," "don\'t be too long." The model will acknowledge these and then proceed however it wants.'},
+    {s:'2 — Partial hard',c:'s-md',d:'Some hard constraints present but major gaps. Has a word count but no topic exclusions. Has excluded one option but not named the others that should be ruled out.'},
+    {s:'3 — Strong',c:'s-hi',d:'Multiple hard constraints with numbers and binary rules. "No recommendations requiring >$2M. Exclude agency nurse options. Focus only on correctable causes, not seasonal demand."'},
+    {s:'4 — Exemplary',c:'s-hi',d:'Comprehensive hard and soft constraints, including what NOT to produce. Covers scope, budget, regulatory, tone, audience, and excluded topics. The model cannot accidentally go out of bounds.'}
+  ]},
+  {title:'Dimension 4: Output definition — format, structure, length',levels:[
+    {s:'0 — None',c:'s-lo',d:'No output format specified. The model decides everything: length, structure, format, level of detail. Results are unpredictable and inconsistent across runs.'},
+    {s:'1 — Type only',c:'s-md',d:'Output type named ("a report," "a plan," "a table") but internal structure undefined. The model will fill the structure with its own defaults — which may not match what you needed.'},
+    {s:'2 — Partial',c:'s-md',d:'Structure outlined but gaps remain. "A table with root causes and recommendations" — but which columns? In what order? For what audience?'},
+    {s:'3 — Defined',c:'s-hi',d:'Format, structure, and length all specified. "Table: Campus | Root Cause | $ Impact | Fix | Owner. Max 6 rows. Executive language — no jargon." Model produces a predictable artifact.'},
+    {s:'4 — Exemplary',c:'s-hi',d:'Section purposes named, length controlled, audience specified, and examples of the output structure provided. The model fills in a template you designed rather than designing its own.'}
+  ]},
+  {title:'Dimension 5: Context sufficiency — everything the model needs to answer',levels:[
+    {s:'0 — No context',c:'s-lo',d:'Model must invent the organizational facts, the data, the situation, and the constraints. Every invented fact is a potential hallucination. Output is fiction dressed as analysis.'},
+    {s:'1 — Thin',c:'s-md',d:'Some background but key facts missing. The model knows it\'s a healthcare organization but doesn\'t know which one, what the numbers are, or what decision is being made.'},
+    {s:'2 — Adequate',c:'s-md',d:'Most context present but gaps remain. The model can produce a useful output but will make 2–4 assumptions it doesn\'t flag. Results are useful but not trustworthy at the detail level.'},
+    {s:'3 — Rich',c:'s-hi',d:'The model has everything needed to respond without guessing. Data, organizational context, decision constraints, and stakeholder information are all present.'},
+    {s:'4 — Exemplary',c:'s-hi',d:'Complete context with known gaps explicitly flagged ("I don\'t have the South Campus data — flag assumptions"). The model\'s uncertainty is visible and manageable rather than hidden.'}
+  ]}
+];
+
+let openDim=null;
+function toggleDim(i){
+  const cards=document.querySelectorAll('.dim-card');
+  const panel=document.getElementById('dimPanel');
+  if(openDim===i){cards[i].classList.remove('sel');panel.classList.remove('open');openDim=null;return;}
+  cards.forEach(c=>c.classList.remove('sel'));
+  cards[i].classList.add('sel');
+  const d=dimData[i];
+  panel.innerHTML=`<div class="dd-title">${d.title}</div><div class="dd-levels">${d.levels.map(l=>`<div class="dd-row"><div class="dd-score ${l.c}">${l.s}</div><div class="dd-desc">${l.d}</div></div>`).join('')}</div>`;
+  panel.classList.add('open');
+  openDim=i;
+}
+
+const dimNames=['Clarity','Specificity','Constraints','Output def.','Context'];
+const feedback=[
+  ['No task stated — add a clear verb + object + scope','Task is implied but ambiguous — make it explicit','Task is mostly clear — remove remaining ambiguity','Good clarity — consider adding measurable scope','Exemplary clarity'],
+  ['Replace all generic language with specific data','Add at least one real number or named entity','Good start — add the missing key data points','Strong specificity — consider adding competitive context','Exemplary specificity'],
+  ['Add at least one hard constraint (binary rule)','Replace soft preferences with numerical limits','Add what NOT to do — exclusions are as powerful as inclusions','Strong constraints — ensure all edge cases are covered','Exemplary constraint quality'],
+  ['Name the output format (table, memo, email, list)','Define the internal structure — columns or sections','Add length specification to the structure','Strong definition — consider naming section purposes','Exemplary output definition'],
+  ['Add organizational context and key data — the model is guessing everything','Add the missing key facts — at least one real number or event','Flag known data gaps explicitly with [ASSUMPTION] instructions','Rich context — flag any remaining data gaps','Exemplary context — model can answer without guessing']
+];
+
+function setScore(dim,val){
+  scores[dim]=val;
+  const opts=document.querySelectorAll(`.scorer-dim:nth-child(${dim+2}) .sd-opt`);
+  opts.forEach((o,i)=>o.classList.toggle('active',i===val));
+  document.getElementById(`sv${dim}`).textContent=val+'/4';
+  document.getElementById(`sb${dim}`).style.width=(val/4*100)+'%';
+  updateTotal();
+}
+
+function updateTotal(){
+  const filled=scores.filter(s=>s!==null);
+  if(filled.length<5){
+    const partial=filled.reduce((a,b)=>a+b,0);
+    document.getElementById('totalScore').textContent=partial;
+    document.getElementById('totalGrade').textContent=`${filled.length}/5 dimensions scored`;
+    document.getElementById('totalVerdict').textContent='Complete all 5 dimensions for your full score and grade.';
+    document.getElementById('totalBar').style.width=(partial/20*100)+'%';
+    document.getElementById('scorerFeedback').style.display='none';
+    return;
+  }
+  const total=scores.reduce((a,b)=>a+b,0);
+  document.getElementById('totalScore').textContent=total;
+  document.getElementById('totalBar').style.width=(total/20*100)+'%';
+  let grade,verdict;
+  if(total>=18){grade='Exemplary ('+total+'/20)';verdict='This prompt is ready for high-stakes professional use. Minimal iteration expected.';}
+  else if(total>=14){grade='Strong ('+total+'/20)';verdict='Good prompt — review lower-scoring dimensions for targeted improvements before sending mission-critical requests.';}
+  else if(total>=10){grade='Adequate ('+total+'/20)';verdict='Useful for low-stakes tasks. For strategic or board-level work, revise the weakest dimensions first.';}
+  else if(total>=6){grade='Weak ('+total+'/20)';verdict='This prompt will produce inconsistent outputs. Significant revision recommended before use.';}
+  else{grade='Critical ('+total+'/20)';verdict='Fundamental redesign needed. The model will guess most of what it needs to answer this prompt.';}
+  document.getElementById('totalGrade').textContent=grade;
+  document.getElementById('totalVerdict').textContent=verdict;
+  const fb=document.getElementById('feedbackItems');
+  fb.innerHTML=scores.map((s,i)=>`<div class="ib-item"><div class="ib-dot ${s>=3?'ib-dot-g':'ib-dot-r'}"></div><strong style="color:var(--ink)">${dimNames[i]}:</strong> ${feedback[i][s]}</div>`).join('');
+  document.getElementById('scorerFeedback').style.display='block';
+}
+
+function goMod(n){
+  document.querySelectorAll('.mod').forEach((m,i)=>m.classList.toggle('active',i===n));
+  document.querySelectorAll('.npill').forEach((p,i)=>p.classList.toggle('active',i===n));
+  document.getElementById('prog').style.width=((n+1)/5*100)+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>

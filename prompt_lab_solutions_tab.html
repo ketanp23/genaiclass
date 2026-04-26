@@ -1,0 +1,802 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+--ink:#16161d;--ink2:#4a4a6a;--ink3:#9090b0;
+--gold:#c9a84c;--gold2:#f0d080;--gold3:#fffbee;
+--sur:#ffffff;--sur2:#f7f6f3;--sur3:#efece8;
+--bd:#e0dbd4;
+--org0:#1e3a5f;--org0l:#e8f0fa;--org0b:#c0d4ef;
+--org1:#2d5a1e;--org1l:#eaf5e8;--org1b:#b8deb0;
+--org2:#5a1e4a;--org2l:#f5e8f3;--org2b:#ddb8d8;
+}
+body{font-family:var(--font-sans,system-ui,sans-serif);background:var(--sur2);color:var(--ink)}
+
+.shell{max-width:900px;margin:0 auto;padding-bottom:60px}
+
+.top-bar{background:var(--ink);padding:40px 40px 32px}
+.eyebrow{font-size:10px;font-weight:500;letter-spacing:3px;color:var(--gold);text-transform:uppercase;margin-bottom:12px}
+.top-title{font-family:var(--font-serif,Georgia,serif);font-size:32px;color:#fff;line-height:1.2;margin-bottom:8px}
+.top-title em{color:var(--gold2);font-style:italic}
+.top-sub{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.65;max-width:580px;margin-bottom:20px}
+.top-chips{display:flex;gap:20px;flex-wrap:wrap}
+.chip{font-size:11px;color:rgba(255,255,255,0.45);display:flex;align-items:center;gap:6px}
+.chip-dot{width:5px;height:5px;border-radius:50%;background:var(--gold)}
+
+.nav-strip{display:flex;padding:0 40px;overflow-x:auto;scrollbar-width:none;background:var(--sur2);border-bottom:0.5px solid var(--bd)}
+.nav-strip::-webkit-scrollbar{display:none}
+.npill{font-size:11px;font-weight:500;color:var(--ink3);padding:10px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;transition:all 0.2s}
+.npill.active{color:var(--ink);border-bottom-color:var(--gold)}
+.npill:hover:not(.active){color:var(--ink2)}
+.npill.sol{color:#b8860b}
+.npill.sol.active{color:#7a5c10;border-bottom-color:var(--gold)}
+
+.prog-wrap{background:rgba(0,0,0,0.06);height:2px;margin:0 40px}
+.prog-bar{height:2px;background:var(--gold);width:100%}
+
+.mod{display:none;padding:32px 40px;animation:fi 0.3s ease}
+.mod.active{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+.sol-header{background:var(--ink);border-radius:10px;padding:24px 28px;margin-bottom:28px}
+.sol-h-label{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.sol-h-title{font-family:var(--font-serif,Georgia,serif);font-size:22px;color:#fff;margin-bottom:8px;line-height:1.25}
+.sol-h-desc{font-size:13px;color:rgba(255,255,255,0.55);line-height:1.65}
+.sol-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}
+.sol-stat{background:rgba(255,255,255,0.06);border-radius:8px;padding:12px 16px;text-align:center}
+.sol-stat-n{font-size:22px;font-weight:500;color:var(--gold2)}
+.sol-stat-l{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
+
+.ex-card{background:var(--sur);border:0.5px solid var(--bd);border-radius:12px;margin-bottom:20px;overflow:hidden}
+.ex-card-head{padding:16px 20px;background:var(--sur);border-bottom:0.5px solid var(--bd);cursor:pointer;display:flex;align-items:flex-start;gap:14px}
+.ex-card-head:hover{background:var(--sur2)}
+.ex-num-badge{width:32px;height:32px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:var(--ink);flex-shrink:0;margin-top:2px}
+.ex-head-meta{flex:1}
+.ex-head-tag{display:inline-block;font-size:10px;font-weight:500;padding:2px 9px;border-radius:10px;margin-bottom:5px;letter-spacing:0.3px}
+.tag-bl{background:var(--org0l);color:var(--org0)}
+.tag-gr{background:var(--org1l);color:var(--org1)}
+.tag-pu{background:var(--org2l);color:var(--org2)}
+.tag-go{background:var(--gold3);color:#7a5c10}
+.ex-head-title{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px;line-height:1.3}
+.ex-head-who{font-size:12px;color:var(--ink3)}
+.ex-caret{font-size:14px;color:var(--ink3);transition:transform 0.2s;margin-top:6px;flex-shrink:0}
+.ex-caret.open{transform:rotate(180deg)}
+
+.ex-body{display:none;padding:0}
+.ex-body.open{display:block}
+
+.section-block{padding:20px 24px;border-bottom:0.5px solid var(--bd)}
+.section-block:last-child{border-bottom:none}
+.sb-label{font-size:10px;font-weight:500;letter-spacing:2px;text-transform:uppercase;color:var(--ink3);margin-bottom:10px}
+
+.question-box{background:var(--sur3);border:0.5px solid var(--bd);border-radius:8px;padding:14px 18px;font-size:13px;color:var(--ink2);line-height:1.7;margin-bottom:0}
+
+.score-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.score-pill{font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;display:flex;align-items:center;gap:5px}
+.sp-green{background:#eaf5e8;color:#2d5a1e;border:0.5px solid #b8deb0}
+.sp-gold{background:var(--gold3);color:#7a5c10;border:0.5px solid #e8cc80}
+.sp-blue{background:var(--org0l);color:var(--org0);border:0.5px solid var(--org0b)}
+
+.ideal-box{background:var(--ink);border-radius:8px;padding:20px 22px;font-family:var(--font-mono,monospace);font-size:11.5px;line-height:1.9;color:rgba(255,255,255,0.82);white-space:pre-wrap}
+.ib-section{color:var(--gold2);font-weight:500}
+.ib-val{color:rgba(255,255,255,0.92)}
+.ib-comment{color:rgba(255,255,255,0.35);font-style:italic}
+
+.annotation-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+.ann{background:var(--sur);border:0.5px solid var(--bd);border-radius:8px;padding:12px 14px}
+.ann-letter{font-family:var(--font-serif,Georgia,serif);font-size:18px;color:var(--gold);margin-bottom:4px}
+.ann-label{font-size:11px;font-weight:500;color:var(--ink);margin-bottom:3px}
+.ann-body{font-size:11.5px;color:var(--ink2);line-height:1.6}
+
+.scoring-table{width:100%;border-collapse:collapse;font-size:12px}
+.scoring-table th{text-align:left;padding:8px 12px;background:var(--sur3);color:var(--ink2);font-size:10px;font-weight:500;letter-spacing:0.8px;border-bottom:0.5px solid var(--bd)}
+.scoring-table td{padding:10px 12px;border-bottom:0.5px solid var(--bd);color:var(--ink2);vertical-align:top;line-height:1.5}
+.scoring-table td:first-child{font-weight:500;color:var(--ink);width:140px}
+.scoring-table tr:last-child td{border-bottom:none}
+.check{color:#2d5a1e;font-weight:500}
+.warn{color:#854F0B;font-weight:500}
+.cross{color:#A32D2D;font-weight:500}
+
+.insight-box{border-radius:0 8px 8px 0;border-left:2px solid var(--gold);padding:12px 16px;margin-top:6px;font-size:12.5px;line-height:1.65;background:var(--gold3)}
+.insight-box strong{color:var(--ink);display:block;font-size:11px;font-weight:500;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px;color:#7a5c10}
+
+.rubric-wrap{margin-top:4px}
+.rubric-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.rubric-title{font-size:11px;font-weight:500;color:var(--ink);letter-spacing:0.3px}
+.rubric-score{font-size:20px;font-weight:500;color:var(--gold)}
+.rubric-items{display:flex;flex-direction:column;gap:6px}
+.rubric-item{display:flex;gap:10px;align-items:flex-start}
+.ri-check{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;margin-top:1px}
+.ri-yes{background:#eaf5e8;color:#2d5a1e}
+.ri-no{background:#fdf0f0;color:#A32D2D}
+.ri-text{font-size:12px;color:var(--ink2);line-height:1.5}
+
+.common-mistakes{background:#fdf0f0;border:0.5px solid #f0c0c0;border-radius:8px;padding:16px 18px}
+.cm-title{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#A32D2D;margin-bottom:10px}
+.cm-item{display:flex;gap:8px;margin-bottom:7px;font-size:12px;color:#6a1a1a;line-height:1.55;align-items:flex-start}
+.cm-dot{width:5px;height:5px;border-radius:50%;background:#A32D2D;flex-shrink:0;margin-top:5px}
+
+.pro-tips{background:#eaf5e8;border:0.5px solid #b8deb0;border-radius:8px;padding:16px 18px}
+.pt-title{font-size:11px;font-weight:500;letter-spacing:1px;text-transform:uppercase;color:#2d5a1e;margin-bottom:10px}
+.pt-item{display:flex;gap:8px;margin-bottom:7px;font-size:12px;color:#1a4a10;line-height:1.55;align-items:flex-start}
+.pt-dot{width:5px;height:5px;border-radius:50%;background:#2d5a1e;flex-shrink:0;margin-top:5px}
+
+.nav-foot{display:flex;justify-content:space-between;align-items:center;margin-top:28px;padding-top:20px;border-top:0.5px solid var(--bd)}
+.nb{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;padding:9px 20px;border-radius:20px;cursor:pointer;transition:all 0.2s;border:0.5px solid var(--bd);background:var(--sur);color:var(--ink)}
+.nb:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+.nb.pri{background:var(--gold);color:var(--ink);border-color:var(--gold)}
+.nb.pri:hover{background:#b8960a}
+.nb-ct{font-size:11px;color:var(--ink3)}
+</style>
+
+<h2 class="sr-only">Prompt Engineering Lab — Solutions Tab with ideal answers, scoring rubrics, and coaching notes for all 6 exercises</h2>
+
+<div class="shell">
+
+<div class="top-bar">
+  <div class="eyebrow">Prompt Engineering Lab · Solutions & Answer Key</div>
+  <div class="top-title">Ideal Solutions for<br><em>All Lab Exercises</em></div>
+  <div class="top-sub">Each exercise includes the ideal prompt with annotations, a scoring rubric, common mistakes to avoid, and facilitator coaching notes.</div>
+  <div class="top-chips">
+    <div class="chip"><div class="chip-dot"></div>6 Exercises</div>
+    <div class="chip"><div class="chip-dot"></div>Annotated ideal prompts</div>
+    <div class="chip"><div class="chip-dot"></div>Scoring rubrics</div>
+    <div class="chip"><div class="chip-dot"></div>Coaching notes</div>
+  </div>
+</div>
+
+<div class="prog-wrap"><div class="prog-bar"></div></div>
+
+<div class="nav-strip">
+  <div class="npill" onclick="goMod(-1)">← Back to Lab</div>
+  <div class="npill sol active" onclick="goSol(0)">Overview</div>
+  <div class="npill sol" onclick="goSol(1)">Ex 1 — CREATE</div>
+  <div class="npill sol" onclick="goSol(2)">Ex 2 — RTF</div>
+  <div class="npill sol" onclick="goSol(3)">Ex 3 — Frameworks</div>
+  <div class="npill sol" onclick="goSol(4)">Ex 4 — Zero-Shot</div>
+  <div class="npill sol" onclick="goSol(5)">Ex 5 — Few-Shot</div>
+  <div class="npill sol" onclick="goSol(6)">Ex 6 — CoT</div>
+</div>
+
+<!-- OVERVIEW -->
+<div class="mod active" id="sol0">
+  <div class="sol-header">
+    <div class="sol-h-label">Answer Key · Edition 2.0</div>
+    <div class="sol-h-title">Solutions to all 6 lab exercises — with scoring rubrics, ideal prompts, and coaching notes</div>
+    <div class="sol-h-desc">This section is designed for facilitators and self-directed learners. Each solution includes an annotated ideal prompt, a rubric for evaluating your own attempt, and a list of the most common mistakes observed in executive classroom settings.</div>
+    <div class="sol-stats">
+      <div class="sol-stat"><div class="sol-stat-n">6</div><div class="sol-stat-l">Exercises solved</div></div>
+      <div class="sol-stat"><div class="sol-stat-n">3</div><div class="sol-stat-l">Organizations covered</div></div>
+      <div class="sol-stat"><div class="sol-stat-n">7</div><div class="sol-stat-l">Techniques demonstrated</div></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
+    <div style="background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:18px 20px;cursor:pointer" onclick="goSol(1)">
+      <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Exercise 1</div>
+      <div style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px">CREATE Framework</div>
+      <div style="font-size:12px;color:var(--ink3)">MedCore · Maya Lim · ICU nurse retention strategy</div>
+    </div>
+    <div style="background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:18px 20px;cursor:pointer" onclick="goSol(2)">
+      <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Exercise 2</div>
+      <div style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px">RTF Framework</div>
+      <div style="font-size:12px;color:var(--ink3)">Verdant · Nina Shah · Crisis PR talking points</div>
+    </div>
+    <div style="background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:18px 20px;cursor:pointer" onclick="goSol(3)">
+      <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Exercise 3</div>
+      <div style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px">Framework Selection</div>
+      <div style="font-size:12px;color:var(--ink3)">Nexus · Amos Ferreira · AML onboarding checklist</div>
+    </div>
+    <div style="background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:18px 20px;cursor:pointer" onclick="goSol(4)">
+      <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Exercise 4</div>
+      <div style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px">Zero-Shot Prompting</div>
+      <div style="font-size:12px;color:var(--ink3)">Nexus · Sophie Wang · LP quarterly update email</div>
+    </div>
+    <div style="background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:18px 20px;cursor:pointer" onclick="goSol(5)">
+      <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Exercise 5</div>
+      <div style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px">Few-Shot Prompting</div>
+      <div style="font-size:12px;color:var(--ink3)">Verdant · Lena Wolff · Executive voice LinkedIn posts</div>
+    </div>
+    <div style="background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:18px 20px;cursor:pointer" onclick="goSol(6)">
+      <div style="font-size:10px;font-weight:500;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:6px">Exercise 6</div>
+      <div style="font-size:14px;font-weight:500;color:var(--ink);margin-bottom:3px">Chain-of-Thought</div>
+      <div style="font-size:12px;color:var(--ink3)">Nexus · Elena Vasquez · Portfolio company capital injection</div>
+    </div>
+  </div>
+
+  <div style="background:var(--sur);border:0.5px solid var(--bd);border-radius:10px;padding:20px 24px">
+    <div style="font-size:12px;font-weight:500;color:var(--ink);margin-bottom:12px">How to use this solutions tab</div>
+    <div style="font-size:13px;color:var(--ink2);line-height:1.75">
+      1. Attempt each exercise in the lab before reviewing solutions here.<br>
+      2. Use the scoring rubric to self-assess your prompt against the ideal — look for gaps in specificity, structure, and constraints.<br>
+      3. Read the annotations on the ideal prompt to understand <em>why</em> each component was written the way it was.<br>
+      4. Review common mistakes — these are drawn from real executive classroom observations.<br>
+      5. Facilitators: use the coaching notes to guide group debrief conversations after each exercise.
+    </div>
+  </div>
+
+  <div class="nav-foot"><div></div><div class="nb-ct">6 solutions to explore</div><button class="nb pri" onclick="goSol(1)">Start with Exercise 1 →</button></div>
+</div>
+
+<!-- SOLUTION 1: CREATE -->
+<div class="mod" id="sol1">
+  <div class="ex-card">
+    <div class="ex-card-head" onclick="toggleCard('s1')">
+      <div class="ex-num-badge">1</div>
+      <div class="ex-head-meta">
+        <span class="ex-head-tag tag-bl">MedCore Health · CREATE Framework</span>
+        <div class="ex-head-title">ICU nurse retention strategy — Maya Lim, HR Director</div>
+        <div class="ex-head-who">Exercise prompt: "Choose your org and write a full CREATE prompt addressing all 6 components"</div>
+      </div>
+      <div class="ex-caret open" id="car-s1">▾</div>
+    </div>
+    <div class="ex-body open" id="s1">
+
+      <div class="section-block">
+        <div class="sb-label">The exercise question</div>
+        <div class="question-box">Choose your organization (MedCore, Verdant, or Nexus) and write a full CREATE prompt for a challenge they face. Address all 6 components explicitly: Character, Request, Examples, Adjustments, Type of output, Extras.</div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Score breakdown</div>
+        <div class="score-row">
+          <div class="score-pill sp-green">Full marks: 6/6 components present</div>
+          <div class="score-pill sp-gold">Specificity: data-driven context</div>
+          <div class="score-pill sp-blue">Constraint quality: actionable guardrails</div>
+        </div>
+        <div class="rubric-wrap">
+          <div class="rubric-head"><div class="rubric-title">Scoring rubric (self-assess your attempt)</div><div class="rubric-score">/ 12 pts</div></div>
+          <table class="scoring-table">
+            <thead><tr><th>Component</th><th>What an ideal answer includes</th><th>Points</th></tr></thead>
+            <tbody>
+              <tr><td>Character (C)</td><td>Specific title + domain expertise + experience level. Not just "an HR person."</td><td>2 pts</td></tr>
+              <tr><td>Request (R)</td><td>Verb + object + measurable scope. "Develop a retention strategy" + specific metric context.</td><td>2 pts</td></tr>
+              <tr><td>Examples (E)</td><td>Actual data — turnover rate, exit survey percentages, competitor specifics. Not generic background.</td><td>2 pts</td></tr>
+              <tr><td>Adjustments (A)</td><td>At least 2 hard constraints (budget cap, timeline, union rules). Vague limits like "be practical" score 0.</td><td>2 pts</td></tr>
+              <tr><td>Type (T)</td><td>Specific format with structure defined (3 phases × timeline). Not just "a plan."</td><td>2 pts</td></tr>
+              <tr><td>Extras (E)</td><td>Confidence rating + assumption flagging + at least one meta-instruction. Missing all three = 0.</td><td>2 pts</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Ideal solution — annotated CREATE prompt</div>
+        <div class="ideal-box"><span class="ib-comment"># COMPONENT C — Character</span>
+<span class="ib-section">C:</span> <span class="ib-val">You are MedCore's Chief People Officer with 20 years of hospital workforce management experience, specializing in clinical staff retention and union labor relations in multi-site health systems.</span>
+
+<span class="ib-comment"># COMPONENT R — Request</span>
+<span class="ib-section">R:</span> <span class="ib-val">Develop a nurse retention strategy for our ICU units, where turnover hit 28% in 2024 — 14 percentage points above the national benchmark of 14%.</span>
+
+<span class="ib-comment"># COMPONENT E — Examples / Context</span>
+<span class="ib-section">E:</span> <span class="ib-val">Exit survey data shows three primary departure reasons: burnout (41%), scheduling inflexibility (33%), and pay gap vs. market rate (26%). Our main competitor, Riverview Medical, hired 60 ICU-certified nurses from MedCore in the past 18 months by offering a 4-day work week. Our current union agreement expires in March 2025 — any scheduling changes must be negotiated.</span>
+
+<span class="ib-comment"># COMPONENT A — Adjustments / Constraints</span>
+<span class="ib-section">A:</span> <span class="ib-val">Focus only on interventions executable within 6 months. Exclude options requiring more than $2M in capital investment. Do not recommend hiring freezes or mandatory overtime increases — these are off the table per board direction.</span>
+
+<span class="ib-comment"># COMPONENT T — Type of output</span>
+<span class="ib-section">T:</span> <span class="ib-val">Deliver as a prioritized action plan in three phases:
+— 3 immediate actions (executable within 30 days)
+— 3 medium-term actions (executable within 90 days)
+— 1 structural change (executable within 180 days)
+Each action: owner, estimated cost, and expected impact on turnover rate.</span>
+
+<span class="ib-comment"># COMPONENT E — Extras</span>
+<span class="ib-section">E:</span> <span class="ib-val">Rate your confidence in each recommendation on a scale of 1–10. Flag any recommendation that depends on union negotiation as [UNION APPROVAL REQUIRED]. Note any assumption about budget availability that I should verify with our CFO.</span></div>
+        <div class="annotation-grid" style="margin-top:12px">
+          <div class="ann"><div class="ann-letter">C</div><div class="ann-label">Character — why "CPO with 20 years"?</div><div class="ann-body">The role is specific enough to calibrate domain knowledge (union relations, clinical workforce) without being so narrow it limits the response. "HR person" gives the model too little; "CPO specializing in ICU staffing at academic medical centers" is unnecessarily precise.</div></div>
+          <div class="ann"><div class="ann-letter">E</div><div class="ann-label">Examples — real numbers are the difference</div><div class="ann-body">The three percentages (41%, 33%, 26%) and the competitor specifics (Riverview, 60 nurses, 4-day week) transform this from a generic HR problem into a MedCore-specific one. Without data, the model produces textbook advice. With data, it produces targeted strategy.</div></div>
+          <div class="ann"><div class="ann-letter">A</div><div class="ann-label">Adjustments — hard stops, not preferences</div><div class="ann-body">The best adjustments are binary: "No options requiring >$2M" is a hard constraint. "Be realistic about budget" is a soft preference the model will interpret loosely. Always convert preferences into numbers or yes/no rules.</div></div>
+          <div class="ann"><div class="ann-letter">E</div><div class="ann-label">Extras — the accountability layer</div><div class="ann-body">The confidence rating and [UNION APPROVAL REQUIRED] flag create accountability in the output — you'll instantly know which recommendations are solid vs. speculative, and which need legal review before action.</div></div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Common mistakes from executive classrooms</div>
+        <div class="common-mistakes">
+          <div class="cm-title">What most participants get wrong</div>
+          <div class="cm-item"><div class="cm-dot"></div>Character is too vague — "an HR expert" instead of naming the specific expertise (union relations, clinical workforce). Vague roles produce generic outputs.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Examples component contains context but no data — writing "we have high turnover" instead of "28% turnover, 14pts above benchmark, 41% cite burnout." Numbers anchor the response.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Adjustments are suggestions, not constraints — "keep it practical" or "don't be too ambitious" are not enforceable. The model ignores soft language.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Type component says "give me a plan" without specifying phases, format, or what each item should contain. The output then matches the vagueness of the instruction.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Extras component is skipped entirely — this is the most commonly missed component, and it's the one that makes the difference between a polished deliverable and a rough draft.</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Facilitator coaching note</div>
+        <div class="insight-box"><strong>Key discussion question</strong>Ask participants: "If you removed the Examples component from this prompt, what would change in the output?" The answer reveals that examples aren't just context — they are the specificity engine of CREATE. Without them, every response defaults to a textbook.</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goSol(0)">← Overview</button><div class="nb-ct">Exercise 1 of 6</div><button class="nb pri" onclick="goSol(2)">Next: RTF →</button></div>
+</div>
+
+<!-- SOLUTION 2: RTF -->
+<div class="mod" id="sol2">
+  <div class="ex-card">
+    <div class="ex-card-head" onclick="toggleCard('s2')">
+      <div class="ex-num-badge">2</div>
+      <div class="ex-head-meta">
+        <span class="ex-head-tag tag-gr">Verdant Retail · RTF Framework</span>
+        <div class="ex-head-title">Crisis PR talking points — Nina Shah, Head of CX</div>
+        <div class="ex-head-who">Exercise prompt: "Write an RTF prompt for Nina Shah responding to viral complaint about damaged eco-packaging"</div>
+      </div>
+      <div class="ex-caret open" id="car-s2">▾</div>
+    </div>
+    <div class="ex-body open" id="s2">
+
+      <div class="section-block">
+        <div class="sb-label">The exercise question</div>
+        <div class="question-box">Verdant's Head of CX Nina Shah needs talking points for a press call about a viral complaint thread where a customer posted that Verdant's "eco-friendly" packaging arrived damaged. Write her RTF prompt in 90 seconds or less.</div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Score breakdown</div>
+        <div class="rubric-wrap">
+          <div class="rubric-head"><div class="rubric-title">Scoring rubric</div><div class="rubric-score">/ 9 pts</div></div>
+          <table class="scoring-table">
+            <thead><tr><th>Component</th><th>Ideal criteria</th><th>Points</th></tr></thead>
+            <tbody>
+              <tr><td>Role (R)</td><td>Names a specific PR/comms expertise (crisis comms, brand reputation) — not just "a PR person." Ideally references sustainability brand context.</td><td>3 pts</td></tr>
+              <tr><td>Task (T)</td><td>Specifies the exact situation (viral tweet, damaged packaging), Verdant's position, and what the talking points need to accomplish. Not just "PR talking points."</td><td>3 pts</td></tr>
+              <tr><td>Format (F)</td><td>Defines number of talking points, length per point, tone directives, and what to avoid. "5 talking points" is better than "some talking points."</td><td>3 pts</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Ideal solution — RTF prompt</div>
+        <div class="ideal-box"><span class="ib-section">R:</span> <span class="ib-val">Act as a senior PR strategist specializing in consumer brand crisis communications, particularly for sustainability-focused companies where brand trust is core to business value.</span>
+
+<span class="ib-section">T:</span> <span class="ib-val">Prepare talking points for Verdant's Head of CX, Nina Shah, who is speaking to a journalist tomorrow about a viral tweet claiming our eco-packaging arrived damaged. Verdant's official position: we are actively investigating, we hold sustainability standards end-to-end including last-mile packaging, and affected customers are being personally contacted and prioritized. Nina must not speculate on root cause and must not make promises about systemic changes we cannot yet commit to.</span>
+
+<span class="ib-section">F:</span> <span class="ib-val">5 talking points, each 2–3 sentences. Structure: open with an empathy statement (point 1), acknowledge accountability without speculation (point 2), state the investigation (point 3), describe customer remediation (point 4), close with a forward commitment (point 5). Avoid defensive or dismissive language. Avoid the words "eco-friendly" — use "sustainable packaging standards." No promises about timelines we cannot guarantee.</span></div>
+        <div class="annotation-grid" style="margin-top:12px">
+          <div class="ann"><div class="ann-letter">R</div><div class="ann-label">Role — sustainability context matters</div><div class="ann-body">Adding "sustainability-focused companies where brand trust is core" is not decoration — it tells the model that Verdant's brand equity is directly tied to environmental credibility, which changes the strategic calculus of the talking points entirely.</div></div>
+          <div class="ann"><div class="ann-letter">T</div><div class="ann-label">Task — what Nina must NOT do</div><div class="ann-body">The constraints embedded in the Task component ("must not speculate," "must not make promises") are just as important as what Nina should say. RTF prompts fail most often because the task only says what to produce, not what to avoid.</div></div>
+          <div class="ann"><div class="ann-letter">F</div><div class="ann-label">Format — structure is the deliverable</div><div class="ann-body">Defining the 5-point structure with named purposes per point (empathy, accountability, investigation, remediation, commitment) means Nina can walk into the call with a clear verbal map — not just a list of loosely related statements.</div></div>
+          <div class="ann"><div class="ann-letter">F</div><div class="ann-label">Word-level constraint: "eco-friendly"</div><div class="ann-body">Banning specific words ("eco-friendly") and providing the preferred alternative ("sustainable packaging standards") is an advanced RTF move. It reflects real brand voice management and prevents the most common PR misstep in sustainability communications.</div></div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Common mistakes</div>
+        <div class="common-mistakes">
+          <div class="cm-title">What most participants get wrong</div>
+          <div class="cm-item"><div class="cm-dot"></div>Role is generic — "a PR expert" gives the model no context about the brand's sustainability identity, which is essential for calibrating tone and what to avoid saying.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Task describes the situation but not Verdant's position — if the model doesn't know what Verdant is willing to commit to, it will invent commitments that may be impossible to fulfill.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Format says "talking points" without specifying number, length, or structure — this produces a generic 8-bullet list instead of a usable press call script.</div>
+          <div class="cm-item"><div class="cm-dot"></div>No constraints on what NOT to say — crisis communications are as much about what to avoid as what to say. Omitting this produces talking points that create new problems.</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Facilitator coaching note</div>
+        <div class="insight-box"><strong>The RTF speed test</strong>The power of RTF is speed + quality. Challenge participants: "How long did it take you to write that prompt?" A well-structured RTF prompt should take under 90 seconds for experienced practitioners. If it took 5 minutes, the cognitive habit isn't formed yet — they need more practice with the formula until it becomes automatic.</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goSol(1)">← CREATE</button><div class="nb-ct">Exercise 2 of 6</div><button class="nb pri" onclick="goSol(3)">Next: Frameworks →</button></div>
+</div>
+
+<!-- SOLUTION 3: FRAMEWORKS -->
+<div class="mod" id="sol3">
+  <div class="ex-card">
+    <div class="ex-card-head" onclick="toggleCard('s3')">
+      <div class="ex-num-badge">3</div>
+      <div class="ex-head-meta">
+        <span class="ex-head-tag tag-pu">Nexus Capital · Framework Selection</span>
+        <div class="ex-head-title">AML onboarding checklist — Amos Ferreira, Compliance Lead</div>
+        <div class="ex-head-who">Exercise prompt: "Identify the right framework and write the prompt for an AML portfolio company onboarding checklist"</div>
+      </div>
+      <div class="ex-caret open" id="car-s3">▾</div>
+    </div>
+    <div class="ex-body open" id="s3">
+
+      <div class="section-block">
+        <div class="sb-label">The exercise question</div>
+        <div class="question-box">Nexus Capital's Amos Ferreira (Compliance Lead) needs to create a step-by-step AML (anti-money laundering) checklist for new portfolio company onboarding. Which framework fits best? Write the prompt using that framework.</div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Framework selection rationale</div>
+        <div style="background:var(--sur3);border:0.5px solid var(--bd);border-radius:8px;padding:14px 18px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:500;color:var(--ink);margin-bottom:8px">Why RISEN is the correct choice</div>
+          <table class="scoring-table">
+            <thead><tr><th>Framework</th><th>Why it fits (or doesn't)</th></tr></thead>
+            <tbody>
+              <tr><td style="color:#2d5a1e">RISEN ✓</td><td>This is a step-by-step procedural output. RISEN's "Steps" component maps directly to checklist items. The "End Goal" and "Narrowing" components handle the handoff use case and scope limitations.</td></tr>
+              <tr><td>CREATE</td><td>Overkill for a checklist — CREATE is best when context complexity and constraint nuance are high. A checklist has low ambiguity.</td></tr>
+              <tr><td>RTF</td><td>Too minimal — "Format" in RTF can specify a checklist, but RTF can't enforce the step sequencing or scope narrowing that compliance requires.</td></tr>
+              <tr><td>COSTAR</td><td>Wrong category — COSTAR is for content and communications, not process documentation.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Ideal solution — RISEN prompt</div>
+        <div class="ideal-box"><span class="ib-section">R — Role:</span> <span class="ib-val">Act as a senior compliance officer at a PE firm with deep expertise in AML, KYC, and financial crime prevention under SEC, FinCEN, and FATF regulatory frameworks. You have onboarded 40+ portfolio companies through AML compliance programs.</span>
+
+<span class="ib-section">I — Instructions:</span> <span class="ib-val">Create a comprehensive AML/KYC onboarding checklist for new portfolio companies acquired by Nexus Capital. This checklist will be handed to the portfolio company CFO on the day of acquisition close.</span>
+
+<span class="ib-section">S — Steps:</span> <span class="ib-val">The checklist must cover these procedural phases in sequence:
+Step 1 — Beneficial ownership verification (25%+ threshold, or 10% for high-risk entities)
+Step 2 — PEP and OFAC sanctions screening for all beneficial owners and key executives
+Step 3 — Source of funds documentation for the acquisition transaction
+Step 4 — Customer Due Diligence (CDD) file assembly and sign-off
+Step 5 — Ongoing monitoring setup: transaction monitoring triggers, annual re-screening schedule
+Step 6 — Designate a compliance liaison at the portfolio company within 30 days of close</span>
+
+<span class="ib-section">E — End Goal:</span> <span class="ib-val">A one-page laminated checklist the Nexus compliance team can hand to any new portfolio company CFO on Day 1 of acquisition close, enabling them to self-execute the program with minimal compliance team hand-holding.</span>
+
+<span class="ib-section">N — Narrowing:</span> <span class="ib-val">Limit to requirements applicable to US-domiciled operating companies with revenue under $500M. Exclude cryptocurrency-specific AML obligations — those have a separate protocol. Do not include fund-level AML requirements — this checklist is for portfolio companies only.</span></div>
+        <div class="annotation-grid" style="margin-top:12px">
+          <div class="ann"><div class="ann-letter">S</div><div class="ann-label">Steps — sequence is the value</div><div class="ann-body">The Steps component isn't a list of requirements — it's an ordered procedure. Each step builds on the previous (you can't do sanctions screening without first identifying who to screen). Sequence is what makes RISEN a superior choice over RTF for process documentation.</div></div>
+          <div class="ann"><div class="ann-letter">E</div><div class="ann-label">End Goal — defines the artifact, not the information</div><div class="ann-body">"A one-page laminated checklist handed to a CFO on Day 1" tells the model the physical artifact and its use context. This produces a checklist formatted for action, not an academic compliance summary.</div></div>
+          <div class="ann"><div class="ann-letter">N</div><div class="ann-label">Narrowing — scope control is critical in compliance</div><div class="ann-body">Compliance prompts without narrowing produce exhaustive documents covering every edge case. "Exclude cryptocurrency" and "portfolio companies only" are surgical cuts that keep the output actionable rather than encyclopedic.</div></div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Common mistakes</div>
+        <div class="common-mistakes">
+          <div class="cm-title">What most participants get wrong</div>
+          <div class="cm-item"><div class="cm-dot"></div>Framework selection error — many participants default to CREATE for everything. The tell-tale sign: they struggle to populate the Examples component because there are no examples to give for a procedural task.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Steps are items, not a sequence — writing "check beneficial ownership, check sanctions, check source of funds" as a flat list misses that these are ordered phases where sequence matters legally.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Narrowing is skipped — without scope limits, the output becomes a 20-page compliance manual rather than a one-page operational checklist. Narrowing is RISEN's most powerful and most skipped component.</div>
+          <div class="cm-item"><div class="cm-dot"></div>End Goal describes content instead of the artifact — "covering all AML requirements" is not an end goal. "A one-page checklist a CFO can self-execute without legal support" is an end goal.</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Facilitator coaching note</div>
+        <div class="insight-box"><strong>Framework selection as a skill</strong>The hardest skill to develop is framework selection — because all frameworks produce outputs, but the wrong framework produces the wrong format of output. Run a 5-minute group exercise: give participants the same task and ask half to use RISEN and half to use COSTAR. Compare outputs. The structural difference is immediately obvious and makes the selection logic visceral, not theoretical.</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goSol(2)">← RTF</button><div class="nb-ct">Exercise 3 of 6</div><button class="nb pri" onclick="goSol(4)">Next: Zero-Shot →</button></div>
+</div>
+
+<!-- SOLUTION 4: ZERO-SHOT -->
+<div class="mod" id="sol4">
+  <div class="ex-card">
+    <div class="ex-card-head" onclick="toggleCard('s4')">
+      <div class="ex-num-badge">4</div>
+      <div class="ex-head-meta">
+        <span class="ex-head-tag tag-pu">Nexus Capital · Zero-Shot</span>
+        <div class="ex-head-title">LP quarterly update email — Sophie Wang, Investor Relations</div>
+        <div class="ex-head-who">Exercise prompt: "Write a zero-shot prompt for an LP quarterly update — no examples provided"</div>
+      </div>
+      <div class="ex-caret open" id="car-s4">▾</div>
+    </div>
+    <div class="ex-body open" id="s4">
+
+      <div class="section-block">
+        <div class="sb-label">The exercise question</div>
+        <div class="question-box">Nexus Capital's Sophie Wang (Investor Relations) needs to draft a quarterly LP update email covering portfolio performance. Write a precise zero-shot prompt — no examples — that would yield a professional output.</div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Score breakdown</div>
+        <div class="rubric-wrap">
+          <div class="rubric-head"><div class="rubric-title">Zero-shot quality rubric</div><div class="rubric-score">/ 10 pts</div></div>
+          <table class="scoring-table">
+            <thead><tr><th>Dimension</th><th>Ideal criteria</th><th>Pts</th></tr></thead>
+            <tbody>
+              <tr><td>Role precision</td><td>Specific IR expertise at PE firm context — not generic "email writer"</td><td>2</td></tr>
+              <tr><td>Context richness</td><td>Actual portfolio data (MOIC, highlights, challenges, new acquisition) — no examples but rich numbers</td><td>3</td></tr>
+              <tr><td>Tone guardrails</td><td>Explicit tone direction + what to avoid ("no vague reassurances," "no jargon")</td><td>2</td></tr>
+              <tr><td>Format specification</td><td>Subject line + paragraph structure defined + word count</td><td>2</td></tr>
+              <tr><td>No examples used</td><td>Achieves specificity through data and constraints, not example outputs</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Ideal solution — zero-shot prompt</div>
+        <div class="ideal-box"><span class="ib-val">You are a seasoned investor relations professional at a mid-market private equity firm managing $4.2B AUM across 12 portfolio companies. You write quarterly LP updates that are direct, transparent, and respected by institutional investors including pension funds, family offices, and endowments.</span>
+
+<span class="ib-val">Draft the Q3 2024 LP update email on behalf of Sophie Wang at Nexus Capital.</span>
+
+<span class="ib-section">Portfolio context:</span>
+<span class="ib-val">— Blended portfolio MOIC: 2.1x unrealized
+— 3 companies performing strongly: EBITDA growth >15% each
+— 2 companies underperforming vs. plan (do not name them, refer to as "two portfolio companies")
+— One exit completed in Q3 at 3.4x MOIC
+— One new acquisition closed in September (manufacturing SaaS, B2B)
+— No capital calls this quarter; one anticipated in Q1 2025</span>
+
+<span class="ib-section">Tone constraints:</span>
+<span class="ib-val">— Professional, confident, and transparent — not promotional
+— Acknowledge underperformers directly; do not minimize or bury
+— No vague reassurances ("we remain optimistic" without evidence)
+— No PE jargon without explanation; pension fund LPs are sophisticated but varied
+— Max 380 words</span>
+
+<span class="ib-section">Output format:</span>
+<span class="ib-val">Subject line (2 options) + 4-paragraph email:
+Para 1 — Overall portfolio health and Q3 headline
+Para 2 — Performance highlights (strong performers and exit)
+Para 3 — Challenges and what Nexus is doing about them
+Para 4 — Q4 outlook and LP call invitation with proposed dates</span></div>
+        <div class="annotation-grid" style="margin-top:12px">
+          <div class="ann"><div class="ann-letter">+</div><div class="ann-label">Zero-shot succeeds through data density</div><div class="ann-body">Since there are no examples, the prompt compensates with rich portfolio data (MOIC, number of companies, exit multiple, acquisition type). This is the zero-shot principle: when you can't show, you must tell — and tell specifically.</div></div>
+          <div class="ann"><div class="ann-letter">+</div><div class="ann-label">Two subject line options</div><div class="ann-body">Asking for two options on the subject line is a zero-shot technique that costs nothing and gives Sophie choice. One option is often too constraining; two reveals the model's thinking about tone and allows Sophie to pick or blend.</div></div>
+          <div class="ann"><div class="ann-letter">+</div><div class="ann-label">Naming the paragraph purposes</div><div class="ann-body">The four-paragraph format with named purposes (Overall health / Highlights / Challenges / Outlook) is not just structure — it's an editorial framework that prevents the most common LP update failure: burying the bad news in paragraph 3 after three paragraphs of good news.</div></div>
+          <div class="ann"><div class="ann-letter">-</div><div class="ann-label">What a weak zero-shot looks like</div><div class="ann-body">"Write a quarterly update email for our PE firm's LPs. Include highlights and challenges. Professional tone." This is a zero-shot prompt — but it produces a generic template, not a Nexus Capital document. The gap is data and constraints, not technique.</div></div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Common mistakes</div>
+        <div class="common-mistakes">
+          <div class="cm-title">What most participants get wrong</div>
+          <div class="cm-item"><div class="cm-dot"></div>Confusing "zero-shot" with "minimal prompt" — zero-shot means no examples, not minimal instructions. The best zero-shot prompts are often longer than poor few-shot prompts because they compensate with data and constraints.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Not providing portfolio data — writing "cover our Q3 performance" without numbers forces the model to invent performance metrics, producing a useless template rather than a draft Sophie can actually send.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Omitting tone guardrails — investor communications fail most often on tone (too promotional, too apologetic, too vague). The "no vague reassurances" constraint is the single most important line in this prompt.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Not specifying the underperformer communication strategy — a common mistake is letting the model decide whether to name underperforming companies. This must be explicitly constrained ("do not name them") to avoid an IR incident.</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Facilitator coaching note</div>
+        <div class="insight-box"><strong>The zero-shot paradox</strong>Counterintuitive insight to share with participants: "The best zero-shot prompt often requires more effort to write than a few-shot prompt, because without examples you must be exhaustively precise in your data and constraints. Zero-shot isn't the lazy option — it's the option you use when you have no good examples to provide." This reframes zero-shot from a shortcut to a deliberate choice.</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goSol(3)">← Frameworks</button><div class="nb-ct">Exercise 4 of 6</div><button class="nb pri" onclick="goSol(5)">Next: Few-Shot →</button></div>
+</div>
+
+<!-- SOLUTION 5: FEW-SHOT -->
+<div class="mod" id="sol5">
+  <div class="ex-card">
+    <div class="ex-card-head" onclick="toggleCard('s5')">
+      <div class="ex-num-badge">5</div>
+      <div class="ex-head-meta">
+        <span class="ex-head-tag tag-gr">Verdant Retail · Few-Shot</span>
+        <div class="ex-head-title">Executive voice LinkedIn posts — Lena Wolff, Brand Director</div>
+        <div class="ex-head-who">Exercise prompt: "Write a 2-shot prompt for LinkedIn posts in Lena's voice — concise, no buzzwords — about AI in enterprise"</div>
+      </div>
+      <div class="ex-caret open" id="car-s5">▾</div>
+    </div>
+    <div class="ex-body open" id="s5">
+
+      <div class="section-block">
+        <div class="sb-label">The exercise question</div>
+        <div class="question-box">Verdant's Brand Director Lena Wolff wants Claude to write LinkedIn posts in her executive voice — concise, insightful, no buzzwords. Write a 2-shot prompt with two example posts she's written, then ask it to write a post about AI adoption in enterprise.</div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Score breakdown</div>
+        <div class="rubric-wrap">
+          <div class="rubric-head"><div class="rubric-title">Few-shot quality rubric</div><div class="rubric-score">/ 12 pts</div></div>
+          <table class="scoring-table">
+            <thead><tr><th>Dimension</th><th>Ideal criteria</th><th>Pts</th></tr></thead>
+            <tbody>
+              <tr><td>Example diversity</td><td>2 examples that cover different topics but share a consistent voice — not two posts on the same subject</td><td>3</td></tr>
+              <tr><td>Voice consistency</td><td>Examples encode the same structural patterns: short sentences, one insight, one principle at the end</td><td>3</td></tr>
+              <tr><td>Explicit style rules</td><td>Written rules supplement the examples — bans on buzzwords, structural rules stated clearly</td><td>2</td></tr>
+              <tr><td>Target task precision</td><td>The final request specifies topic, angle, and any constraints beyond the examples</td><td>2</td></tr>
+              <tr><td>Example quality</td><td>Examples themselves demonstrate the voice — they are not generic; they have specific observations and data</td><td>2</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Ideal solution — 2-shot prompt</div>
+        <div class="ideal-box"><span class="ib-val">Write LinkedIn posts in my exact professional voice. Study these two examples carefully before writing anything.</span>
+
+<span class="ib-section">Example 1 — On supplier relationships:</span>
+<span class="ib-val">"We dropped our cheapest fabric supplier last year. Margins took a hit for two quarters. Then something shifted — our return rate dropped 18%, customer reviews got sharper, and our NPS climbed 12 points. Quality is slower than a discount. But it compounds."</span>
+
+<span class="ib-section">Example 2 — On brand strategy:</span>
+<span class="ib-val">"Most brands talk about what they make. The ones people remember talk about what they believe. We spent three years refining our product. We spent one afternoon writing our belief statement. The afternoon did more for our growth than the three years. Sequence matters."</span>
+
+<span class="ib-section">Voice rules (non-negotiable):</span>
+<span class="ib-val">— Short sentences. Never more than 15 words per sentence.
+— One central insight per post, not a list of observations.
+— End with a single-sentence principle (often a paradox or inversion).
+— Never use: "game-changer," "leverage," "synergy," "disruption," "ecosystem," "AI-powered," "transformative."
+— No hashtags in the post body. No emojis. No rhetorical questions.
+— Maximum 120 words.</span>
+
+<span class="ib-section">Now write:</span>
+<span class="ib-val">A post about why most enterprise AI adoption fails in year two. Angle: the problem isn't the technology — it's that companies treat AI as a project, not a practice. The insight Lena wants to land: adoption without habit formation is just expensive experimentation.</span></div>
+        <div class="annotation-grid" style="margin-top:12px">
+          <div class="ann"><div class="ann-letter">E</div><div class="ann-label">Example quality is everything</div><div class="ann-body">The two examples encode specific structural fingerprints: a concrete event (dropped supplier, wrote belief statement), a counter-intuitive outcome, and a short principle at the end. The model will replicate this structure even without being told — that's the power of high-quality examples.</div></div>
+          <div class="ann"><div class="ann-letter">R</div><div class="ann-label">Voice rules amplify examples</div><div class="ann-body">The "Voice rules" section doesn't replace the examples — it makes them more precise. The banned word list ("game-changer," "leverage") is especially powerful because it removes the model's most common defaults for business content and forces it into Lena's actual vocabulary.</div></div>
+          <div class="ann"><div class="ann-letter">A</div><div class="ann-label">The final request has an angle</div><div class="ann-body">"Angle: the problem isn't the technology — it's that companies treat AI as a project, not a practice" gives Lena's point of view before the model starts writing. Without this, the model would generate a balanced, generic take. With it, it generates Lena's take.</div></div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Common mistakes</div>
+        <div class="common-mistakes">
+          <div class="cm-title">What most participants get wrong</div>
+          <div class="cm-item"><div class="cm-dot"></div>Generic examples — using posts like "Great meeting with our team today — so proud of what we're building!" as examples teaches the model nothing about voice. Examples must contain the actual structural and linguistic DNA of the desired output.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Two examples on the same topic — if both example posts are about sustainability, the model may assume all posts should be about sustainability. Diverse topics, consistent voice.</div>
+          <div class="cm-item"><div class="cm-dot"></div>No style rules to supplement examples — examples show; rules tell. The best few-shot prompts do both. Without explicit rules, the model will approximate the voice but miss nuances like sentence length limits.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Target task has no angle — asking for "a post about AI adoption" produces a generic insight. Providing Lena's specific angle ("AI as practice, not project") produces a distinctive executive point of view.</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Sample ideal output (what this prompt produces)</div>
+        <div style="background:var(--sur3);border:0.5px solid var(--bd);border-radius:8px;padding:16px 20px;font-size:13px;color:var(--ink2);line-height:1.8;font-style:italic">
+          "Most enterprise AI pilots succeed. Most enterprise AI programs fail. The technology works. The habit doesn't form. Companies invest in the tool and forget to invest in the routine. A hammer doesn't build a house. A carpenter with a hammer, every morning, does. AI adoption is a practice problem, not a technology problem."
+        </div>
+        <div style="font-size:11px;color:var(--ink3);margin-top:6px">Note: short sentences, one central insight, ends with a principle-inversion, no buzzwords — voice rules followed precisely.</div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Facilitator coaching note</div>
+        <div class="insight-box"><strong>The example quality test</strong>Ask participants to read their examples aloud. If they sound generic — if they could belong to any LinkedIn executive — they are not high-quality few-shot examples. High-quality examples sound unmistakably like one person. This is the quality test: "Could I guess who wrote this without seeing the name?"</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-foot"><button class="nb" onclick="goSol(4)">← Zero-Shot</button><div class="nb-ct">Exercise 5 of 6</div><button class="nb pri" onclick="goSol(6)">Next: CoT →</button></div>
+</div>
+
+<!-- SOLUTION 6: COT -->
+<div class="mod" id="sol6">
+  <div class="ex-card">
+    <div class="ex-card-head" onclick="toggleCard('s6')">
+      <div class="ex-num-badge">6</div>
+      <div class="ex-head-meta">
+        <span class="ex-head-tag tag-pu">Nexus Capital · Chain-of-Thought</span>
+        <div class="ex-head-title">Capital injection decision — Elena Vasquez, Managing Partner</div>
+        <div class="ex-head-who">Exercise prompt: "Write a CoT prompt for an $8M injection decision into a portfolio company with 60% customer concentration"</div>
+      </div>
+      <div class="ex-caret open" id="car-s6">▾</div>
+    </div>
+    <div class="ex-body open" id="s6">
+
+      <div class="section-block">
+        <div class="sb-label">The exercise question</div>
+        <div class="question-box">Nexus Capital's Managing Partner Elena Vasquez must decide whether to inject $8M more into a struggling portfolio company (a B2B logistics software firm with 60% of revenue from one customer). Write a CoT prompt that makes Claude reason through this systematically before recommending.</div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Score breakdown</div>
+        <div class="rubric-wrap">
+          <div class="rubric-head"><div class="rubric-title">Chain-of-Thought quality rubric</div><div class="rubric-score">/ 12 pts</div></div>
+          <table class="scoring-table">
+            <thead><tr><th>Dimension</th><th>Ideal criteria</th><th>Pts</th></tr></thead>
+            <tbody>
+              <tr><td>CoT trigger</td><td>Explicit instruction to reason step-by-step BEFORE concluding — not just "think about it"</td><td>2</td></tr>
+              <tr><td>Step quality</td><td>5 steps minimum, each targeting a distinct dimension of the decision (not variations of the same question)</td><td>3</td></tr>
+              <tr><td>Step sequence logic</td><td>Steps build on each other — you can't do step 4 without completing step 3's analysis</td><td>2</td></tr>
+              <tr><td>Context richness</td><td>Actual financial data, company specifics, fund dynamics provided before the reasoning begins</td><td>2</td></tr>
+              <tr><td>Decision gate</td><td>Clear instruction: only give a recommendation AFTER completing all steps, with specific decision options</td><td>2</td></tr>
+              <tr><td>Uncertainty handling</td><td>Asks for the one assumption that most changes the recommendation — forces intellectual honesty</td><td>1</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Ideal solution — Chain-of-Thought prompt</div>
+        <div class="ideal-box"><span class="ib-val">You are a senior private equity operating partner with 18 years of experience evaluating capital allocation decisions for B2B software portfolio companies. You are known for intellectual rigor and bear-case thinking — you present the downside scenarios as clearly as the upside.</span>
+
+<span class="ib-val">Before giving any recommendation, think through this capital injection decision step by step. Complete each step fully before moving to the next.</span>
+
+<span class="ib-section">Step 1 — Quantify the concentration risk</span>
+<span class="ib-val">What does 60% revenue from one customer mean for company valuation, downside scenarios if that customer churns, and buyer appetite in an M&A exit process? Be specific about the valuation discount a strategic or financial buyer would apply.</span>
+
+<span class="ib-section">Step 2 — Evaluate the $8M use of funds</span>
+<span class="ib-val">What can $8M realistically achieve in 12–18 months for a B2B logistics SaaS company? What revenue or ARR outcome would need to materialize for this injection to be value-accretive vs. value-destructive?</span>
+
+<span class="ib-section">Step 3 — Examine the no-injection scenario</span>
+<span class="ib-val">What happens to the company and Nexus's position if no capital is injected? What is the liquidation or secondary sale value? Is the company at risk of covenant breach or operational failure without the $8M?</span>
+
+<span class="ib-section">Step 4 — Assess the management team</span>
+<span class="ib-val">Is this an execution problem (fixable with capital and operating support) or a structural market problem (capital cannot solve it)? How should the answer change Nexus's decision?</span>
+
+<span class="ib-section">Step 5 — Model the exit scenarios</span>
+<span class="ib-val">At current trajectory (no injection) vs. post-injection trajectory, what are the realistic exit multiples and DPI outcomes for Nexus Fund II? Account for the fund's timeline — Fund II is in year 6 of a 10-year life.</span>
+
+<span class="ib-section">Company context:</span>
+<span class="ib-val">— B2B logistics SaaS, $6M ARR, 60% from one enterprise customer (Walmart Logistics)
+— NRR: 84% (was 110% at acquisition). EBITDA: -$400K (was +$200K at acquisition)
+— Nexus invested $14M at acquisition 18 months ago. Current FMV estimated at $10M.
+— Fund II: $180M raised, 80% deployed, year 6 of 10-year life.</span>
+
+<span class="ib-val">Only after completing all 5 steps: give a clear Invest / Do Not Invest / Partial Injection recommendation with your top 3 conviction reasons. State the single assumption that, if wrong, would reverse your recommendation.</span></div>
+        <div class="annotation-grid" style="margin-top:12px">
+          <div class="ann"><div class="ann-letter">1</div><div class="ann-label">Step 1 targets the thesis-defining risk</div><div class="ann-body">Starting with customer concentration is deliberate — it's the most structurally significant risk and the one that most affects valuation. CoT steps should be ordered from most foundational to most derivative, not just listed in the order they come to mind.</div></div>
+          <div class="ann"><div class="ann-letter">3</div><div class="ann-label">The no-injection scenario is critical</div><div class="ann-body">Most investment prompts only evaluate the "invest" scenario. Step 3 forces the model to evaluate the alternative — what happens if you don't invest. This is the most commonly skipped step in real PE decision-making and the most common source of sunk-cost fallacy errors.</div></div>
+          <div class="ann"><div class="ann-letter">5</div><div class="ann-label">Fund dynamics matter as much as company dynamics</div><div class="ann-body">Step 5 connects the company decision to fund-level reality (year 6, 80% deployed). A decision that makes sense for the company may be wrong for the fund at this stage. Including fund dynamics is what separates a PE-grade CoT from a generic investment analysis.</div></div>
+          <div class="ann"><div class="ann-letter">+</div><div class="ann-label">The assumption reversal test</div><div class="ann-body">"State the single assumption that, if wrong, would reverse your recommendation" is a high-value meta-instruction that forces the model to identify the load-bearing assumption in its reasoning — the one thing Elena must verify before acting on the recommendation.</div></div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Common mistakes</div>
+        <div class="common-mistakes">
+          <div class="cm-title">What most participants get wrong</div>
+          <div class="cm-item"><div class="cm-dot"></div>CoT trigger is too weak — "think about this carefully" or "consider all angles" does not produce structured chain-of-thought. The trigger must explicitly say "reason step by step" and "complete each step before moving to the next."</div>
+          <div class="cm-item"><div class="cm-dot"></div>Steps are variations of one question — writing Step 1: "Is this a good investment?" Step 2: "Should we invest?" Step 3: "What are the pros and cons?" produces circular reasoning, not a chain. Each step must target a distinct analytical dimension.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Skipping the no-injection scenario — most participants write steps about the investment case only. The alternative scenario (no injection, liquidation, secondary sale) is the most important step and the most commonly skipped.</div>
+          <div class="cm-item"><div class="cm-dot"></div>No decision gate — allowing the model to recommend mid-chain breaks the reasoning. The instruction "only after completing all steps" is a critical gate that prevents the model from jumping to conclusions before earning the recommendation.</div>
+          <div class="cm-item"><div class="cm-dot"></div>Context provided after the steps — providing company data after the CoT instruction means the model may begin reasoning without the full picture. Always provide context before the steps begin.</div>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Sample CoT output excerpt (what this prompt produces)</div>
+        <div style="background:var(--sur3);border:0.5px solid var(--bd);border-radius:8px;padding:16px 20px;font-size:12.5px;color:var(--ink2);line-height:1.8">
+          <div style="font-size:11px;font-weight:500;color:var(--ink3);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.8px">Step 1 output (excerpt)</div>
+          <em>"At 60% revenue concentration with a single customer, LogiFlow faces a structural valuation discount of 30–40% vs. peers with diversified ARR. In an M&A process, strategic buyers will demand customer consent rights and escrow provisions; financial buyers will reprice. If Walmart Logistics churns — which becomes increasingly likely as they review vendor consolidation programs — the company drops from $6M ARR to $2.4M ARR overnight, putting the business below viability threshold. This is not a manageable risk; it is the thesis."</em>
+          <div style="font-size:11px;font-weight:500;color:var(--ink3);margin-top:14px;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.8px">Final recommendation (excerpt)</div>
+          <em>"Do Not Inject (full $8M). Recommend a conditional partial injection of $3M tied to signing a second enterprise customer within 90 days. The single assumption that reverses this: if Walmart has signed a 3-year renewal contract (not disclosed in context), the concentration risk changes materially and the full injection becomes defensible."</em>
+        </div>
+      </div>
+
+      <div class="section-block">
+        <div class="sb-label">Facilitator coaching note</div>
+        <div class="insight-box"><strong>Why CoT prevents the sunk-cost fallacy</strong>In real PE decision-making, the $14M already invested creates enormous pressure to "protect" the investment with more capital. CoT prompting defeats this by forcing explicit evaluation of the no-injection scenario (Step 3) before the recommendation is formed. Share this observation with participants: "The best use of CoT in business isn't to get a better answer — it's to remove cognitive bias from the reasoning process before the conclusion is reached." This reframes CoT from a technical prompting trick to a strategic thinking tool.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="background:var(--ink);border-radius:10px;padding:24px 28px;margin-top:24px">
+    <div style="font-family:var(--font-serif,Georgia,serif);font-size:20px;color:#fff;margin-bottom:16px">Solutions complete — key principles across all 6 exercises</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:14px 16px">
+        <div style="font-size:11px;font-weight:500;color:var(--gold2);margin-bottom:6px">Specificity over brevity</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6">Every ideal solution uses real numbers, named people, and specific constraints. Vague prompts produce vague outputs — always.</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:14px 16px">
+        <div style="font-size:11px;font-weight:500;color:var(--gold2);margin-bottom:6px">Constraints are as important as instructions</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6">What NOT to do (banned words, excluded topics, forbidden recommendations) shapes outputs as powerfully as what to include.</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:14px 16px">
+        <div style="font-size:11px;font-weight:500;color:var(--gold2);margin-bottom:6px">Format is a deliverable, not an afterthought</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6">Define structure before the AI writes. Named sections, paragraph purposes, word counts — all reduce the gap between draft and final.</div>
+      </div>
+      <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:14px 16px">
+        <div style="font-size:11px;font-weight:500;color:var(--gold2);margin-bottom:6px">Build prompt libraries, not one-off prompts</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6">Every ideal prompt here is a reusable template. The investment in crafting one excellent prompt pays back across hundreds of uses by your entire team.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-foot"><button class="nb" onclick="goSol(5)">← Few-Shot</button><div class="nb-ct">All 6 exercises complete</div><button class="nb pri" onclick="goSol(0)">Back to overview ↺</button></div>
+</div>
+
+</div>
+
+<script>
+let curSol=0;
+
+function goMod(n){
+  alert('Navigate back to the main lab to continue. This is the Solutions tab.');
+}
+
+function goSol(n){
+  curSol=n;
+  document.querySelectorAll('.mod').forEach((m,i)=>m.classList.toggle('active',i===n));
+  const pills=document.querySelectorAll('.npill.sol');
+  pills.forEach((p,i)=>p.classList.toggle('active',i===n));
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function toggleCard(id){
+  const body=document.getElementById(id);
+  const car=document.getElementById('car-'+id);
+  const open=body.classList.toggle('open');
+  car.classList.toggle('open',open);
+}
+
+document.querySelectorAll('.ex-card-head').forEach(h=>{
+  const id=h.getAttribute('onclick').match(/toggleCard\('(.+?)'\)/)[1];
+  document.getElementById(id).classList.add('open');
+  const car=document.getElementById('car-'+id);
+  if(car) car.classList.add('open');
+});
+</script>
