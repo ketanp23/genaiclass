@@ -1,0 +1,1839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RAG Pipeline — Step-by-Step Visual Explainer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f4ed;
+    --bg-2: #ffffff;
+    --bg-3: #efece3;
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a48;
+    --ink-mute: #8a8782;
+    --line: #d6d2c5;
+    --line-strong: #1a1a1a;
+    --accent: #b8541f;
+    --accent-2: #d8a165;
+    --accent-soft: #f0e2c8;
+    --teal: #1d6e54;
+    --teal-soft: #cfe5db;
+    --rose: #b8364a;
+    --rose-soft: #f0d4d9;
+    --blue: #1f5d99;
+    --blue-soft: #d6e3f0;
+    --purple: #5c3a8c;
+    --purple-soft: #e0d4f0;
+    --serif: 'Instrument Serif', 'Times New Roman', serif;
+    --sans: 'DM Sans', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 40px;
+    position: relative;
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    padding: 70px 0 60px;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .hero-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 36px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .hero-top .dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(52px, 8vw, 112px);
+    line-height: 0.92;
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    margin-bottom: 24px;
+  }
+
+  .hero h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .hero-deck {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(20px, 2.2vw, 26px);
+    line-height: 1.4;
+    color: var(--ink-soft);
+    max-width: 820px;
+  }
+
+  /* ============ USE CASE HEADER ============ */
+  .uc-section {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--line-strong);
+  }
+
+  .uc-banner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 32px;
+    align-items: center;
+    padding-bottom: 32px;
+    margin-bottom: 56px;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .uc-id {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 96px;
+    line-height: 0.85;
+    color: var(--accent);
+  }
+
+  .uc-title-block .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .uc-title-block h2 {
+    font-family: var(--serif);
+    font-size: clamp(36px, 4.5vw, 56px);
+    line-height: 1;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+
+  .uc-title-block h2 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .uc-chip {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    background: var(--accent);
+    color: white;
+    font-weight: 600;
+  }
+
+  .uc-chip.alt {
+    background: var(--teal);
+  }
+
+  /* ============ STEP CARD ============ */
+  .step {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 56px;
+    margin-bottom: 64px;
+    align-items: start;
+  }
+
+  .step-left {
+    position: sticky;
+    top: 24px;
+  }
+
+  .step-tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--accent);
+    display: inline-block;
+  }
+
+  .step-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 84px;
+    line-height: 0.85;
+    color: var(--ink);
+    margin-bottom: 16px;
+  }
+
+  .step-name {
+    font-family: var(--serif);
+    font-size: 26px;
+    line-height: 1.15;
+    margin-bottom: 14px;
+    color: var(--ink);
+  }
+
+  .step-narration {
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+  }
+
+  .step-right {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    padding: 32px;
+  }
+
+  .diagram-caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--line);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+
+  .diagram-caption .right {
+    color: var(--accent);
+  }
+
+  .diagram-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .step-detail {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px dashed var(--line);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .detail-block h5 {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .detail-block p {
+    font-family: var(--sans);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+
+  .detail-block p code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg-3);
+    padding: 2px 6px;
+    color: var(--ink);
+  }
+
+  /* PIPELINE STRIP — overview at top of each use case */
+  .pipeline-strip {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin: 0 0 56px;
+    padding: 20px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+  }
+
+  .pip {
+    text-align: center;
+    padding: 14px 8px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    position: relative;
+  }
+
+  .pip .pn {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    margin-bottom: 6px;
+  }
+
+  .pip .pname {
+    font-family: var(--serif);
+    font-size: 15px;
+    line-height: 1.2;
+    color: var(--ink);
+  }
+
+  .pip.phase-divider {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+  }
+
+  /* SUMMARY */
+  .summary {
+    margin-top: 56px;
+    padding: 40px;
+    background: var(--ink);
+    color: var(--bg);
+    border-left: 4px solid var(--accent);
+  }
+
+  .summary .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent-2);
+    margin-bottom: 16px;
+  }
+
+  .summary p {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.45;
+    font-style: italic;
+    color: var(--bg);
+  }
+
+  /* PHASE LABEL */
+  .phase-label {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 0 0 32px;
+    padding: 16px 24px;
+    background: var(--bg-3);
+    border-left: 4px solid var(--accent);
+  }
+
+  .phase-label .tag {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .phase-label .name {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-style: italic;
+    color: var(--ink);
+  }
+
+  .phase-label .desc {
+    flex: 1;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+
+  /* ============ TAKEAWAY ============ */
+  .takeaway {
+    padding: 80px 0;
+    text-align: center;
+  }
+
+  .takeaway-quote {
+    font-family: var(--serif);
+    font-size: clamp(28px, 4vw, 48px);
+    line-height: 1.2;
+    font-style: italic;
+    max-width: 900px;
+    margin: 0 auto;
+    color: var(--ink);
+  }
+
+  .takeaway-quote em {
+    color: var(--accent);
+  }
+
+  .footer-rule {
+    width: 60px;
+    height: 2px;
+    background: var(--accent);
+    margin: 40px auto 20px;
+  }
+
+  .colophon {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 900px) {
+    .wrap { padding: 0 20px; }
+    .uc-banner { grid-template-columns: 1fr; gap: 16px; }
+    .step { grid-template-columns: 1fr; gap: 24px; }
+    .step-left { position: static; }
+    .step-num { font-size: 56px; }
+    .step-right { padding: 20px; }
+    .step-detail { grid-template-columns: 1fr; }
+    .pipeline-strip { grid-template-columns: 1fr 1fr; }
+    .uc-id { font-size: 64px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-top">
+      <span><span class="dot"></span>RAG PIPELINE · STEP-BY-STEP VISUAL EXPLAINER</span>
+      <span>TWO USE CASES · TWELVE DIAGRAMS</span>
+    </div>
+    <h1>How a <em>RAG</em><br>Pipeline Works.</h1>
+    <p class="hero-deck">Each step is shown as it actually flows — data moving through the system, one stage at a time. Two business cases, side by side: documents on the left, databases on the right.</p>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- USE CASE 1: INSURANCE CLAIMS - UNSTRUCTURED -->
+<!-- ============================================ -->
+<section class="uc-section">
+  <div class="wrap">
+    <div class="uc-banner">
+      <div class="uc-id">01</div>
+      <div class="uc-title-block">
+        <div class="eyebrow">Use Case · Insurance · Property &amp; Casualty</div>
+        <h2>Claims Adjuster's <em>Co-Pilot</em></h2>
+      </div>
+      <div>
+        <div class="uc-chip">UNSTRUCTURED DATA</div>
+      </div>
+    </div>
+
+    <!-- Pipeline strip overview -->
+    <div class="pipeline-strip">
+      <div class="pip"><div class="pn">STEP 01</div><div class="pname">Sources</div></div>
+      <div class="pip"><div class="pn">STEP 02</div><div class="pname">Chunk + Tag</div></div>
+      <div class="pip"><div class="pn">STEP 03</div><div class="pname">Embed + Index</div></div>
+      <div class="pip phase-divider"><div class="pn">— LIVE —</div><div class="pname">Adjuster Asks</div></div>
+      <div class="pip"><div class="pn">STEP 05</div><div class="pname">Retrieve + Rank</div></div>
+      <div class="pip"><div class="pn">STEP 06</div><div class="pname">Answer + Cite</div></div>
+    </div>
+
+    <!-- PHASE A: OFFLINE -->
+    <div class="phase-label">
+      <span class="tag">PHASE A</span>
+      <span class="name">Ingestion — offline, scheduled</span>
+      <span class="desc">Building the knowledge base, before any user shows up</span>
+    </div>
+
+    <!-- ============ STEP 1: SOURCES ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE A · STEP 01</div>
+        <div class="step-num">01</div>
+        <div class="step-name">Pull from every source</div>
+        <p class="step-narration">Five different systems hold the knowledge an adjuster needs. The pipeline starts by collecting all of them into one place — a flat folder of raw content, untouched.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 1.1 — Source connectors</span>
+          <span class="right">→ Unstructured Corpus</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar1" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#b8541f" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- 5 source boxes on left -->
+          <g>
+            <rect x="40" y="30" width="180" height="46" rx="6" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="60" y="49" font-family="DM Sans" font-size="13" font-weight="500" fill="#1f5d99">Policy wordings</text>
+            <text x="60" y="66" font-family="JetBrains Mono" font-size="10" fill="#4a4a48">PDF · ~180 pages each</text>
+          </g>
+          <g>
+            <rect x="40" y="88" width="180" height="46" rx="6" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="60" y="107" font-family="DM Sans" font-size="13" font-weight="500" fill="#1f5d99">Endorsements</text>
+            <text x="60" y="124" font-family="JetBrains Mono" font-size="10" fill="#4a4a48">DOCX · variant-specific</text>
+          </g>
+          <g>
+            <rect x="40" y="146" width="180" height="46" rx="6" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="60" y="165" font-family="DM Sans" font-size="13" font-weight="500" fill="#1f5d99">Claims handbook</text>
+            <text x="60" y="182" font-family="JetBrains Mono" font-size="10" fill="#4a4a48">SharePoint</text>
+          </g>
+          <g>
+            <rect x="40" y="204" width="180" height="46" rx="6" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="60" y="223" font-family="DM Sans" font-size="13" font-weight="500" fill="#1f5d99">Prior case decisions</text>
+            <text x="60" y="240" font-family="JetBrains Mono" font-size="10" fill="#4a4a48">Salesforce</text>
+          </g>
+          <g>
+            <rect x="40" y="262" width="180" height="46" rx="6" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="60" y="281" font-family="DM Sans" font-size="13" font-weight="500" fill="#1f5d99">Loss-adjuster emails</text>
+            <text x="60" y="298" font-family="JetBrains Mono" font-size="10" fill="#4a4a48">Outlook archive</text>
+          </g>
+
+          <!-- Arrows -->
+          <line x1="225" y1="53" x2="335" y2="155" stroke="#b8541f" stroke-width="1" marker-end="url(#ar1)" stroke-dasharray="2 3"/>
+          <line x1="225" y1="111" x2="335" y2="160" stroke="#b8541f" stroke-width="1" marker-end="url(#ar1)" stroke-dasharray="2 3"/>
+          <line x1="225" y1="169" x2="335" y2="170" stroke="#b8541f" stroke-width="1" marker-end="url(#ar1)" stroke-dasharray="2 3"/>
+          <line x1="225" y1="227" x2="335" y2="180" stroke="#b8541f" stroke-width="1" marker-end="url(#ar1)" stroke-dasharray="2 3"/>
+          <line x1="225" y1="285" x2="335" y2="190" stroke="#b8541f" stroke-width="1" marker-end="url(#ar1)" stroke-dasharray="2 3"/>
+
+          <!-- Connector / loader box -->
+          <g>
+            <rect x="335" y="135" width="120" height="70" rx="6" fill="#f0e2c8" stroke="#b8541f" stroke-width="1"/>
+            <text x="395" y="160" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">Source</text>
+            <text x="395" y="178" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">Connectors</text>
+            <text x="395" y="196" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">A.1</text>
+          </g>
+
+          <!-- Arrow to corpus -->
+          <line x1="456" y1="170" x2="500" y2="170" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar1)"/>
+
+          <!-- Output: raw corpus -->
+          <g>
+            <rect x="500" y="120" width="150" height="100" rx="6" fill="#1a1a1a" stroke="#1a1a1a"/>
+            <text x="575" y="148" font-family="DM Sans" font-size="13" font-weight="600" fill="#f7f4ed" text-anchor="middle">Raw corpus</text>
+            <text x="575" y="166" font-family="JetBrains Mono" font-size="10" fill="#d8a165" text-anchor="middle">~280,000 docs</text>
+            <line x1="520" y1="180" x2="630" y2="180" stroke="#d8a165" stroke-width="0.5"/>
+            <text x="575" y="198" font-family="JetBrains Mono" font-size="10" fill="#d8a165" text-anchor="middle">untouched, dated</text>
+            <text x="575" y="212" font-family="JetBrains Mono" font-size="10" fill="#d8a165" text-anchor="middle">tagged by source</text>
+          </g>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>What the component does</h5>
+            <p>Source connectors are plug-ins that authenticate to SharePoint, Outlook, Salesforce and read documents on a schedule. They preserve original filename, version, and date.</p>
+          </div>
+          <div class="detail-block">
+            <h5>Why it matters</h5>
+            <p>If a source is missed here, the model is permanently blind to it. Coverage of the input estate is the first determinant of answer quality.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STEP 2: CHUNK & TAG ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE A · STEP 02</div>
+        <div class="step-num">02</div>
+        <div class="step-name">Cut into clauses, tag each one</div>
+        <p class="step-narration">Long documents are useless to a model in one piece. The chunker breaks each PDF into individual clauses or sections, and stamps every chunk with metadata: policy variant, jurisdiction, issue date.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 1.2 — Chunking a policy document</span>
+          <span class="right">→ Tagged chunks</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar2" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#b8541f" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- Left: a full document with sections visible -->
+          <g>
+            <rect x="40" y="40" width="180" height="280" rx="4" fill="#ffffff" stroke="#8a8782" stroke-width="0.5"/>
+            <text x="130" y="62" font-family="DM Sans" font-size="11" font-weight="600" fill="#4a4a48" text-anchor="middle">policy_H-2019.pdf</text>
+            <line x1="60" y1="74" x2="200" y2="74" stroke="#d6d2c5"/>
+
+            <!-- Sections inside doc -->
+            <rect x="55" y="85" width="150" height="32" fill="#f0e2c8" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="63" y="98" font-family="DM Sans" font-size="10" font-weight="600" fill="#b8541f">§ 1 Definitions</text>
+            <text x="63" y="111" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">Building, contents...</text>
+
+            <rect x="55" y="125" width="150" height="32" fill="#f0e2c8" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="63" y="138" font-family="DM Sans" font-size="10" font-weight="600" fill="#b8541f">§ 2.1 Storm cover</text>
+            <text x="63" y="151" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">Wind, hail damage...</text>
+
+            <rect x="55" y="165" width="150" height="32" fill="#f0e2c8" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="63" y="178" font-family="DM Sans" font-size="10" font-weight="600" fill="#b8541f">§ 4.2 Outbuildings</text>
+            <text x="63" y="191" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">Garages, sheds...</text>
+
+            <rect x="55" y="205" width="150" height="32" fill="#f0e2c8" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="63" y="218" font-family="DM Sans" font-size="10" font-weight="600" fill="#b8541f">§ 6 Exclusions</text>
+            <text x="63" y="231" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">Flood, war...</text>
+
+            <rect x="55" y="245" width="150" height="32" fill="#f0e2c8" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="63" y="258" font-family="DM Sans" font-size="10" font-weight="600" fill="#b8541f">§ 8 Claims process</text>
+            <text x="63" y="271" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">Notification...</text>
+
+            <text x="130" y="305" font-family="JetBrains Mono" font-size="9" fill="#8a8782" text-anchor="middle">... 180 pages ...</text>
+          </g>
+
+          <!-- Arrow + chunker label -->
+          <line x1="225" y1="180" x2="270" y2="180" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar2)"/>
+          <text x="247" y="173" font-family="JetBrains Mono" font-size="9" fill="#b8541f" text-anchor="middle">CHUNK</text>
+
+          <!-- Middle: chunker process -->
+          <g>
+            <rect x="275" y="140" width="100" height="80" rx="6" fill="#f0e2c8" stroke="#b8541f" stroke-width="1"/>
+            <text x="325" y="166" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">Section-aware</text>
+            <text x="325" y="184" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">chunker</text>
+            <text x="325" y="208" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">A.2</text>
+          </g>
+
+          <!-- Arrow to chunks -->
+          <line x1="380" y1="180" x2="425" y2="180" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar2)"/>
+
+          <!-- Right: tagged chunks -->
+          <g>
+            <!-- Chunk 1 -->
+            <rect x="430" y="50" width="220" height="62" rx="4" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="442" y="68" font-family="DM Sans" font-size="11" font-weight="600" fill="#1f5d99">Chunk 1 — § 2.1 Storm cover</text>
+            <text x="442" y="83" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">"Loss caused by wind force..."</text>
+            <line x1="442" y1="90" x2="638" y2="90" stroke="#d6d2c5" stroke-dasharray="2 2"/>
+            <text x="442" y="103" font-family="JetBrains Mono" font-size="9" fill="#b8541f">policy:H-2019 · jurisdiction:UK · 2024-03</text>
+
+            <!-- Chunk 2 -->
+            <rect x="430" y="122" width="220" height="62" rx="4" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="442" y="140" font-family="DM Sans" font-size="11" font-weight="600" fill="#1f5d99">Chunk 2 — § 4.2 Outbuildings</text>
+            <text x="442" y="155" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">"Detached structures up to £15k..."</text>
+            <line x1="442" y1="162" x2="638" y2="162" stroke="#d6d2c5" stroke-dasharray="2 2"/>
+            <text x="442" y="175" font-family="JetBrains Mono" font-size="9" fill="#b8541f">policy:H-2019 · jurisdiction:UK · 2024-03</text>
+
+            <!-- Chunk 3 -->
+            <rect x="430" y="194" width="220" height="62" rx="4" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="442" y="212" font-family="DM Sans" font-size="11" font-weight="600" fill="#1f5d99">Chunk 3 — § 6 Exclusions</text>
+            <text x="442" y="227" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">"Flood damage excluded where..."</text>
+            <line x1="442" y1="234" x2="638" y2="234" stroke="#d6d2c5" stroke-dasharray="2 2"/>
+            <text x="442" y="247" font-family="JetBrains Mono" font-size="9" fill="#b8541f">policy:H-2019 · jurisdiction:UK · 2024-03</text>
+
+            <text x="540" y="285" font-family="JetBrains Mono" font-size="10" fill="#8a8782" text-anchor="middle">~280,000 chunks total</text>
+          </g>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>Why section-aware chunking</h5>
+            <p>A naive fixed-size cut would slice "§ 4.2 Outbuildings" in half. Section-aware chunking respects the clause boundary, so a clause is always retrieved whole.</p>
+          </div>
+          <div class="detail-block">
+            <h5>Why metadata tagging</h5>
+            <p>Tagging policy variant and date lets retrieval filter to <code>policy:H-2019</code> only. Without tags, the model would see clauses from every variant — and pick the wrong one.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STEP 3: EMBED + INDEX ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE A · STEP 03</div>
+        <div class="step-num">03</div>
+        <div class="step-name">Turn meaning into vectors</div>
+        <p class="step-narration">Each clause is fed to an embedding model that converts its meaning into a long list of numbers. Clauses about similar concepts land near each other in this numerical space — even if they use different words.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 1.3 — Embedding &amp; indexing</span>
+          <span class="right">→ Vector store</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar3" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#b8541f" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- Left: 3 sample chunks -->
+          <g>
+            <rect x="30" y="40" width="180" height="44" rx="4" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="40" y="58" font-family="DM Sans" font-size="11" font-weight="600" fill="#1f5d99">Chunk — § 2.1</text>
+            <text x="40" y="73" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">"Wind damage to structures..."</text>
+
+            <rect x="30" y="96" width="180" height="44" rx="4" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="40" y="114" font-family="DM Sans" font-size="11" font-weight="600" fill="#1f5d99">Chunk — § 4.2</text>
+            <text x="40" y="129" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">"Detached garages covered..."</text>
+
+            <rect x="30" y="152" width="180" height="44" rx="4" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="40" y="170" font-family="DM Sans" font-size="11" font-weight="600" fill="#1f5d99">Chunk — § 6</text>
+            <text x="40" y="185" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">"Flood exclusions apply..."</text>
+
+            <text x="120" y="220" font-family="JetBrains Mono" font-size="9" fill="#8a8782" text-anchor="middle">+ 279,997 more</text>
+          </g>
+
+          <!-- Arrow + embedding model -->
+          <line x1="215" y1="118" x2="260" y2="118" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar3)"/>
+
+          <g>
+            <rect x="265" y="78" width="120" height="80" rx="6" fill="#f0e2c8" stroke="#b8541f" stroke-width="1"/>
+            <text x="325" y="104" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">Embedding</text>
+            <text x="325" y="122" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">model</text>
+            <text x="325" y="146" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">A.3 · 1536-dim</text>
+          </g>
+
+          <!-- Numerical vectors -->
+          <line x1="390" y1="118" x2="430" y2="118" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar3)"/>
+
+          <g>
+            <rect x="435" y="55" width="220" height="22" rx="3" fill="#efece3" stroke="#d6d2c5" stroke-width="0.5"/>
+            <text x="445" y="70" font-family="JetBrains Mono" font-size="9.5" fill="#1f5d99">[0.213, -0.041, 0.782, 0.119, ...]</text>
+            <rect x="435" y="83" width="220" height="22" rx="3" fill="#efece3" stroke="#d6d2c5" stroke-width="0.5"/>
+            <text x="445" y="98" font-family="JetBrains Mono" font-size="9.5" fill="#1f5d99">[0.198, -0.038, 0.801, 0.122, ...]</text>
+            <rect x="435" y="111" width="220" height="22" rx="3" fill="#efece3" stroke="#d6d2c5" stroke-width="0.5"/>
+            <text x="445" y="126" font-family="JetBrains Mono" font-size="9.5" fill="#1f5d99">[-0.412, 0.673, -0.105, 0.043, ...]</text>
+
+            <text x="545" y="155" font-family="JetBrains Mono" font-size="9" fill="#8a8782" text-anchor="middle">one vector per chunk</text>
+          </g>
+
+          <!-- Vector store: scatter visualization -->
+          <g>
+            <rect x="120" y="245" width="440" height="115" rx="8" fill="#1a1a1a" stroke="#1a1a1a"/>
+            <text x="340" y="268" font-family="DM Sans" font-size="13" font-weight="600" fill="#f7f4ed" text-anchor="middle">Vector store · A.4</text>
+            <text x="340" y="283" font-family="JetBrains Mono" font-size="9" fill="#d8a165" text-anchor="middle">280,000 embeddings, queryable by meaning in milliseconds</text>
+
+            <!-- Cluster visualization -->
+            <!-- Storm cluster -->
+            <circle cx="200" cy="320" r="3" fill="#d8a165"/>
+            <circle cx="207" cy="324" r="3" fill="#d8a165"/>
+            <circle cx="194" cy="328" r="3" fill="#d8a165"/>
+            <circle cx="212" cy="318" r="3" fill="#d8a165"/>
+            <circle cx="203" cy="332" r="3" fill="#d8a165"/>
+            <text x="205" y="350" font-family="JetBrains Mono" font-size="9" fill="#d8a165" text-anchor="middle">storm / wind</text>
+
+            <!-- Property cluster -->
+            <circle cx="340" cy="325" r="3" fill="#cfe5db"/>
+            <circle cx="346" cy="319" r="3" fill="#cfe5db"/>
+            <circle cx="334" cy="322" r="3" fill="#cfe5db"/>
+            <circle cx="352" cy="328" r="3" fill="#cfe5db"/>
+            <circle cx="338" cy="333" r="3" fill="#cfe5db"/>
+            <text x="343" y="350" font-family="JetBrains Mono" font-size="9" fill="#cfe5db" text-anchor="middle">property / structures</text>
+
+            <!-- Flood cluster -->
+            <circle cx="480" cy="318" r="3" fill="#d6e3f0"/>
+            <circle cx="486" cy="324" r="3" fill="#d6e3f0"/>
+            <circle cx="474" cy="322" r="3" fill="#d6e3f0"/>
+            <circle cx="492" cy="328" r="3" fill="#d6e3f0"/>
+            <text x="483" y="350" font-family="JetBrains Mono" font-size="9" fill="#d6e3f0" text-anchor="middle">flood / water</text>
+          </g>
+
+          <line x1="545" y1="135" x2="400" y2="245" stroke="#b8541f" stroke-width="1" marker-end="url(#ar3)" stroke-dasharray="3 3"/>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>What an embedding is, plainly</h5>
+            <p>A vector of numbers that captures the meaning of a passage. Two clauses about wind damage land near each other even if one says "wind" and the other says "storm."</p>
+          </div>
+          <div class="detail-block">
+            <h5>The vector store</h5>
+            <p>A specialised database that, given a query vector, finds the closest matches across millions of records in milliseconds. This is what makes retrieval fast and meaning-aware.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE B: ONLINE -->
+    <div class="phase-label">
+      <span class="tag">PHASE B</span>
+      <span class="name">Query — live, per question</span>
+      <span class="desc">What happens in the seconds after an adjuster asks</span>
+    </div>
+
+    <!-- ============ STEP 4: QUESTION ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE B · STEP 04</div>
+        <div class="step-num">04</div>
+        <div class="step-name">Adjuster asks in plain English</div>
+        <p class="step-narration">An adjuster types a real-world question into the co-pilot. The system attaches the claim's metadata — the policy variant, the customer's jurisdiction — so retrieval can filter to only the clauses that apply.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 1.4 — Question + context enters the pipeline</span>
+          <span class="right">→ Query embedding</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 340" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar4" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#b8541f" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- Adjuster persona -->
+          <g>
+            <circle cx="70" cy="80" r="22" fill="#cfe5db" stroke="#1d6e54" stroke-width="1"/>
+            <circle cx="70" cy="72" r="8" fill="#1d6e54"/>
+            <path d="M52 95 Q70 80 88 95" stroke="#1d6e54" stroke-width="1.5" fill="none"/>
+            <text x="70" y="125" font-family="DM Sans" font-size="11" font-weight="600" fill="#1d6e54" text-anchor="middle">Adjuster</text>
+            <text x="70" y="139" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">on a claim</text>
+          </g>
+
+          <!-- Question bubble -->
+          <g>
+            <rect x="120" y="40" width="350" height="100" rx="8" fill="#f7f4ed" stroke="#1d6e54" stroke-width="1"/>
+            <text x="135" y="62" font-family="JetBrains Mono" font-size="9" fill="#b8541f">USER ASKS:</text>
+            <text x="135" y="86" font-family="Instrument Serif" font-style="italic" font-size="16" fill="#1a1a1a">"Is wind damage to a detached garage covered</text>
+            <text x="135" y="108" font-family="Instrument Serif" font-style="italic" font-size="16" fill="#1a1a1a">under H-2019 with endorsement P-441?"</text>
+            <line x1="135" y1="118" x2="455" y2="118" stroke="#d6d2c5" stroke-dasharray="2 2"/>
+            <text x="135" y="132" font-family="JetBrains Mono" font-size="9" fill="#8a8782">claim_id:C-44219 · attached automatically</text>
+          </g>
+
+          <!-- Metadata extracted box -->
+          <g>
+            <rect x="120" y="170" width="350" height="80" rx="6" fill="#efece3" stroke="#d6d2c5" stroke-width="0.5"/>
+            <text x="135" y="190" font-family="JetBrains Mono" font-size="9" fill="#b8541f">EXTRACTED CONTEXT (becomes retrieval filters):</text>
+            <g>
+              <rect x="135" y="200" width="90" height="22" rx="3" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+              <text x="180" y="215" font-family="JetBrains Mono" font-size="10" fill="#1f5d99" text-anchor="middle">policy: H-2019</text>
+              <rect x="232" y="200" width="100" height="22" rx="3" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+              <text x="282" y="215" font-family="JetBrains Mono" font-size="10" fill="#1f5d99" text-anchor="middle">endorse: P-441</text>
+              <rect x="339" y="200" width="120" height="22" rx="3" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+              <text x="399" y="215" font-family="JetBrains Mono" font-size="10" fill="#1f5d99" text-anchor="middle">jurisdiction: UK</text>
+              <rect x="135" y="226" width="80" height="18" rx="3" fill="#f0e2c8" stroke="#b8541f" stroke-width="0.5"/>
+              <text x="175" y="239" font-family="JetBrains Mono" font-size="9" fill="#b8541f" text-anchor="middle">topic: storm</text>
+              <rect x="222" y="226" width="98" height="18" rx="3" fill="#f0e2c8" stroke="#b8541f" stroke-width="0.5"/>
+              <text x="271" y="239" font-family="JetBrains Mono" font-size="9" fill="#b8541f" text-anchor="middle">topic: outbuildings</text>
+            </g>
+          </g>
+
+          <!-- Arrow to embed -->
+          <line x1="475" y1="180" x2="525" y2="180" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar4)"/>
+
+          <!-- Embed query -->
+          <g>
+            <rect x="530" y="140" width="120" height="80" rx="6" fill="#f0e2c8" stroke="#b8541f" stroke-width="1"/>
+            <text x="590" y="166" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">Embed</text>
+            <text x="590" y="184" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">the query</text>
+            <text x="590" y="208" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">B.1 → vector</text>
+          </g>
+
+          <!-- Result -->
+          <g>
+            <rect x="530" y="240" width="120" height="50" rx="4" fill="#1a1a1a"/>
+            <text x="590" y="262" font-family="JetBrains Mono" font-size="10" fill="#d8a165" text-anchor="middle">[0.218, -0.043,</text>
+            <text x="590" y="276" font-family="JetBrains Mono" font-size="10" fill="#d8a165" text-anchor="middle">0.778, 0.121, ...]</text>
+          </g>
+          <line x1="590" y1="222" x2="590" y2="238" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar4)"/>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>Why context matters</h5>
+            <p>The same question on two claims has two different answers. Attaching <code>policy</code>, <code>endorse</code>, <code>jurisdiction</code> as retrieval filters prevents the system from mixing variants.</p>
+          </div>
+          <div class="detail-block">
+            <h5>Same embedding model — both sides</h5>
+            <p>The question is embedded by the <em>same</em> model that embedded the chunks in Step 3. Both live in the same numerical space, so "near each other" is meaningful.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STEP 5: RETRIEVE + RANK ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE B · STEP 05</div>
+        <div class="step-num">05</div>
+        <div class="step-name">Find the closest clauses, re-rank, filter</div>
+        <p class="step-narration">The vector store returns the 20 clauses whose meaning is nearest to the query. A re-ranker reads each one carefully and keeps the top 3. Permission and policy-variant filters trim anything that doesn't belong.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 1.5 — Retrieval &amp; re-ranking</span>
+          <span class="right">→ Top clauses</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 400" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar5" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#b8541f" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- Query in -->
+          <g>
+            <rect x="20" y="170" width="100" height="50" rx="4" fill="#1a1a1a"/>
+            <text x="70" y="192" font-family="DM Sans" font-size="11" font-weight="600" fill="#f7f4ed" text-anchor="middle">Query vector</text>
+            <text x="70" y="208" font-family="JetBrains Mono" font-size="9" fill="#d8a165" text-anchor="middle">+ filters</text>
+          </g>
+
+          <!-- Arrow into retriever -->
+          <line x1="125" y1="195" x2="165" y2="195" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar5)"/>
+
+          <!-- Retriever (vector store) -->
+          <g>
+            <rect x="170" y="40" width="170" height="320" rx="8" fill="#f7f4ed" stroke="#b8541f" stroke-width="1"/>
+            <text x="255" y="62" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">Hybrid retriever</text>
+            <text x="255" y="78" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">B.2 · vector + keyword</text>
+            <line x1="190" y1="88" x2="320" y2="88" stroke="#d6d2c5"/>
+
+            <!-- candidate list -->
+            <text x="255" y="105" font-family="JetBrains Mono" font-size="9" fill="#8a8782" text-anchor="middle">TOP-20 CANDIDATES</text>
+            <g>
+              <rect x="180" y="115" width="150" height="20" fill="#ffffff" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="186" y="128" font-family="JetBrains Mono" font-size="9" fill="#1f5d99">§ 4.2 outbuildings · 0.92</text>
+              <rect x="180" y="138" width="150" height="20" fill="#ffffff" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="186" y="151" font-family="JetBrains Mono" font-size="9" fill="#1f5d99">§ 2.1 storm cover · 0.89</text>
+              <rect x="180" y="161" width="150" height="20" fill="#ffffff" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="186" y="174" font-family="JetBrains Mono" font-size="9" fill="#1f5d99">P-441 endorsement · 0.87</text>
+              <rect x="180" y="184" width="150" height="20" fill="#ffffff" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="186" y="197" font-family="JetBrains Mono" font-size="9" fill="#1f5d99">§ 6 exclusions · 0.78</text>
+              <rect x="180" y="207" width="150" height="20" fill="#ffffff" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="186" y="220" font-family="JetBrains Mono" font-size="9" fill="#8a8782">§ 7 claims process · 0.71</text>
+              <rect x="180" y="230" width="150" height="20" fill="#ffffff" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="186" y="243" font-family="JetBrains Mono" font-size="9" fill="#8a8782">G-2018 storm · 0.69</text>
+              <rect x="180" y="253" width="150" height="20" fill="#efece3" stroke="#b8364a" stroke-width="0.5" stroke-dasharray="2 2"/>
+              <text x="186" y="266" font-family="JetBrains Mono" font-size="9" fill="#b8364a">G-2018 outbuildings · 0.67</text>
+              <text x="255" y="290" font-family="JetBrains Mono" font-size="9" fill="#8a8782" text-anchor="middle">...13 more candidates</text>
+            </g>
+
+            <text x="255" y="325" font-family="JetBrains Mono" font-size="9" fill="#b8364a" text-anchor="middle">— filter: policy ≠ H-2019 dropped —</text>
+            <text x="255" y="345" font-family="JetBrains Mono" font-size="9" fill="#b8364a" text-anchor="middle">— filter: date &lt; 2024 dropped —</text>
+          </g>
+
+          <!-- Arrow to re-ranker -->
+          <line x1="345" y1="195" x2="385" y2="195" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar5)"/>
+
+          <!-- Re-ranker -->
+          <g>
+            <rect x="390" y="120" width="120" height="150" rx="8" fill="#f0e2c8" stroke="#b8541f" stroke-width="1"/>
+            <text x="450" y="146" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">Re-ranker</text>
+            <text x="450" y="162" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">cross-encoder</text>
+            <line x1="402" y1="172" x2="498" y2="172" stroke="#d6d2c5"/>
+            <text x="450" y="190" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">reads each clause</text>
+            <text x="450" y="205" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">against the question</text>
+            <text x="450" y="220" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">in detail; reorders</text>
+            <text x="450" y="245" font-family="JetBrains Mono" font-size="10" font-weight="600" fill="#b8541f" text-anchor="middle">keep top 3</text>
+          </g>
+
+          <!-- Arrow to final top-3 -->
+          <line x1="515" y1="195" x2="555" y2="195" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar5)"/>
+
+          <!-- Final top-3 -->
+          <g>
+            <rect x="560" y="100" width="105" height="60" rx="4" fill="#cfe5db" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="612" y="120" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1d6e54" text-anchor="middle">§ 4.2</text>
+            <text x="612" y="135" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">Outbuildings</text>
+            <text x="612" y="151" font-family="JetBrains Mono" font-size="9" fill="#1d6e54" text-anchor="middle">★ relevance 0.96</text>
+
+            <rect x="560" y="165" width="105" height="60" rx="4" fill="#cfe5db" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="612" y="185" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1d6e54" text-anchor="middle">P-441</text>
+            <text x="612" y="200" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">Endorsement</text>
+            <text x="612" y="216" font-family="JetBrains Mono" font-size="9" fill="#1d6e54" text-anchor="middle">★ relevance 0.94</text>
+
+            <rect x="560" y="230" width="105" height="60" rx="4" fill="#cfe5db" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="612" y="250" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1d6e54" text-anchor="middle">§ 2.1</text>
+            <text x="612" y="265" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">Storm cover</text>
+            <text x="612" y="281" font-family="JetBrains Mono" font-size="9" fill="#1d6e54" text-anchor="middle">★ relevance 0.91</text>
+
+            <text x="612" y="320" font-family="JetBrains Mono" font-size="10" font-weight="600" fill="#1d6e54" text-anchor="middle">TOP 3 CLAUSES</text>
+            <text x="612" y="335" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">all on H-2019, current</text>
+          </g>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>Two-stage retrieval, why?</h5>
+            <p>Stage one (vector search) is fast but rough — it casts a wide net. Stage two (re-ranker) is slower but sharper — it inspects each candidate carefully. Combining them gets both speed and accuracy.</p>
+          </div>
+          <div class="detail-block">
+            <h5>Filters fire here, not later</h5>
+            <p>Permission, jurisdiction, and recency filters are applied during retrieval — never after the LLM has spoken. The model can never see what it shouldn't.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STEP 6: GENERATE + CITE ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE B · STEP 06</div>
+        <div class="step-num">06</div>
+        <div class="step-name">Generate the answer with citations</div>
+        <p class="step-narration">The top 3 clauses, the original question, and a strict instruction ("answer only from these passages, cite every claim") are handed to the LLM. The model produces a coverage opinion the adjuster can defend, line by line.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 1.6 — Augmented prompt → grounded answer</span>
+          <span class="right">→ Cited response</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 410" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar6" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#b8541f" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- Left: augmented prompt -->
+          <g>
+            <rect x="20" y="30" width="240" height="320" rx="8" fill="#f7f4ed" stroke="#b8541f" stroke-width="1"/>
+            <text x="140" y="52" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">Augmented prompt</text>
+            <text x="140" y="68" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">B.3 · sent to LLM</text>
+            <line x1="35" y1="78" x2="245" y2="78" stroke="#d6d2c5"/>
+
+            <text x="32" y="95" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#b8541f">SYSTEM:</text>
+            <text x="32" y="108" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">Answer using only the</text>
+            <text x="32" y="120" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">passages below. Cite the</text>
+            <text x="32" y="132" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">clause for every claim. If</text>
+            <text x="32" y="144" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">unsupported, say so.</text>
+
+            <text x="32" y="167" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">PASSAGES:</text>
+            <rect x="32" y="173" width="216" height="36" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="38" y="186" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">[1] § 4.2 Outbuildings</text>
+            <text x="38" y="200" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">Detached structures up to £15k...</text>
+
+            <rect x="32" y="213" width="216" height="36" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="38" y="226" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">[2] P-441 Endorsement</text>
+            <text x="38" y="240" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">Raises outbuilding limit to £25k...</text>
+
+            <rect x="32" y="253" width="216" height="36" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="38" y="266" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">[3] § 2.1 Storm cover</text>
+            <text x="38" y="280" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">Wind force ≥ 47 mph qualifies...</text>
+
+            <text x="32" y="312" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1d6e54">QUESTION:</text>
+            <text x="32" y="326" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">Is wind damage to detached</text>
+            <text x="32" y="338" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">garage covered under H-2019?</text>
+          </g>
+
+          <!-- Arrow to LLM -->
+          <line x1="265" y1="190" x2="305" y2="190" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar6)"/>
+
+          <!-- LLM -->
+          <g>
+            <rect x="310" y="140" width="110" height="100" rx="8" fill="#f0e2c8" stroke="#b8541f" stroke-width="1"/>
+            <text x="365" y="166" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">LLM</text>
+            <text x="365" y="184" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">generator</text>
+            <text x="365" y="208" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">B.4 · grounded</text>
+            <text x="365" y="222" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">composition</text>
+          </g>
+
+          <!-- Arrow to answer -->
+          <line x1="425" y1="190" x2="465" y2="190" stroke="#b8541f" stroke-width="1.5" marker-end="url(#ar6)"/>
+
+          <!-- Final answer -->
+          <g>
+            <rect x="470" y="30" width="195" height="350" rx="8" fill="#1a1a1a"/>
+            <text x="567" y="52" font-family="DM Sans" font-size="13" font-weight="600" fill="#f7f4ed" text-anchor="middle">Grounded answer</text>
+            <text x="567" y="68" font-family="JetBrains Mono" font-size="9" fill="#d8a165" text-anchor="middle">delivered to adjuster</text>
+            <line x1="485" y1="78" x2="650" y2="78" stroke="#d8a165" stroke-width="0.5"/>
+
+            <text x="485" y="100" font-family="Instrument Serif" font-style="italic" font-size="13" fill="#f7f4ed">Wind damage to a</text>
+            <text x="485" y="116" font-family="Instrument Serif" font-style="italic" font-size="13" fill="#f7f4ed">detached garage is</text>
+            <text x="485" y="132" font-family="Instrument Serif" font-style="italic" font-size="13" fill="#d8a165">covered up to £25,000</text>
+            <text x="485" y="148" font-family="Instrument Serif" font-style="italic" font-size="13" fill="#f7f4ed">under H-2019 with</text>
+            <text x="485" y="164" font-family="Instrument Serif" font-style="italic" font-size="13" fill="#f7f4ed">endorsement P-441,</text>
+            <text x="485" y="180" font-family="Instrument Serif" font-style="italic" font-size="13" fill="#f7f4ed">provided wind speed</text>
+            <text x="485" y="196" font-family="Instrument Serif" font-style="italic" font-size="13" fill="#f7f4ed">exceeded 47 mph.</text>
+
+            <line x1="485" y1="215" x2="650" y2="215" stroke="#d8a165" stroke-width="0.5" stroke-dasharray="2 2"/>
+            <text x="485" y="230" font-family="JetBrains Mono" font-size="9" fill="#d8a165">SOURCES:</text>
+            <text x="485" y="247" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">[1] § 4.2 base £15k limit</text>
+            <text x="485" y="262" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">[2] P-441 raises to £25k</text>
+            <text x="485" y="277" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">[3] § 2.1 wind threshold</text>
+
+            <line x1="485" y1="295" x2="650" y2="295" stroke="#d8a165" stroke-width="0.5" stroke-dasharray="2 2"/>
+            <text x="485" y="312" font-family="JetBrains Mono" font-size="9" fill="#d8a165">CONFIDENCE: high</text>
+            <text x="485" y="328" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">all 3 sources current,</text>
+            <text x="485" y="343" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">on policy H-2019</text>
+
+            <rect x="485" y="355" width="165" height="18" fill="#cfe5db"/>
+            <text x="567" y="368" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1d6e54" text-anchor="middle">VIEW SOURCES →</text>
+          </g>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>The model is constrained, not free</h5>
+            <p>The system prompt forbids invention. If the answer isn't in the three passages, the model must say so. This is the architectural cure for hallucination.</p>
+          </div>
+          <div class="detail-block">
+            <h5>Every claim is clickable</h5>
+            <p>Each citation links back to the original clause in SharePoint. A regulator, auditor, or disputing customer can trace any decision to its source — instantly.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary">
+      <div class="tag">USE CASE 1 · WRAP</div>
+      <p>The adjuster pressed one button. Behind it: six steps, five systems, 280,000 clauses, one cited answer in under three seconds. The model never invented anything — it only assembled what retrieval put on its desk.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- USE CASE 2: RETAIL FINANCE - STRUCTURED -->
+<!-- ============================================ -->
+<section class="uc-section">
+  <div class="wrap">
+    <div class="uc-banner">
+      <div class="uc-id">02</div>
+      <div class="uc-title-block">
+        <div class="eyebrow">Use Case · Retail · Omnichannel Apparel</div>
+        <h2>Store Manager's <em>Finance Co-Pilot</em></h2>
+      </div>
+      <div>
+        <div class="uc-chip alt">STRUCTURED DATA</div>
+      </div>
+    </div>
+
+    <!-- Pipeline strip overview -->
+    <div class="pipeline-strip">
+      <div class="pip"><div class="pn">STEP 01</div><div class="pname">Warehouse</div></div>
+      <div class="pip"><div class="pn">STEP 02</div><div class="pname">Semantic Layer</div></div>
+      <div class="pip"><div class="pn">STEP 03</div><div class="pname">Schema Index</div></div>
+      <div class="pip phase-divider"><div class="pn">— LIVE —</div><div class="pname">Manager Asks</div></div>
+      <div class="pip"><div class="pn">STEP 05</div><div class="pname">Generate SQL</div></div>
+      <div class="pip"><div class="pn">STEP 06</div><div class="pname">Execute + Narrate</div></div>
+    </div>
+
+    <!-- PHASE A: OFFLINE -->
+    <div class="phase-label">
+      <span class="tag">PHASE A</span>
+      <span class="name">Schema preparation — offline</span>
+      <span class="desc">Teaching the system what the business means by "revenue," "store," "active SKU"</span>
+    </div>
+
+    <!-- ============ STEP 1: WAREHOUSE ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE A · STEP 01</div>
+        <div class="step-num">01</div>
+        <div class="step-name">Start with the warehouse, as it is</div>
+        <p class="step-narration">The retailer's Snowflake warehouse has hundreds of tables holding sales, returns, inventory, footfall and promo data. They refresh hourly. The pipeline does not duplicate this data — it learns its shape.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 2.1 — Warehouse landscape</span>
+          <span class="right">→ Schema metadata</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar7" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#1d6e54" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- Snowflake warehouse container -->
+          <g>
+            <rect x="40" y="40" width="380" height="290" rx="12" fill="#f7f4ed" stroke="#1f5d99" stroke-width="1"/>
+            <text x="60" y="66" font-family="DM Sans" font-size="13" font-weight="600" fill="#1f5d99">Snowflake warehouse</text>
+            <text x="60" y="82" font-family="JetBrains Mono" font-size="10" fill="#4a4a48">refreshed hourly · governed by data team</text>
+            <line x1="55" y1="92" x2="405" y2="92" stroke="#d6d2c5"/>
+
+            <!-- Tables drawn as little spreadsheet icons -->
+            <g>
+              <rect x="60" y="105" width="100" height="64" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+              <rect x="60" y="105" width="100" height="14" fill="#d6e3f0"/>
+              <text x="65" y="115" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">sales_fact</text>
+              <line x1="60" y1="129" x2="160" y2="129" stroke="#d6d2c5" stroke-width="0.5"/>
+              <line x1="60" y1="139" x2="160" y2="139" stroke="#d6d2c5" stroke-width="0.5"/>
+              <line x1="60" y1="149" x2="160" y2="149" stroke="#d6d2c5" stroke-width="0.5"/>
+              <line x1="60" y1="159" x2="160" y2="159" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="65" y="126" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">store_id</text>
+              <text x="65" y="136" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">sku_id</text>
+              <text x="65" y="146" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">qty, gross_amt</text>
+              <text x="65" y="156" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">net_rev_recog</text>
+            </g>
+            <g>
+              <rect x="175" y="105" width="100" height="64" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+              <rect x="175" y="105" width="100" height="14" fill="#d6e3f0"/>
+              <text x="180" y="115" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">stores_dim</text>
+              <line x1="175" y1="129" x2="275" y2="129" stroke="#d6d2c5" stroke-width="0.5"/>
+              <line x1="175" y1="139" x2="275" y2="139" stroke="#d6d2c5" stroke-width="0.5"/>
+              <line x1="175" y1="149" x2="275" y2="149" stroke="#d6d2c5" stroke-width="0.5"/>
+              <line x1="175" y1="159" x2="275" y2="159" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="180" y="126" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">store_id</text>
+              <text x="180" y="136" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">city, region</text>
+              <text x="180" y="146" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">format</text>
+              <text x="180" y="156" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">is_active</text>
+            </g>
+            <g>
+              <rect x="290" y="105" width="100" height="64" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+              <rect x="290" y="105" width="100" height="14" fill="#d6e3f0"/>
+              <text x="295" y="115" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">inventory_fact</text>
+              <line x1="290" y1="129" x2="390" y2="129" stroke="#d6d2c5" stroke-width="0.5"/>
+              <line x1="290" y1="139" x2="390" y2="139" stroke="#d6d2c5" stroke-width="0.5"/>
+              <line x1="290" y1="149" x2="390" y2="149" stroke="#d6d2c5" stroke-width="0.5"/>
+              <line x1="290" y1="159" x2="390" y2="159" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="295" y="126" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">store_id</text>
+              <text x="295" y="136" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">sku_id</text>
+              <text x="295" y="146" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">on_hand_qty</text>
+              <text x="295" y="156" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">days_on_hand</text>
+            </g>
+            <g>
+              <rect x="60" y="185" width="100" height="64" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+              <rect x="60" y="185" width="100" height="14" fill="#d6e3f0"/>
+              <text x="65" y="195" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">footfall_hourly</text>
+              <line x1="60" y1="209" x2="160" y2="209" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="65" y="206" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">store_id, hour</text>
+              <text x="65" y="222" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">visitors</text>
+              <text x="65" y="236" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">basket_conv</text>
+            </g>
+            <g>
+              <rect x="175" y="185" width="100" height="64" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+              <rect x="175" y="185" width="100" height="14" fill="#d6e3f0"/>
+              <text x="180" y="195" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">returns_fact</text>
+              <line x1="175" y1="209" x2="275" y2="209" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="180" y="206" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">store_id, sku</text>
+              <text x="180" y="222" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">return_qty</text>
+              <text x="180" y="236" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">return_reason</text>
+            </g>
+            <g>
+              <rect x="290" y="185" width="100" height="64" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+              <rect x="290" y="185" width="100" height="14" fill="#d6e3f0"/>
+              <text x="295" y="195" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">promo_dim</text>
+              <line x1="290" y1="209" x2="390" y2="209" stroke="#d6d2c5" stroke-width="0.5"/>
+              <text x="295" y="206" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">promo_id</text>
+              <text x="295" y="222" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">discount_pct</text>
+              <text x="295" y="236" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">start, end</text>
+            </g>
+
+            <text x="230" y="290" font-family="JetBrains Mono" font-size="10" fill="#8a8782" text-anchor="middle">+ 240 more tables · 4,800+ columns</text>
+            <text x="230" y="307" font-family="JetBrains Mono" font-size="10" fill="#b8364a" text-anchor="middle">"revenue" — 14 columns named like this!</text>
+          </g>
+
+          <!-- Arrow + schema reader -->
+          <line x1="425" y1="195" x2="475" y2="195" stroke="#1d6e54" stroke-width="1.5" marker-end="url(#ar7)"/>
+
+          <g>
+            <rect x="480" y="155" width="170" height="80" rx="6" fill="#cfe5db" stroke="#1d6e54" stroke-width="1"/>
+            <text x="565" y="180" font-family="DM Sans" font-size="13" font-weight="600" fill="#1d6e54" text-anchor="middle">Schema reader</text>
+            <text x="565" y="196" font-family="DM Sans" font-size="13" font-weight="600" fill="#1d6e54" text-anchor="middle">+ profiler</text>
+            <text x="565" y="218" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">A.1 · reads DDL,</text>
+            <text x="565" y="230" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">samples values</text>
+          </g>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>The schema problem</h5>
+            <p>The warehouse has 14 columns that could plausibly mean "revenue." Picking the wrong one gives a confident, wrong, defensible-looking number. This is the hardest problem in structured-data RAG.</p>
+          </div>
+          <div class="detail-block">
+            <h5>No data is copied</h5>
+            <p>The pipeline reads the schema — table names, column names, sample values, relationships — but never duplicates the warehouse. Queries run live, so answers are always current.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STEP 2: SEMANTIC LAYER ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE A · STEP 02</div>
+        <div class="step-num">02</div>
+        <div class="step-name">Build the semantic layer</div>
+        <p class="step-narration">A small team — finance plus data — agrees on canonical business definitions. "Revenue" means one specific column with one specific filter. "Active store" means three specific conditions. The model is given these as gospel.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 2.2 — Business terms → canonical SQL</span>
+          <span class="right">→ Semantic dictionary</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar8" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#1d6e54" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- Left: business words -->
+          <g>
+            <text x="100" y="32" font-family="JetBrains Mono" font-size="10" font-weight="600" fill="#1d6e54" text-anchor="middle">WHAT THE BUSINESS SAYS</text>
+
+            <rect x="30" y="50" width="140" height="40" rx="4" fill="#cfe5db" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="100" y="68" font-family="Instrument Serif" font-style="italic" font-size="16" fill="#1d6e54" text-anchor="middle">"revenue"</text>
+            <text x="100" y="82" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">in 100 emails this week</text>
+
+            <rect x="30" y="105" width="140" height="40" rx="4" fill="#cfe5db" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="100" y="123" font-family="Instrument Serif" font-style="italic" font-size="16" fill="#1d6e54" text-anchor="middle">"active store"</text>
+            <text x="100" y="137" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">3 definitions in use</text>
+
+            <rect x="30" y="160" width="140" height="40" rx="4" fill="#cfe5db" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="100" y="178" font-family="Instrument Serif" font-style="italic" font-size="16" fill="#1d6e54" text-anchor="middle">"slow-moving"</text>
+            <text x="100" y="192" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">SKU jargon</text>
+
+            <rect x="30" y="215" width="140" height="40" rx="4" fill="#cfe5db" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="100" y="233" font-family="Instrument Serif" font-style="italic" font-size="16" fill="#1d6e54" text-anchor="middle">"target"</text>
+            <text x="100" y="247" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">daily plan number</text>
+          </g>
+
+          <!-- Middle: semantic layer -->
+          <g>
+            <rect x="195" y="40" width="160" height="280" rx="8" fill="#f0e2c8" stroke="#b8541f" stroke-width="1"/>
+            <text x="275" y="63" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">Semantic layer</text>
+            <text x="275" y="79" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">A.2 · one truth</text>
+            <line x1="210" y1="90" x2="340" y2="90" stroke="#d6d2c5"/>
+
+            <text x="275" y="108" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">curated by</text>
+            <text x="275" y="120" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">finance + data</text>
+            <text x="275" y="135" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">together · once</text>
+
+            <rect x="210" y="148" width="130" height="32" fill="#ffffff" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="275" y="166" font-family="DM Sans" font-size="11" font-weight="600" fill="#b8541f" text-anchor="middle">revenue</text>
+            <text x="275" y="177" font-family="JetBrains Mono" font-size="8" fill="#4a4a48" text-anchor="middle">→ canonical SQL</text>
+
+            <rect x="210" y="186" width="130" height="32" fill="#ffffff" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="275" y="204" font-family="DM Sans" font-size="11" font-weight="600" fill="#b8541f" text-anchor="middle">active_store</text>
+            <text x="275" y="215" font-family="JetBrains Mono" font-size="8" fill="#4a4a48" text-anchor="middle">→ canonical SQL</text>
+
+            <rect x="210" y="224" width="130" height="32" fill="#ffffff" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="275" y="242" font-family="DM Sans" font-size="11" font-weight="600" fill="#b8541f" text-anchor="middle">slow_moving_sku</text>
+            <text x="275" y="253" font-family="JetBrains Mono" font-size="8" fill="#4a4a48" text-anchor="middle">→ canonical SQL</text>
+
+            <rect x="210" y="262" width="130" height="32" fill="#ffffff" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="275" y="280" font-family="DM Sans" font-size="11" font-weight="600" fill="#b8541f" text-anchor="middle">daily_target</text>
+            <text x="275" y="291" font-family="JetBrains Mono" font-size="8" fill="#4a4a48" text-anchor="middle">→ canonical SQL</text>
+
+            <text x="275" y="312" font-family="JetBrains Mono" font-size="9" fill="#b8541f" font-weight="600" text-anchor="middle">~120 defined terms</text>
+          </g>
+
+          <!-- Arrows from biz to semantic -->
+          <line x1="175" y1="70" x2="195" y2="160" stroke="#1d6e54" stroke-width="0.8" marker-end="url(#ar8)" stroke-dasharray="3 3"/>
+          <line x1="175" y1="125" x2="195" y2="200" stroke="#1d6e54" stroke-width="0.8" marker-end="url(#ar8)" stroke-dasharray="3 3"/>
+          <line x1="175" y1="180" x2="195" y2="238" stroke="#1d6e54" stroke-width="0.8" marker-end="url(#ar8)" stroke-dasharray="3 3"/>
+          <line x1="175" y1="235" x2="195" y2="276" stroke="#1d6e54" stroke-width="0.8" marker-end="url(#ar8)" stroke-dasharray="3 3"/>
+
+          <!-- Arrow to SQL -->
+          <line x1="360" y1="180" x2="395" y2="180" stroke="#1d6e54" stroke-width="1.5" marker-end="url(#ar8)"/>
+
+          <!-- Right: expanded definition -->
+          <g>
+            <rect x="400" y="40" width="260" height="280" rx="8" fill="#1a1a1a"/>
+            <text x="530" y="62" font-family="DM Sans" font-size="13" font-weight="600" fill="#f7f4ed" text-anchor="middle">Canonical definition</text>
+            <text x="530" y="78" font-family="JetBrains Mono" font-size="9" fill="#d8a165" text-anchor="middle">example: "revenue"</text>
+            <line x1="415" y1="90" x2="645" y2="90" stroke="#d8a165" stroke-width="0.5"/>
+
+            <text x="415" y="110" font-family="JetBrains Mono" font-size="10" fill="#d8a165">SELECT</text>
+            <text x="425" y="124" font-family="JetBrains Mono" font-size="10" fill="#f7f4ed">SUM(sf.net_rev_recog)</text>
+            <text x="415" y="138" font-family="JetBrains Mono" font-size="10" fill="#d8a165">FROM</text>
+            <text x="425" y="152" font-family="JetBrains Mono" font-size="10" fill="#f7f4ed">sales_fact sf</text>
+            <text x="415" y="166" font-family="JetBrains Mono" font-size="10" fill="#d8a165">JOIN</text>
+            <text x="425" y="180" font-family="JetBrains Mono" font-size="10" fill="#f7f4ed">stores_dim sd</text>
+            <text x="425" y="194" font-family="JetBrains Mono" font-size="10" fill="#f7f4ed">ON sf.store_id = sd.id</text>
+            <text x="415" y="208" font-family="JetBrains Mono" font-size="10" fill="#d8a165">WHERE</text>
+            <text x="425" y="222" font-family="JetBrains Mono" font-size="10" fill="#f7f4ed">sf.is_voided = FALSE</text>
+            <text x="425" y="236" font-family="JetBrains Mono" font-size="10" fill="#f7f4ed">AND sd.is_active = TRUE</text>
+
+            <line x1="415" y1="252" x2="645" y2="252" stroke="#d8a165" stroke-width="0.5" stroke-dasharray="2 2"/>
+            <text x="415" y="270" font-family="JetBrains Mono" font-size="9" fill="#d8a165">EXCLUDES:</text>
+            <text x="415" y="284" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">· gift card top-ups</text>
+            <text x="415" y="298" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">· returns (separate metric)</text>
+            <text x="415" y="312" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">· franchise channel</text>
+          </g>
+
+          <text x="530" y="350" font-family="JetBrains Mono" font-size="9" fill="#1d6e54" text-anchor="middle" font-weight="600">ONE WORD → ONE DEFINITION → ONE NUMBER ACROSS THE ORG</text>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>The single most important step</h5>
+            <p>The semantic layer is what separates a structured-RAG pilot from a structured-RAG product. Without it, every leader sees a slightly different version of "revenue."</p>
+          </div>
+          <div class="detail-block">
+            <h5>Built once, used forever</h5>
+            <p>About 120 business terms cover 95% of questions. Defining each one is a one-time investment that the model and every downstream tool reuses indefinitely.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STEP 3: SCHEMA INDEX ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE A · STEP 03</div>
+        <div class="step-num">03</div>
+        <div class="step-name">Make the schema retrievable</div>
+        <p class="step-narration">Schema descriptions, sample queries, business term definitions, and historical successful SQL are all embedded into a vector store. When a question arrives, the system retrieves only the parts of the schema it needs — not all 4,800 columns.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 2.3 — Building the retrieval index for schema</span>
+          <span class="right">→ Schema vector store</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 360" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar9" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#1d6e54" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- Three input sources -->
+          <g>
+            <rect x="30" y="40" width="180" height="56" rx="6" fill="#cfe5db" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="40" y="62" font-family="DM Sans" font-size="12" font-weight="600" fill="#1d6e54">Table + column descriptions</text>
+            <text x="40" y="80" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">from data catalog / dbt</text>
+
+            <rect x="30" y="106" width="180" height="56" rx="6" fill="#f0e2c8" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="40" y="128" font-family="DM Sans" font-size="12" font-weight="600" fill="#b8541f">Semantic layer terms</text>
+            <text x="40" y="146" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">120 business definitions</text>
+
+            <rect x="30" y="172" width="180" height="56" rx="6" fill="#d6e3f0" stroke="#1f5d99" stroke-width="0.5"/>
+            <text x="40" y="194" font-family="DM Sans" font-size="12" font-weight="600" fill="#1f5d99">Successful past queries</text>
+            <text x="40" y="212" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">~800 vetted Q&amp;SQL pairs</text>
+
+            <rect x="30" y="238" width="180" height="56" rx="6" fill="#e0d4f0" stroke="#5c3a8c" stroke-width="0.5"/>
+            <text x="40" y="260" font-family="DM Sans" font-size="12" font-weight="600" fill="#5c3a8c">Join graph</text>
+            <text x="40" y="278" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">how tables connect</text>
+          </g>
+
+          <!-- Arrows to embedding -->
+          <line x1="215" y1="68" x2="275" y2="165" stroke="#1d6e54" stroke-width="1" marker-end="url(#ar9)" stroke-dasharray="3 3"/>
+          <line x1="215" y1="134" x2="275" y2="170" stroke="#1d6e54" stroke-width="1" marker-end="url(#ar9)" stroke-dasharray="3 3"/>
+          <line x1="215" y1="200" x2="275" y2="180" stroke="#1d6e54" stroke-width="1" marker-end="url(#ar9)" stroke-dasharray="3 3"/>
+          <line x1="215" y1="266" x2="275" y2="195" stroke="#1d6e54" stroke-width="1" marker-end="url(#ar9)" stroke-dasharray="3 3"/>
+
+          <!-- Embedding model -->
+          <g>
+            <rect x="280" y="135" width="120" height="80" rx="6" fill="#f0e2c8" stroke="#b8541f" stroke-width="1"/>
+            <text x="340" y="160" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">Embedding</text>
+            <text x="340" y="178" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">model</text>
+            <text x="340" y="202" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">A.3 · 1536-dim</text>
+          </g>
+
+          <!-- Arrow -->
+          <line x1="405" y1="175" x2="445" y2="175" stroke="#1d6e54" stroke-width="1.5" marker-end="url(#ar9)"/>
+
+          <!-- Schema vector store -->
+          <g>
+            <rect x="450" y="100" width="210" height="170" rx="8" fill="#1a1a1a"/>
+            <text x="555" y="124" font-family="DM Sans" font-size="13" font-weight="600" fill="#f7f4ed" text-anchor="middle">Schema vector store</text>
+            <text x="555" y="140" font-family="JetBrains Mono" font-size="9" fill="#d8a165" text-anchor="middle">A.4 · queryable by meaning</text>
+            <line x1="465" y1="150" x2="645" y2="150" stroke="#d8a165" stroke-width="0.5"/>
+
+            <text x="465" y="170" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">▸ table descriptions</text>
+            <text x="465" y="186" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">▸ column meanings</text>
+            <text x="465" y="202" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">▸ canonical definitions</text>
+            <text x="465" y="218" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">▸ example Q→SQL pairs</text>
+            <text x="465" y="234" font-family="JetBrains Mono" font-size="9" fill="#f7f4ed">▸ valid joins</text>
+
+            <line x1="465" y1="244" x2="645" y2="244" stroke="#d8a165" stroke-width="0.5" stroke-dasharray="2 2"/>
+            <text x="555" y="260" font-family="JetBrains Mono" font-size="10" font-weight="600" fill="#d8a165" text-anchor="middle">retrieves on demand</text>
+          </g>
+
+          <text x="555" y="298" font-family="JetBrains Mono" font-size="9" fill="#8a8782" text-anchor="middle">Now: a question can pull only the tables it needs,</text>
+          <text x="555" y="313" font-family="JetBrains Mono" font-size="9" fill="#8a8782" text-anchor="middle">not all 240. The LLM's working memory stays clean.</text>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>Why we still need retrieval</h5>
+            <p>You can't paste 4,800 column descriptions into a prompt — too long, too noisy. Retrieval narrows the schema down to the ~10 columns relevant to the question being asked.</p>
+          </div>
+          <div class="detail-block">
+            <h5>The past as a teacher</h5>
+            <p>Including ~800 vetted question-to-SQL pairs lets the model imitate proven patterns rather than invent SQL from scratch. New questions reuse old solutions.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE B: LIVE -->
+    <div class="phase-label">
+      <span class="tag">PHASE B</span>
+      <span class="name">Query — live, per question</span>
+      <span class="desc">A store manager asks; the system writes SQL, runs it, narrates the answer</span>
+    </div>
+
+    <!-- ============ STEP 4: MANAGER ASKS ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE B · STEP 04</div>
+        <div class="step-num">04</div>
+        <div class="step-name">Store manager asks in plain English</div>
+        <p class="step-narration">A store manager asks a real question on her phone, the same way she'd ask a colleague. The system attaches her identity — her store, her permissions — so the answer is scoped to what she's allowed to see.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 2.4 — Question → relevant schema retrieved</span>
+          <span class="right">→ Working context</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 380" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar10" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#1d6e54" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- Manager persona -->
+          <g>
+            <circle cx="60" cy="80" r="22" fill="#f0e2c8" stroke="#b8541f" stroke-width="1"/>
+            <circle cx="60" cy="72" r="8" fill="#b8541f"/>
+            <path d="M42 95 Q60 80 78 95" stroke="#b8541f" stroke-width="1.5" fill="none"/>
+            <text x="60" y="125" font-family="DM Sans" font-size="11" font-weight="600" fill="#b8541f" text-anchor="middle">Priya</text>
+            <text x="60" y="139" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">store mgr · Mumbai 14</text>
+          </g>
+
+          <!-- Question -->
+          <g>
+            <rect x="110" y="40" width="320" height="100" rx="8" fill="#f7f4ed" stroke="#b8541f" stroke-width="1"/>
+            <text x="125" y="62" font-family="JetBrains Mono" font-size="9" fill="#1d6e54">USER ASKS (Monday morning, on phone):</text>
+            <text x="125" y="86" font-family="Instrument Serif" font-style="italic" font-size="16" fill="#1a1a1a">"Why did my store underperform last</text>
+            <text x="125" y="108" font-family="Instrument Serif" font-style="italic" font-size="16" fill="#1a1a1a">week, and which SKUs should I discount?"</text>
+            <line x1="125" y1="118" x2="415" y2="118" stroke="#d6d2c5" stroke-dasharray="2 2"/>
+            <text x="125" y="132" font-family="JetBrains Mono" font-size="9" fill="#8a8782">user_id:priya_m · scope: store_14 · region: west</text>
+          </g>
+
+          <!-- Embed query -->
+          <g>
+            <rect x="445" y="50" width="115" height="80" rx="6" fill="#cfe5db" stroke="#1d6e54" stroke-width="1"/>
+            <text x="502" y="76" font-family="DM Sans" font-size="13" font-weight="600" fill="#1d6e54" text-anchor="middle">Embed +</text>
+            <text x="502" y="94" font-family="DM Sans" font-size="13" font-weight="600" fill="#1d6e54" text-anchor="middle">decompose</text>
+            <text x="502" y="118" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">B.1</text>
+          </g>
+
+          <!-- Arrow -->
+          <line x1="435" y1="90" x2="442" y2="90" stroke="#1d6e54" stroke-width="1.5" marker-end="url(#ar10)"/>
+
+          <!-- Decomposed sub-questions -->
+          <g>
+            <rect x="445" y="148" width="200" height="22" rx="3" fill="#ffffff" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="455" y="163" font-family="JetBrains Mono" font-size="10" fill="#1d6e54">Q1: store 14 sales vs target</text>
+
+            <rect x="445" y="174" width="200" height="22" rx="3" fill="#ffffff" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="455" y="189" font-family="JetBrains Mono" font-size="10" fill="#1d6e54">Q2: top 3 underperforming SKUs</text>
+
+            <rect x="445" y="200" width="200" height="22" rx="3" fill="#ffffff" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="455" y="215" font-family="JetBrains Mono" font-size="10" fill="#1d6e54">Q3: discount candidates by stock</text>
+
+            <text x="545" y="240" font-family="JetBrains Mono" font-size="9" fill="#8a8782" text-anchor="middle">complex question = 3 sub-queries</text>
+          </g>
+
+          <!-- Schema retrieval result -->
+          <g>
+            <rect x="60" y="175" width="370" height="180" rx="6" fill="#efece3" stroke="#d6d2c5" stroke-width="0.5"/>
+            <text x="75" y="196" font-family="JetBrains Mono" font-size="9" fill="#b8541f">RETRIEVED FROM SCHEMA VECTOR STORE:</text>
+            <line x1="75" y1="206" x2="415" y2="206" stroke="#d6d2c5"/>
+
+            <g>
+              <rect x="75" y="216" width="100" height="56" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+              <rect x="75" y="216" width="100" height="14" fill="#d6e3f0"/>
+              <text x="80" y="226" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">sales_fact</text>
+              <text x="80" y="240" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">store_id, sku_id</text>
+              <text x="80" y="252" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">net_rev_recog</text>
+              <text x="80" y="264" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">tx_date</text>
+            </g>
+            <g>
+              <rect x="185" y="216" width="100" height="56" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+              <rect x="185" y="216" width="100" height="14" fill="#d6e3f0"/>
+              <text x="190" y="226" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">targets_dim</text>
+              <text x="190" y="240" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">store_id, week</text>
+              <text x="190" y="252" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">target_amount</text>
+            </g>
+            <g>
+              <rect x="295" y="216" width="100" height="56" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+              <rect x="295" y="216" width="100" height="14" fill="#d6e3f0"/>
+              <text x="300" y="226" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1f5d99">inventory_fact</text>
+              <text x="300" y="240" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">store_id, sku</text>
+              <text x="300" y="252" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">on_hand_qty</text>
+              <text x="300" y="264" font-family="JetBrains Mono" font-size="8" fill="#4a4a48">days_on_hand</text>
+            </g>
+
+            <text x="75" y="295" font-family="JetBrains Mono" font-size="9" fill="#b8541f">+ canonical definitions:</text>
+            <rect x="180" y="285" width="80" height="16" fill="#f0e2c8" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="220" y="296" font-family="JetBrains Mono" font-size="9" fill="#b8541f" text-anchor="middle">revenue</text>
+            <rect x="266" y="285" width="80" height="16" fill="#f0e2c8" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="306" y="296" font-family="JetBrains Mono" font-size="9" fill="#b8541f" text-anchor="middle">slow_moving</text>
+
+            <text x="75" y="322" font-family="JetBrains Mono" font-size="9" fill="#1f5d99">+ 1 similar past SQL example matched</text>
+            <text x="75" y="340" font-family="JetBrains Mono" font-size="9" fill="#1d6e54" font-weight="600">+ scope filter: store_id = 14 (Priya's only)</text>
+          </g>
+
+          <!-- Arrow back to working context -->
+          <line x1="502" y1="225" x2="445" y2="260" stroke="#1d6e54" stroke-width="1" marker-end="url(#ar10)" stroke-dasharray="3 3"/>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>Complex questions get split</h5>
+            <p>"Why did I underperform?" actually contains three questions. Splitting them produces clean, debuggable SQL — and is easier for the model than one giant query.</p>
+          </div>
+          <div class="detail-block">
+            <h5>Identity = permission</h5>
+            <p>Priya's identity narrows scope to <code>store_id = 14</code>. She physically cannot see Bangalore's numbers — the filter is applied at retrieval, not by trusting the LLM.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STEP 5: GENERATE + EXECUTE SQL ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE B · STEP 05</div>
+        <div class="step-num">05</div>
+        <div class="step-name">Generate SQL, validate, execute</div>
+        <p class="step-narration">The LLM writes SQL using only the schema it was given. A validator checks the SQL is safe (read-only, scope-respecting, no joins to disallowed tables). It then runs against the warehouse — live, fresh, never copied.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 2.5 — SQL generation, validation, execution</span>
+          <span class="right">→ Result rows</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar11" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#1d6e54" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- LLM generator -->
+          <g>
+            <rect x="20" y="30" width="120" height="80" rx="6" fill="#f0e2c8" stroke="#b8541f" stroke-width="1"/>
+            <text x="80" y="56" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">LLM SQL</text>
+            <text x="80" y="74" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">generator</text>
+            <text x="80" y="96" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">B.2</text>
+          </g>
+
+          <line x1="145" y1="70" x2="180" y2="70" stroke="#1d6e54" stroke-width="1.5" marker-end="url(#ar11)"/>
+
+          <!-- Generated SQL -->
+          <g>
+            <rect x="185" y="20" width="320" height="180" rx="6" fill="#1a1a1a"/>
+            <text x="345" y="42" font-family="DM Sans" font-size="13" font-weight="600" fill="#f7f4ed" text-anchor="middle">Generated SQL</text>
+            <text x="345" y="58" font-family="JetBrains Mono" font-size="9" fill="#d8a165" text-anchor="middle">written using only retrieved schema</text>
+            <line x1="200" y1="68" x2="490" y2="68" stroke="#d8a165" stroke-width="0.5"/>
+
+            <text x="200" y="86" font-family="JetBrains Mono" font-size="10" fill="#d8a165">SELECT</text>
+            <text x="210" y="100" font-family="JetBrains Mono" font-size="10" fill="#f7f4ed">sf.sku_id, p.name,</text>
+            <text x="210" y="114" font-family="JetBrains Mono" font-size="10" fill="#f7f4ed">SUM(sf.net_rev_recog) AS rev,</text>
+            <text x="210" y="128" font-family="JetBrains Mono" font-size="10" fill="#f7f4ed">AVG(i.days_on_hand) AS doh</text>
+            <text x="200" y="142" font-family="JetBrains Mono" font-size="10" fill="#d8a165">FROM</text>
+            <text x="210" y="156" font-family="JetBrains Mono" font-size="10" fill="#f7f4ed">sales_fact sf JOIN inventory_fact i ...</text>
+            <text x="200" y="170" font-family="JetBrains Mono" font-size="10" fill="#d8a165">WHERE</text>
+            <text x="210" y="184" font-family="JetBrains Mono" font-size="10" fill="#cfe5db">sf.store_id = 14</text>
+            <text x="210" y="196" font-family="JetBrains Mono" font-size="10" fill="#f7f4ed">AND sf.tx_date BETWEEN ... ORDER BY rev ASC LIMIT 3</text>
+          </g>
+
+          <!-- Arrow down to validator -->
+          <line x1="345" y1="205" x2="345" y2="240" stroke="#1d6e54" stroke-width="1.5" marker-end="url(#ar11)"/>
+
+          <!-- Validator -->
+          <g>
+            <rect x="225" y="245" width="240" height="60" rx="6" fill="#cfe5db" stroke="#1d6e54" stroke-width="1"/>
+            <text x="345" y="266" font-family="DM Sans" font-size="13" font-weight="600" fill="#1d6e54" text-anchor="middle">SQL validator (gatekeeper)</text>
+            <text x="345" y="282" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">SELECT-only · scope check · syntax · cost cap</text>
+            <text x="345" y="296" font-family="JetBrains Mono" font-size="9" fill="#1d6e54" font-weight="600" text-anchor="middle">✓ passes — store_id = 14 enforced</text>
+          </g>
+
+          <!-- Arrow to warehouse -->
+          <line x1="345" y1="310" x2="345" y2="345" stroke="#1d6e54" stroke-width="1.5" marker-end="url(#ar11)"/>
+
+          <!-- Warehouse executes -->
+          <g>
+            <rect x="190" y="350" width="310" height="56" rx="6" fill="#d6e3f0" stroke="#1f5d99" stroke-width="1"/>
+            <text x="345" y="372" font-family="DM Sans" font-size="13" font-weight="600" fill="#1f5d99" text-anchor="middle">Snowflake executes the query</text>
+            <text x="345" y="390" font-family="JetBrains Mono" font-size="10" fill="#4a4a48" text-anchor="middle">reads live data · ~280ms · cost: $0.0042</text>
+          </g>
+
+          <!-- Result on the right -->
+          <line x1="510" y1="378" x2="540" y2="378" stroke="#1d6e54" stroke-width="1.5" marker-end="url(#ar11)"/>
+
+          <g>
+            <rect x="545" y="240" width="125" height="170" rx="4" fill="#ffffff" stroke="#1d6e54" stroke-width="1"/>
+            <rect x="545" y="240" width="125" height="22" fill="#cfe5db"/>
+            <text x="607" y="255" font-family="JetBrains Mono" font-size="10" font-weight="600" fill="#1d6e54" text-anchor="middle">RESULT ROWS</text>
+
+            <text x="555" y="278" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1d6e54">sku  rev  doh</text>
+            <line x1="555" y1="284" x2="660" y2="284" stroke="#d6d2c5"/>
+
+            <text x="555" y="298" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">A-218 ₹42k 56d</text>
+            <text x="555" y="312" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">B-103 ₹38k 71d</text>
+            <text x="555" y="326" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">C-440 ₹35k 48d</text>
+
+            <line x1="555" y1="340" x2="660" y2="340" stroke="#d6d2c5" stroke-dasharray="2 2"/>
+            <text x="555" y="358" font-family="JetBrains Mono" font-size="9" fill="#b8364a">total: ₹2.1M</text>
+            <text x="555" y="372" font-family="JetBrains Mono" font-size="9" fill="#b8364a">target: ₹2.4M</text>
+            <text x="555" y="386" font-family="JetBrains Mono" font-size="9" fill="#b8364a" font-weight="600">gap: −12.5%</text>
+            <text x="555" y="400" font-family="JetBrains Mono" font-size="8" fill="#8a8782">3 rows · 280ms</text>
+          </g>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>The validator is non-optional</h5>
+            <p>The LLM cannot run a DELETE, an UPDATE, or a query that touches tables outside its allow-list. The validator rejects anything dangerous before it reaches the database.</p>
+          </div>
+          <div class="detail-block">
+            <h5>The data never moves</h5>
+            <p>The SQL runs against Snowflake live. No data copies, no stale extracts, no governance gap. The model sees rows but never sees the warehouse itself.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ STEP 6: NARRATE + CITE ============ -->
+    <div class="step">
+      <div class="step-left">
+        <div class="step-tag">PHASE B · STEP 06</div>
+        <div class="step-num">06</div>
+        <div class="step-name">Turn rows into a narrative answer</div>
+        <p class="step-narration">The result rows go back into the LLM with one final instruction: "Explain these numbers to a store manager in plain English; show the SQL and the source tables." The output is a chat message a non-analyst can act on.</p>
+      </div>
+      <div class="step-right">
+        <div class="diagram-caption">
+          <span>Diagram 2.6 — Rows → narrated answer with citations</span>
+          <span class="right">→ Manager's screen</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 420" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="ar12" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#1d6e54" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <!-- Left: inputs to narrator -->
+          <g>
+            <rect x="20" y="40" width="180" height="64" rx="4" fill="#ffffff" stroke="#1f5d99" stroke-width="0.5"/>
+            <rect x="20" y="40" width="180" height="18" fill="#d6e3f0"/>
+            <text x="110" y="53" font-family="JetBrains Mono" font-size="10" font-weight="600" fill="#1f5d99" text-anchor="middle">Result rows</text>
+            <text x="30" y="74" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">A-218 ₹42k 56d</text>
+            <text x="30" y="88" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">B-103 ₹38k 71d</text>
+            <text x="30" y="100" font-family="JetBrains Mono" font-size="9" fill="#b8364a">gap: −12.5%</text>
+
+            <rect x="20" y="115" width="180" height="50" rx="4" fill="#f7f4ed" stroke="#b8541f" stroke-width="0.5"/>
+            <text x="30" y="132" font-family="JetBrains Mono" font-size="9" fill="#b8541f">Original question</text>
+            <text x="30" y="150" font-family="Instrument Serif" font-style="italic" font-size="11" fill="#4a4a48">"Why did my store</text>
+            <text x="30" y="162" font-family="Instrument Serif" font-style="italic" font-size="11" fill="#4a4a48">underperform?"</text>
+
+            <rect x="20" y="178" width="180" height="50" rx="4" fill="#cfe5db" stroke="#1d6e54" stroke-width="0.5"/>
+            <text x="30" y="195" font-family="JetBrains Mono" font-size="9" fill="#1d6e54">SQL executed</text>
+            <text x="30" y="213" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">SELECT sku, rev,</text>
+            <text x="30" y="225" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">SUM(...) FROM ...</text>
+
+            <rect x="20" y="240" width="180" height="40" rx="4" fill="#efece3" stroke="#d6d2c5" stroke-width="0.5"/>
+            <text x="30" y="257" font-family="JetBrains Mono" font-size="9" fill="#b8541f">Instructions to LLM</text>
+            <text x="30" y="273" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">narrate · cite · be brief</text>
+          </g>
+
+          <!-- Arrow -->
+          <line x1="205" y1="170" x2="245" y2="170" stroke="#1d6e54" stroke-width="1.5" marker-end="url(#ar12)"/>
+
+          <!-- LLM narrator -->
+          <g>
+            <rect x="250" y="130" width="115" height="80" rx="6" fill="#f0e2c8" stroke="#b8541f" stroke-width="1"/>
+            <text x="307" y="156" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">LLM</text>
+            <text x="307" y="174" font-family="DM Sans" font-size="13" font-weight="600" fill="#b8541f" text-anchor="middle">narrator</text>
+            <text x="307" y="198" font-family="JetBrains Mono" font-size="9" fill="#4a4a48" text-anchor="middle">B.3 · rows → prose</text>
+          </g>
+
+          <!-- Arrow to final -->
+          <line x1="370" y1="170" x2="410" y2="170" stroke="#1d6e54" stroke-width="1.5" marker-end="url(#ar12)"/>
+
+          <!-- Final answer on phone -->
+          <g>
+            <!-- phone frame -->
+            <rect x="415" y="20" width="240" height="380" rx="22" fill="#1a1a1a" stroke="#1a1a1a"/>
+            <rect x="425" y="36" width="220" height="350" rx="6" fill="#f7f4ed"/>
+
+            <text x="535" y="58" font-family="DM Sans" font-size="11" font-weight="600" fill="#4a4a48" text-anchor="middle">Finance Co-Pilot</text>
+            <line x1="435" y1="68" x2="635" y2="68" stroke="#d6d2c5"/>
+
+            <!-- Manager bubble -->
+            <rect x="475" y="78" width="160" height="32" rx="6" fill="#d6e3f0"/>
+            <text x="555" y="92" font-family="DM Sans" font-size="10" fill="#1f5d99" text-anchor="middle">"Why did my store</text>
+            <text x="555" y="104" font-family="DM Sans" font-size="10" fill="#1f5d99" text-anchor="middle">underperform last week?"</text>
+
+            <!-- Assistant bubble -->
+            <rect x="435" y="122" width="200" height="190" rx="6" fill="#ffffff" stroke="#d6d2c5" stroke-width="0.5"/>
+            <text x="445" y="138" font-family="Instrument Serif" font-style="italic" font-size="11" fill="#1a1a1a">Sales were ₹2.1M against</text>
+            <text x="445" y="152" font-family="Instrument Serif" font-style="italic" font-size="11" fill="#1a1a1a">a target of ₹2.4M — a</text>
+            <text x="445" y="166" font-family="Instrument Serif" font-style="italic" font-weight="600" font-size="11" fill="#b8364a">12.5% shortfall.</text>
+
+            <text x="445" y="184" font-family="Instrument Serif" font-style="italic" font-size="11" fill="#1a1a1a">Three SKUs account for</text>
+            <text x="445" y="198" font-family="Instrument Serif" font-style="italic" font-size="11" fill="#1a1a1a">most of the drag:</text>
+
+            <text x="445" y="216" font-family="JetBrains Mono" font-size="9" fill="#1d6e54">▸ A-218 — 56 days on hand</text>
+            <text x="445" y="230" font-family="JetBrains Mono" font-size="9" fill="#1d6e54">▸ B-103 — 71 days on hand</text>
+            <text x="445" y="244" font-family="JetBrains Mono" font-size="9" fill="#1d6e54">▸ C-440 — 48 days on hand</text>
+
+            <text x="445" y="264" font-family="Instrument Serif" font-style="italic" font-size="11" fill="#1a1a1a">Recommend discounting</text>
+            <text x="445" y="278" font-family="Instrument Serif" font-style="italic" font-size="11" fill="#1a1a1a">B-103 first (longest</text>
+            <text x="445" y="292" font-family="Instrument Serif" font-style="italic" font-size="11" fill="#1a1a1a">stock age).</text>
+
+            <line x1="445" y1="302" x2="625" y2="302" stroke="#d6d2c5" stroke-dasharray="2 2"/>
+
+            <!-- citations -->
+            <rect x="435" y="320" width="200" height="60" rx="4" fill="#efece3" stroke="#d6d2c5" stroke-width="0.5"/>
+            <text x="445" y="334" font-family="JetBrains Mono" font-size="9" fill="#b8541f">SOURCES (tap to expand):</text>
+            <text x="445" y="350" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">▸ sales_fact, inventory_fact</text>
+            <text x="445" y="364" font-family="JetBrains Mono" font-size="9" fill="#4a4a48">▸ Definition: revenue</text>
+            <text x="445" y="378" font-family="JetBrains Mono" font-size="9" fill="#1d6e54">▸ [VIEW SQL] · 280ms</text>
+          </g>
+        </svg>
+
+        <div class="step-detail">
+          <div class="detail-block">
+            <h5>Narration with discipline</h5>
+            <p>The LLM is told to use only the rows it was given. It can rank, summarise, recommend — but cannot fabricate a number. Every figure in the answer maps to a value in the result set.</p>
+          </div>
+          <div class="detail-block">
+            <h5>Citations the manager can audit</h5>
+            <p>The SQL is visible. The tables are named. The semantic definitions are linked. If finance disputes the answer, the trail is one tap away — and identical for every store manager.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="summary">
+      <div class="tag">USE CASE 2 · WRAP</div>
+      <p>Priya asked a question in plain English on her phone at 8 a.m. By 8:00:04, she had a number, a reason, a recommendation, and a citation. No analyst was woken up. No spreadsheet was sent. The warehouse stayed governed, the answer stayed grounded.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TAKEAWAY ============ -->
+<section class="takeaway">
+  <div class="wrap">
+    <p class="takeaway-quote">Whether the answer lives in a <em>clause</em> or a <em>row</em>, the six steps are the same: <em>collect, prepare, embed, retrieve, generate, cite.</em></p>
+    <div class="footer-rule"></div>
+    <p class="colophon">Two Use Cases · Twelve Diagrams · One Architecture</p>
+  </div>
+</section>
+
+</body>
+</html>
