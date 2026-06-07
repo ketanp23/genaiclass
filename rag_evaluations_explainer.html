@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Evaluating RAG — Standard, Graph, Agentic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..700;1,6..72,300..700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1419;
+    --bg-2: #161c23;
+    --bg-3: #1d242d;
+    --bg-card: #ffffff;
+    --bg-panel: #f7f4ed;
+    --ink: #0f1419;
+    --ink-2: #2e3640;
+    --ink-mute: #6b7480;
+    --ink-mute-2: #9aa3ae;
+    --line: #2a323d;
+    --line-light: #e0dccf;
+
+    --gold: #c9a14a;
+    --gold-soft: #f0e5c8;
+    --gold-deep: #8a6a1f;
+
+    --rag: #2d7a64;
+    --rag-soft: #d4eae3;
+    --rag-deep: #1a4a3c;
+
+    --graph: #6b4ba8;
+    --graph-soft: #e2d8f0;
+    --graph-deep: #3f2a6e;
+
+    --agent: #b85a2e;
+    --agent-soft: #f4d9c6;
+    --agent-deep: #6e3216;
+
+    --critical: #c93a3a;
+    --good: #2d7a64;
+    --warn: #c98a2e;
+
+    --serif: 'Newsreader', 'Times New Roman', serif;
+    --sans: 'Inter', system-ui, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink-mute-2);
+    font-family: var(--sans);
+    font-size: 16px;
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  .wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+  }
+
+  /* ============ MASTHEAD ============ */
+  .masthead {
+    padding: 80px 0 70px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 56px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+
+  .masthead-top .left { display: flex; align-items: center; gap: 12px; }
+  .masthead-top .glyph {
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--gold);
+    color: var(--gold);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 16px;
+  }
+
+  .masthead-eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 32px;
+    font-weight: 500;
+  }
+
+  .masthead h1 {
+    font-family: var(--serif);
+    font-size: clamp(56px, 9vw, 132px);
+    line-height: 0.9;
+    font-weight: 300;
+    letter-spacing: -0.025em;
+    margin-bottom: 36px;
+    color: #f0e9d8;
+    font-variation-settings: "opsz" 72;
+  }
+
+  .masthead h1 em {
+    font-style: italic;
+    color: var(--gold);
+    font-weight: 400;
+  }
+
+  .masthead h1 .small {
+    display: block;
+    font-size: 0.45em;
+    font-style: italic;
+    color: var(--ink-mute-2);
+    font-weight: 300;
+    margin-top: 18px;
+    letter-spacing: -0.01em;
+  }
+
+  .masthead-deck {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(20px, 2.3vw, 26px);
+    line-height: 1.45;
+    color: #cdc8b8;
+    max-width: 900px;
+    font-weight: 300;
+  }
+
+  .masthead-tickers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    margin-top: 60px;
+    border-top: 1px solid var(--line);
+  }
+
+  .ticker {
+    padding: 24px 28px;
+    border-right: 1px solid var(--line);
+  }
+
+  .ticker:last-child { border-right: none; }
+
+  .ticker .num {
+    font-family: var(--serif);
+    font-size: 38px;
+    line-height: 1;
+    color: var(--gold);
+    font-style: italic;
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+
+  .ticker .lbl {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+
+  /* ============ THE FRAMEWORK ============ */
+  .framework {
+    padding: 80px 0;
+    background: var(--bg-panel);
+    color: var(--ink);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .framework .wrap > .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 22px;
+    font-weight: 500;
+  }
+
+  .framework h2 {
+    font-family: var(--serif);
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 0.95;
+    font-weight: 400;
+    letter-spacing: -0.018em;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+
+  .framework h2 em {
+    font-style: italic;
+    color: var(--gold-deep);
+  }
+
+  .framework-intro {
+    font-family: var(--serif);
+    font-size: 21px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: 880px;
+    margin-bottom: 56px;
+  }
+
+  /* parameter cards */
+  .params-section h3 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line-light);
+    font-weight: 600;
+  }
+
+  .params-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+    margin-bottom: 48px;
+  }
+
+  .param {
+    background: var(--bg-card);
+    border: 1px solid var(--line-light);
+    padding: 24px 26px;
+    position: relative;
+  }
+
+  .param-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .param-num {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 24px;
+    color: var(--gold);
+    line-height: 1;
+    font-weight: 500;
+  }
+
+  .param-name {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.1;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .param-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    background: var(--gold-soft);
+    padding: 3px 8px;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .param p {
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    margin-bottom: 12px;
+  }
+
+  .param p strong {
+    font-weight: 500;
+    color: var(--ink);
+  }
+
+  .param .qcheck {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 14px;
+    color: var(--gold-deep);
+    padding-top: 12px;
+    border-top: 1px dashed var(--line-light);
+  }
+
+  .param .qcheck::before {
+    content: 'Q:';
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    background: var(--gold-deep);
+    color: var(--gold-soft);
+    padding: 2px 6px;
+    margin-right: 8px;
+    vertical-align: middle;
+    font-weight: 600;
+  }
+
+  /* ============ USE CASE SECTION ============ */
+  .uc {
+    padding: 80px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .uc-banner {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 32px;
+    align-items: center;
+    padding-bottom: 28px;
+    margin-bottom: 48px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .uc-id {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 84px;
+    line-height: 0.85;
+    color: var(--gold);
+    font-weight: 400;
+    font-variation-settings: "opsz" 72;
+  }
+
+  .uc.rag .uc-id { color: var(--gold); }
+  .uc.rag-str .uc-id { color: #7dc4c0; }
+  .uc.graph .uc-id { color: #b59ad6; }
+  .uc.agent .uc-id { color: #e09573; }
+
+  .uc-title-block .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: var(--gold);
+  }
+
+  .uc.rag-str .uc-title-block .eyebrow { color: #7dc4c0; }
+  .uc.graph .uc-title-block .eyebrow { color: #b59ad6; }
+  .uc.agent .uc-title-block .eyebrow { color: #e09573; }
+
+  .uc-title-block h2 {
+    font-family: var(--serif);
+    font-size: clamp(36px, 4.6vw, 56px);
+    line-height: 1;
+    font-weight: 400;
+    letter-spacing: -0.012em;
+    color: #f0e9d8;
+  }
+
+  .uc-title-block h2 em {
+    font-style: italic;
+  }
+
+  .uc.rag h2 em { color: var(--gold); }
+  .uc.rag-str h2 em { color: #7dc4c0; }
+  .uc.graph h2 em { color: #b59ad6; }
+  .uc.agent h2 em { color: #e09573; }
+
+  .uc-chips {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-end;
+  }
+
+  .uc-chip {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    color: var(--ink-mute-2);
+    font-weight: 500;
+  }
+
+  /* Scene panel */
+  .scene {
+    background: var(--bg-2);
+    border-left: 3px solid var(--gold);
+    border-top: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 26px 32px;
+    margin-bottom: 40px;
+    position: relative;
+  }
+
+  .uc.rag-str .scene { border-left-color: #7dc4c0; }
+  .uc.graph .scene { border-left-color: #b59ad6; }
+  .uc.agent .scene { border-left-color: #e09573; }
+
+  .scene::before {
+    content: 'THE SETTING';
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background: var(--bg);
+    padding: 0 12px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .uc.rag-str .scene::before { color: #7dc4c0; }
+  .uc.graph .scene::before { color: #b59ad6; }
+  .uc.agent .scene::before { color: #e09573; }
+
+  .scene p {
+    font-family: var(--serif);
+    font-size: 19px;
+    line-height: 1.5;
+    color: #d8d3c4;
+    font-weight: 300;
+  }
+
+  .scene p strong {
+    font-weight: 500;
+    color: #f0e9d8;
+    font-style: italic;
+  }
+
+  /* Two-col layout: diagram + evaluation panel */
+  .uc-body {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 36px;
+    margin-bottom: 32px;
+    align-items: start;
+  }
+
+  .uc-diagram {
+    background: var(--bg-panel);
+    border: 1px solid var(--line);
+    padding: 24px;
+  }
+
+  .uc-diagram-caption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px dashed var(--line-light);
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+
+  .uc.rag .uc-diagram-caption .r { color: var(--rag); }
+  .uc.rag-str .uc-diagram-caption .r { color: #1d6e7c; }
+  .uc.graph .uc-diagram-caption .r { color: var(--graph); }
+  .uc.agent .uc-diagram-caption .r { color: var(--agent); }
+
+  .diagram-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .uc-eval {
+    padding-top: 0;
+  }
+
+  .uc-eval-head {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+    font-weight: 600;
+  }
+
+  .uc.rag-str .uc-eval-head { color: #7dc4c0; }
+  .uc.graph .uc-eval-head { color: #b59ad6; }
+  .uc.agent .uc-eval-head { color: #e09573; }
+
+  .metric-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: start;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .metric-row:last-child { border-bottom: none; }
+
+  .metric-name {
+    font-family: var(--serif);
+    font-size: 19px;
+    line-height: 1.15;
+    color: #f0e9d8;
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .metric-name em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .uc.rag-str .metric-name em { color: #7dc4c0; }
+  .uc.graph .metric-name em { color: #b59ad6; }
+  .uc.agent .metric-name em { color: #e09573; }
+
+  .metric-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--ink-mute);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .metric-body {
+    font-family: var(--sans);
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-mute-2);
+  }
+
+  .metric-body code {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--bg-2);
+    padding: 1px 5px;
+    color: #d8d3c4;
+  }
+
+  .metric-score {
+    text-align: right;
+    min-width: 100px;
+  }
+
+  .metric-score .val {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 28px;
+    line-height: 1;
+    font-weight: 500;
+  }
+
+  .metric-score .val.good { color: var(--good); }
+  .metric-score .val.warn { color: var(--warn); }
+  .metric-score .val.bad { color: var(--critical); }
+
+  .metric-score .max {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-mute);
+    margin-top: 2px;
+    letter-spacing: 0.12em;
+  }
+
+  /* Insight */
+  .insight {
+    background: var(--bg-2);
+    border-left: 3px solid var(--gold);
+    padding: 22px 28px;
+    margin-top: 28px;
+  }
+
+  .uc.rag-str .insight { border-left-color: #7dc4c0; }
+  .uc.graph .insight { border-left-color: #b59ad6; }
+  .uc.agent .insight { border-left-color: #e09573; }
+
+  .insight .ihead {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .uc.rag-str .insight .ihead { color: #7dc4c0; }
+  .uc.graph .insight .ihead { color: #b59ad6; }
+  .uc.agent .insight .ihead { color: #e09573; }
+
+  .insight p {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.5;
+    color: #e6dfca;
+    font-weight: 300;
+  }
+
+  .insight p strong {
+    font-weight: 500;
+    color: #f0e9d8;
+    font-style: normal;
+  }
+
+  /* ============ DECISION TABLE ============ */
+  .decision {
+    padding: 90px 0 80px;
+    background: var(--bg-panel);
+    color: var(--ink);
+  }
+
+  .decision .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-bottom: 22px;
+    font-weight: 500;
+  }
+
+  .decision h2 {
+    font-family: var(--serif);
+    font-size: clamp(40px, 5vw, 64px);
+    line-height: 0.95;
+    font-weight: 400;
+    letter-spacing: -0.018em;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+
+  .decision h2 em {
+    font-style: italic;
+    color: var(--gold-deep);
+  }
+
+  .decision-intro {
+    font-family: var(--serif);
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    max-width: 880px;
+    margin-bottom: 48px;
+  }
+
+  .table-wrap {
+    background: var(--bg-card);
+    border: 1px solid var(--ink);
+    overflow-x: auto;
+  }
+
+  table.decision-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--sans);
+    min-width: 1100px;
+  }
+
+  table.decision-table thead {
+    background: var(--ink);
+    color: var(--gold-soft);
+  }
+
+  table.decision-table th {
+    padding: 18px 20px;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-right: 1px solid rgba(240, 229, 200, 0.12);
+    vertical-align: bottom;
+  }
+
+  table.decision-table th:last-child { border-right: none; }
+
+  table.decision-table th .tname {
+    display: block;
+    font-family: var(--serif);
+    font-size: 21px;
+    font-style: italic;
+    color: #f0e9d8;
+    letter-spacing: -0.005em;
+    margin-bottom: 4px;
+    text-transform: none;
+    font-weight: 500;
+  }
+
+  table.decision-table th .ttag {
+    color: var(--gold);
+  }
+
+  table.decision-table td {
+    padding: 16px 16px;
+    border-bottom: 1px solid var(--line-light);
+    border-right: 1px solid var(--line-light);
+    vertical-align: top;
+    font-family: var(--sans);
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  table.decision-table td:last-child { border-right: none; }
+
+  table.decision-table tbody tr:last-child td { border-bottom: none; }
+
+  table.decision-table tbody tr.alt td { background: #fbf9f2; }
+
+  table.decision-table td.row-label {
+    font-family: var(--serif);
+    font-size: 16px;
+    color: var(--ink);
+    font-weight: 500;
+    background: var(--gold-soft);
+    width: 190px;
+  }
+
+  table.decision-table td.row-label .sub {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--gold-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-top: 4px;
+    font-weight: 600;
+  }
+
+  table.decision-table td strong {
+    display: block;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 15px;
+    color: var(--ink);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    margin-right: 4px;
+    font-weight: 600;
+  }
+
+  .badge.green { background: #d4eae3; color: var(--rag-deep); }
+  .badge.cyan { background: #d6eced; color: #0c4d56; }
+  .badge.purple { background: #e2d8f0; color: var(--graph-deep); }
+  .badge.orange { background: #f4d9c6; color: var(--agent-deep); }
+  .badge.muted { background: #ebe5d7; color: var(--ink-mute); }
+
+  /* Picker section */
+  .picker {
+    margin-top: 56px;
+    background: var(--ink);
+    color: var(--bg-panel);
+    padding: 40px 44px;
+    border: 1px solid var(--gold);
+  }
+
+  .picker h3 {
+    font-family: var(--serif);
+    font-size: 30px;
+    color: var(--gold-soft);
+    margin-bottom: 22px;
+    font-weight: 400;
+  }
+
+  .picker h3 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .picker-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .picker-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(201, 161, 74, 0.3);
+    padding: 22px;
+    border-top: 3px solid;
+  }
+
+  .picker-card.rag { border-top-color: var(--gold); }
+  .picker-card.rag-str { border-top-color: #7dc4c0; }
+  .picker-card.graph { border-top-color: #b59ad6; }
+  .picker-card.agent { border-top-color: #e09573; }
+
+  .picker-card h4 {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 22px;
+    color: #f0e9d8;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  .picker-card.rag h4 em { color: var(--gold); }
+  .picker-card.rag-str h4 em { color: #7dc4c0; }
+  .picker-card.graph h4 em { color: #b59ad6; }
+  .picker-card.agent h4 em { color: #e09573; }
+
+  .picker-card .pick-line {
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.7;
+    color: #cdc8b8;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.08);
+  }
+
+  .picker-card .pick-line:last-child { border-bottom: none; }
+
+  .picker-card .pick-line strong {
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .picker-card.rag-str .pick-line strong { color: #7dc4c0; }
+  .picker-card.graph .pick-line strong { color: #b59ad6; }
+  .picker-card.agent .pick-line strong { color: #e09573; }
+
+  /* Final */
+  .final {
+    padding: 100px 0 80px;
+    text-align: center;
+    background: var(--bg);
+  }
+
+  .final-mark {
+    font-family: var(--serif);
+    font-size: 56px;
+    font-style: italic;
+    color: var(--gold);
+    margin-bottom: 22px;
+    font-weight: 400;
+  }
+
+  .final-quote {
+    font-family: var(--serif);
+    font-size: clamp(28px, 4vw, 48px);
+    line-height: 1.18;
+    font-style: italic;
+    max-width: 940px;
+    margin: 0 auto 24px;
+    font-weight: 300;
+    letter-spacing: -0.01em;
+    color: #e6dfca;
+  }
+
+  .final-quote em { color: var(--gold); }
+
+  .colophon {
+    margin-top: 36px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .wrap { padding: 0 20px; }
+    .uc-body { grid-template-columns: 1fr; }
+    .uc-banner { grid-template-columns: 1fr; gap: 16px; }
+    .uc-chips { flex-direction: row; flex-wrap: wrap; align-items: flex-start; }
+    .params-grid, .picker-grid { grid-template-columns: 1fr; }
+    .masthead-tickers { grid-template-columns: 1fr; }
+    .ticker { border-right: none; border-bottom: 1px solid var(--line); }
+    .ticker:last-child { border-bottom: none; }
+    .uc-id { font-size: 56px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ MASTHEAD ============ -->
+<header class="wrap">
+  <div class="masthead">
+    <div class="masthead-top">
+      <div class="left"><span class="glyph">§</span> EVALUATING RETRIEVAL-AUGMENTED GENERATION</div>
+      <div>FOUR PATTERNS · ONE DISCIPLINE</div>
+    </div>
+    <div class="masthead-eyebrow">— A practitioner's handbook on measurement —</div>
+    <h1>
+      How do you know<br>
+      <em>your RAG works?</em>
+      <span class="small">The parameters, the use cases, the choice.</span>
+    </h1>
+    <p class="masthead-deck">A RAG system that nobody measures is a hallucination machine waiting to embarrass you. This document covers the evaluation parameters that matter — across standard RAG over unstructured text, standard RAG over structured databases, graph RAG, and agentic RAG — illustrated through four concrete business use cases, and closes with a decision table for picking the right pattern for the right job.</p>
+
+    <div class="masthead-tickers">
+      <div class="ticker">
+        <div class="num">4</div>
+        <div class="lbl">Patterns Compared</div>
+      </div>
+      <div class="ticker">
+        <div class="num">12</div>
+        <div class="lbl">Evaluation Metrics</div>
+      </div>
+      <div class="ticker">
+        <div class="num">1</div>
+        <div class="lbl">Decision Matrix</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ THE FRAMEWORK ============ -->
+<section class="framework">
+  <div class="wrap">
+    <div class="eyebrow">§ 01 · The evaluation framework</div>
+    <h2>The <em>twelve parameters</em> that decide whether your RAG is working.</h2>
+    <p class="framework-intro">RAG evaluation isn't one metric. It's a stack of measurements arranged in two layers: the <em>retrieval</em> layer (did we fetch the right stuff?) and the <em>generation</em> layer (did we answer well from it?). For graph and agentic RAG, two more layers stack on top: <em>traversal quality</em> and <em>agent behaviour</em>. Skip any layer and a failure mode hides behind it.</p>
+
+    <div class="params-section">
+      <h3>Layer 1 · Retrieval quality — Did we fetch the right things?</h3>
+      <div class="params-grid">
+        <div class="param">
+          <span class="param-tag">RETRIEVAL</span>
+          <div class="param-head"><span class="param-num">01</span><span class="param-name">Context Precision</span></div>
+          <p>Of the chunks we retrieved, <strong>what fraction were actually relevant</strong> to the question? High precision means we're not drowning the LLM in noise.</p>
+          <p class="qcheck">If we retrieved 10 chunks and 7 actually relate to the question, precision = 0.70.</p>
+        </div>
+        <div class="param">
+          <span class="param-tag">RETRIEVAL</span>
+          <div class="param-head"><span class="param-num">02</span><span class="param-name">Context Recall</span></div>
+          <p>Of all the relevant information that <em>exists in the corpus</em>, <strong>what fraction did we retrieve</strong>? Recall protects against quietly missing a clause that mattered.</p>
+          <p class="qcheck">Did we miss any clause the regulator would want to see cited?</p>
+        </div>
+        <div class="param">
+          <span class="param-tag">RETRIEVAL</span>
+          <div class="param-head"><span class="param-num">03</span><span class="param-name">Context Relevance</span></div>
+          <p>For each retrieved chunk, <strong>how on-topic is it</strong>? An LLM-judge or human rater scores chunks against the query. Cheap to compute, surprisingly diagnostic.</p>
+          <p class="qcheck">Are the top-5 chunks all on-topic, or is rank #3 a near-miss from a different policy?</p>
+        </div>
+        <div class="param">
+          <span class="param-tag">RETRIEVAL</span>
+          <div class="param-head"><span class="param-num">04</span><span class="param-name">MRR / Hit Rate @ K</span></div>
+          <p>Where does the <em>first</em> correct chunk appear in the ranked results? Mean Reciprocal Rank rewards getting the right answer to the top of the list.</p>
+          <p class="qcheck">Is the right passage at rank #1, or does the model have to wade through 8 wrong ones to find it?</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="params-section">
+      <h3>Layer 2 · Generation quality — Did we answer well from the retrieval?</h3>
+      <div class="params-grid">
+        <div class="param">
+          <span class="param-tag">GENERATION</span>
+          <div class="param-head"><span class="param-num">05</span><span class="param-name">Faithfulness</span></div>
+          <p>Is <strong>every claim in the answer supported by the retrieved context</strong>? This is the anti-hallucination metric. Each generated sentence is checked against the sources.</p>
+          <p class="qcheck">Can every sentence in the answer be traced back to a retrieved passage?</p>
+        </div>
+        <div class="param">
+          <span class="param-tag">GENERATION</span>
+          <div class="param-head"><span class="param-num">06</span><span class="param-name">Answer Relevance</span></div>
+          <p>Did the answer actually <strong>address what was asked</strong>? A faithful answer can still be off-topic. Relevance catches non-sequiturs and over-broad responses.</p>
+          <p class="qcheck">If you asked about refund timeframes, does the answer address timeframes — or wander into refund policy in general?</p>
+        </div>
+        <div class="param">
+          <span class="param-tag">GENERATION</span>
+          <div class="param-head"><span class="param-num">07</span><span class="param-name">Answer Correctness</span></div>
+          <p>Compared to a <em>ground-truth</em> answer (curated by a human SME), is the generated answer <strong>factually right</strong>? Requires labelled test sets but is the gold standard.</p>
+          <p class="qcheck">Does this match what an expert would have written?</p>
+        </div>
+        <div class="param">
+          <span class="param-tag">GENERATION</span>
+          <div class="param-head"><span class="param-num">08</span><span class="param-name">Citation Coverage</span></div>
+          <p>What fraction of the answer's claims <strong>cite a verifiable source</strong>? For regulated industries this is non-negotiable. An uncited claim is, formally, hallucinated.</p>
+          <p class="qcheck">Could an auditor open every source mentioned and verify the claim it underpins?</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="params-section">
+      <h3>Layer 3 · Graph &amp; agent extensions — When the pattern is more than retrieve-and-answer.</h3>
+      <div class="params-grid">
+        <div class="param">
+          <span class="param-tag">GRAPH RAG</span>
+          <div class="param-head"><span class="param-num">09</span><span class="param-name">Path Validity</span></div>
+          <p>For each multi-hop answer, is the <strong>graph path the system traversed actually correct</strong> — every edge real, every entity properly resolved?</p>
+          <p class="qcheck">Does the chain "Acme → Cayman → Petrov" reflect actual ownership edges in the graph, with sources for each?</p>
+        </div>
+        <div class="param">
+          <span class="param-tag">GRAPH RAG</span>
+          <div class="param-head"><span class="param-num">10</span><span class="param-name">Subgraph Completeness</span></div>
+          <p>Did the traversal <strong>return all paths that matter</strong>, not just one? Missing an alternative chain is as bad as inventing one.</p>
+          <p class="qcheck">Are there other 4-hop chains from the customer to a sanctioned entity we didn't surface?</p>
+        </div>
+        <div class="param">
+          <span class="param-tag">AGENTIC RAG</span>
+          <div class="param-head"><span class="param-num">11</span><span class="param-name">Tool-Call Accuracy</span></div>
+          <p>For each sub-task, did the agent <strong>pick the right tool</strong> and call it with sensible arguments? A wrong tool choice cascades into the rest of the run.</p>
+          <p class="qcheck">Should the agent have hit the CRM or the news API? Did it choose well?</p>
+        </div>
+        <div class="param">
+          <span class="param-tag">AGENTIC RAG</span>
+          <div class="param-head"><span class="param-num">12</span><span class="param-name">Trajectory Efficiency</span></div>
+          <p>How many tool calls did the agent need? Did it loop usefully or wander? <strong>Efficiency</strong> = quality-of-answer ÷ number-of-steps.</p>
+          <p class="qcheck">Did the agent reach the right answer in 5 tool calls or did it stumble through 17?</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ USE CASE 1: STANDARD RAG · INSURANCE ============ -->
+<section class="uc rag">
+  <div class="wrap">
+    <div class="uc-banner">
+      <div class="uc-id">01</div>
+      <div class="uc-title-block">
+        <div class="eyebrow">Standard RAG · Insurance · Customer support</div>
+        <h2>Policy Lookup &amp; <em>Claim Eligibility</em></h2>
+      </div>
+      <div class="uc-chips">
+        <div class="uc-chip">SINGLE-HOP</div>
+        <div class="uc-chip">HIGH-VOLUME</div>
+      </div>
+    </div>
+
+    <div class="scene">
+      <p><strong>The setting.</strong> A mid-sized health insurer's contact centre handles 4,200 calls per day. Roughly 60% are policy questions: "Is X procedure covered?" "What's my deductible?" "How long until reimbursement?" A standard RAG sits behind the agent's screen, retrieving from policy documents, schedules of benefits, and the customer's enrolment record. One question. One retrieval. One grounded answer.</p>
+    </div>
+
+    <div class="uc-body">
+      <div class="uc-diagram">
+        <div class="uc-diagram-caption">
+          <span>Diagram 1.1 — Single-pass RAG with evaluation hooks</span>
+          <span class="r">→ One question, one retrieval</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 440" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="r-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#2d7a64" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+            <marker id="r-ar-gold" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#c9a14a" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <rect x="20" y="20" width="170" height="64" rx="6" fill="#ffffff" stroke="#2d7a64" stroke-width="1.5"/>
+          <text x="105" y="42" font-family="Inter" font-size="12" font-weight="500" fill="#1a4a3c" text-anchor="middle">Agent asks</text>
+          <text x="105" y="58" font-family="Newsreader" font-style="italic" font-size="13" fill="#0f1419" text-anchor="middle">"Is laser eye surgery</text>
+          <text x="105" y="74" font-family="Newsreader" font-style="italic" font-size="13" fill="#0f1419" text-anchor="middle">covered under Gold plan?"</text>
+
+          <line x1="195" y1="52" x2="225" y2="52" stroke="#2d7a64" stroke-width="1.5" marker-end="url(#r-ar)"/>
+
+          <rect x="230" y="20" width="160" height="64" rx="6" fill="#d4eae3" stroke="#2d7a64" stroke-width="1.5"/>
+          <text x="310" y="44" font-family="Inter" font-size="13" font-weight="500" fill="#1a4a3c" text-anchor="middle">Embed query</text>
+          <text x="310" y="60" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">→ 1536-d vector</text>
+          <text x="310" y="74" font-family="JetBrains Mono" font-size="9" fill="#6b7480" text-anchor="middle">~120ms</text>
+
+          <line x1="395" y1="52" x2="425" y2="52" stroke="#2d7a64" stroke-width="1.5" marker-end="url(#r-ar)"/>
+
+          <rect x="430" y="20" width="230" height="64" rx="6" fill="#d4eae3" stroke="#2d7a64" stroke-width="1.5"/>
+          <text x="545" y="44" font-family="Inter" font-size="13" font-weight="500" fill="#1a4a3c" text-anchor="middle">Vector search · top-k=5</text>
+          <text x="545" y="60" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">Pinecone · policy docs index</text>
+          <text x="545" y="74" font-family="JetBrains Mono" font-size="9" fill="#6b7480" text-anchor="middle">~85ms</text>
+
+          <line x1="545" y1="84" x2="545" y2="110" stroke="#2d7a64" stroke-width="1.5" marker-end="url(#r-ar)"/>
+
+          <rect x="200" y="115" width="460" height="100" rx="6" fill="#f7f4ed" stroke="#1a4a3c" stroke-width="1"/>
+          <text x="215" y="135" font-family="JetBrains Mono" font-size="10" font-weight="600" fill="#1a4a3c">5 retrieved chunks (ranked):</text>
+          <line x1="215" y1="140" x2="645" y2="140" stroke="#e0dccf"/>
+
+          <rect x="215" y="148" width="430" height="14" rx="2" fill="#d4eae3" stroke="#2d7a64" stroke-width="0.5"/>
+          <text x="222" y="159" font-family="JetBrains Mono" font-size="9.5" fill="#1a4a3c">1. §8.3 Refractive procedures — vision benefits schedule</text>
+
+          <rect x="215" y="166" width="430" height="14" rx="2" fill="#d4eae3" stroke="#2d7a64" stroke-width="0.5"/>
+          <text x="222" y="177" font-family="JetBrains Mono" font-size="9.5" fill="#1a4a3c">2. §8.1 Vision benefits overview — Gold plan</text>
+
+          <rect x="215" y="184" width="430" height="14" rx="2" fill="#f7f4ed" stroke="#9aa3ae" stroke-width="0.5"/>
+          <text x="222" y="195" font-family="JetBrains Mono" font-size="9.5" fill="#6b7480">3. §12 General exclusions — cosmetic procedures</text>
+
+          <rect x="215" y="202" width="430" height="14" rx="2" fill="#f7f4ed" stroke="#9aa3ae" stroke-width="0.5"/>
+          <text x="222" y="213" font-family="JetBrains Mono" font-size="9.5" fill="#6b7480">4. §3.2 Deductibles — out-of-pocket calculation</text>
+
+          <line x1="430" y1="225" x2="430" y2="252" stroke="#2d7a64" stroke-width="1.5" marker-end="url(#r-ar)"/>
+
+          <rect x="280" y="255" width="300" height="50" rx="6" fill="#1a4a3c"/>
+          <text x="430" y="278" font-family="Inter" font-size="13" font-weight="500" fill="#f0e5c8" text-anchor="middle">LLM generates grounded answer</text>
+          <text x="430" y="294" font-family="JetBrains Mono" font-size="9" fill="#cdc8b8" text-anchor="middle">with citations · ~1.4s</text>
+
+          <line x1="430" y1="305" x2="430" y2="332" stroke="#2d7a64" stroke-width="1.5" marker-end="url(#r-ar)"/>
+
+          <rect x="20" y="335" width="640" height="90" rx="6" fill="#ffffff" stroke="#2d7a64" stroke-width="1"/>
+          <text x="35" y="355" font-family="JetBrains Mono" font-size="10" font-weight="600" fill="#1a4a3c">ANSWER (returned in ~1.6s end-to-end):</text>
+          <line x1="35" y1="360" x2="645" y2="360" stroke="#e0dccf"/>
+          <text x="35" y="378" font-family="Newsreader" font-style="italic" font-size="13" fill="#0f1419">Laser eye surgery (refractive) is covered under the Gold plan up to $2,000 per eye,</text>
+          <text x="35" y="394" font-family="Newsreader" font-style="italic" font-size="13" fill="#0f1419">per lifetime [§8.3]. The standard 20% co-insurance applies after the deductible</text>
+          <text x="35" y="410" font-family="Newsreader" font-style="italic" font-size="13" fill="#0f1419">is met [§8.1]. Pre-authorization is required.</text>
+        </svg>
+      </div>
+
+      <div class="uc-eval">
+        <div class="uc-eval-head">§ Evaluation results · live monitoring</div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Context <em>precision</em></div>
+            <div class="metric-meta">P @ 5 · LLM-judge rated</div>
+            <p class="metric-body">Of 5 retrieved chunks, the top 2 are directly on-topic; chunks 3–5 are tangentially related (general exclusions, deductibles). The LLM mostly ignored them — but they bloat context.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val warn">0.40</div>
+            <div class="max">2 of 5</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Context <em>recall</em></div>
+            <div class="metric-meta">vs. golden set</div>
+            <p class="metric-body">Every clause an SME would have wanted cited was retrieved. <code>§8.3</code> and <code>§8.1</code> together cover the question. Nothing missed.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">1.00</div>
+            <div class="max">all clauses</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name"><em>Faithfulness</em></div>
+            <div class="metric-meta">3 of 3 claims · grounded</div>
+            <p class="metric-body">Each of three claims in the answer ($2,000 cap, 20% co-insurance, pre-auth) maps to a retrieved sentence. No fabrication.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">1.00</div>
+            <div class="max">3 of 3</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Answer <em>relevance</em></div>
+            <div class="metric-meta">LLM-judge · question alignment</div>
+            <p class="metric-body">Question was about coverage; answer leads with coverage, then adds two qualifiers (co-insurance, pre-auth) that the user will inevitably need next.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">0.94</div>
+            <div class="max">/ 1.00</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name"><em>Citation</em> coverage</div>
+            <div class="metric-meta">claims with traceable source</div>
+            <p class="metric-body">Both clause references resolve to actual paragraphs in the master policy. The pre-auth requirement is in <code>§8.3</code> but isn't bracket-cited — a minor compliance gap.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val warn">0.67</div>
+            <div class="max">2 of 3</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">MRR / hit rate</div>
+            <div class="metric-meta">first relevant at rank...</div>
+            <p class="metric-body">The most relevant clause (<code>§8.3</code>) is at rank #1. Across the eval set of 500 queries, the system hits rank #1 about 78% of the time.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">0.78</div>
+            <div class="max">MRR @ 5</div>
+          </div>
+        </div>
+
+        <div class="insight">
+          <div class="ihead">What the metrics tell us</div>
+          <p>This is a healthy standard-RAG profile: <strong>recall is perfect, faithfulness is perfect, citation coverage is close.</strong> The flag is precision — we're retrieving more than we need. Tightening top-k from 5 to 3 (or re-ranking) would lift precision without hurting recall. Classic optimization terrain.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ USE CASE 2: STRUCTURED RAG · RETAIL ============ -->
+<section class="uc rag-str">
+  <div class="wrap">
+    <div class="uc-banner">
+      <div class="uc-id">02</div>
+      <div class="uc-title-block">
+        <div class="eyebrow">Standard RAG · Retail · Store operations</div>
+        <h2>Store Manager's <em>Finance Co-Pilot</em></h2>
+      </div>
+      <div class="uc-chips">
+        <div class="uc-chip">TEXT-TO-SQL</div>
+        <div class="uc-chip">STRUCTURED</div>
+      </div>
+    </div>
+
+    <div class="scene">
+      <p><strong>The setting.</strong> A national apparel retailer's 320 store managers were drowning the central analytics team with ad-hoc questions: "Why did my margin drop last week?" "What's selling badly?" "How does my markdown rate compare to my district?" The data lives in a Snowflake warehouse with 40+ tables — sales, inventory, markdowns, payroll. A structured RAG sits in front of the warehouse: manager asks in plain English, the system writes and runs SQL, the LLM explains the numbers. One question. One query. One numeric answer, explained.</p>
+    </div>
+
+    <div class="uc-body">
+      <div class="uc-diagram">
+        <div class="uc-diagram-caption">
+          <span>Diagram 2.1 — Text-to-SQL RAG with evaluation hooks</span>
+          <span class="r">→ Plain English in, numbers out</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 440" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="rs-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#1d6e7c" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <rect x="20" y="20" width="640" height="50" rx="6" fill="#ffffff" stroke="#1d6e7c" stroke-width="1.5"/>
+          <text x="35" y="42" font-family="JetBrains Mono" font-size="10" fill="#1d6e7c" font-weight="600">STORE MANAGER ASKS:</text>
+          <text x="35" y="60" font-family="Newsreader" font-style="italic" font-size="14" fill="#0f1419">"Why did Store 12's margin fall last week compared to the district average?"</text>
+
+          <line x1="340" y1="74" x2="340" y2="92" stroke="#1d6e7c" stroke-width="1.5" marker-end="url(#rs-ar)"/>
+
+          <rect x="180" y="96" width="320" height="56" rx="6" fill="#0f1419"/>
+          <text x="340" y="118" font-family="Inter" font-size="13" font-weight="500" fill="#f0e9d8" text-anchor="middle">LLM translates question → SQL</text>
+          <text x="340" y="138" font-family="JetBrains Mono" font-size="10" fill="#7dc4c0" text-anchor="middle">guided by table schema + business-glossary RAG</text>
+
+          <line x1="340" y1="152" x2="340" y2="170" stroke="#1d6e7c" stroke-width="1.5" marker-end="url(#rs-ar)"/>
+
+          <rect x="80" y="176" width="520" height="76" rx="6" fill="#1a1a1a"/>
+          <text x="92" y="194" font-family="JetBrains Mono" font-size="9" fill="#7dc4c0" font-weight="600">GENERATED SQL:</text>
+          <line x1="92" y1="200" x2="588" y2="200" stroke="#1d6e7c" stroke-width="0.5"/>
+          <text x="92" y="216" font-family="JetBrains Mono" font-size="11" fill="#f0e9d8">SELECT store_id, week, SUM(revenue - cogs)/SUM(revenue) AS margin</text>
+          <text x="92" y="232" font-family="JetBrains Mono" font-size="11" fill="#f0e9d8">FROM sales_weekly WHERE district = 'D-04' AND week = '2026-W22'</text>
+          <text x="92" y="248" font-family="JetBrains Mono" font-size="11" fill="#7dc4c0">GROUP BY store_id, week;</text>
+
+          <line x1="340" y1="252" x2="340" y2="270" stroke="#1d6e7c" stroke-width="1.5" marker-end="url(#rs-ar)"/>
+
+          <rect x="40" y="276" width="280" height="48" rx="6" fill="#d4eae3" stroke="#1d6e7c" stroke-width="1.5"/>
+          <text x="180" y="296" font-family="Inter" font-size="13" font-weight="500" fill="#1a4a3c" text-anchor="middle">Run query · Snowflake warehouse</text>
+          <text x="180" y="313" font-family="JetBrains Mono" font-size="9" fill="#0f4034" text-anchor="middle">sales_weekly · inventory · markdowns · 40+ tables</text>
+
+          <line x1="320" y1="300" x2="358" y2="300" stroke="#1d6e7c" stroke-width="1.5" marker-end="url(#rs-ar)"/>
+
+          <rect x="362" y="276" width="278" height="48" rx="6" fill="#f7f4ed" stroke="#1d6e7c" stroke-width="1"/>
+          <text x="372" y="293" font-family="JetBrains Mono" font-size="9" fill="#1d6e7c" font-weight="600">RESULT SET:</text>
+          <text x="372" y="308" font-family="JetBrains Mono" font-size="10" fill="#2e3640">Store 12: 18.2% · District avg: 22.6%</text>
+          <text x="372" y="320" font-family="JetBrains Mono" font-size="10" fill="#2e3640">Markdowns_pct (Store 12): 14% vs 6% avg</text>
+
+          <line x1="340" y1="328" x2="340" y2="350" stroke="#1d6e7c" stroke-width="1.5" marker-end="url(#rs-ar)"/>
+
+          <rect x="180" y="354" width="320" height="44" rx="6" fill="#0f1419"/>
+          <text x="340" y="374" font-family="Inter" font-size="13" font-weight="500" fill="#f0e9d8" text-anchor="middle">LLM explains the numbers</text>
+          <text x="340" y="390" font-family="JetBrains Mono" font-size="9" fill="#7dc4c0" text-anchor="middle">data → plain-English insight</text>
+
+          <line x1="340" y1="398" x2="340" y2="412" stroke="#1d6e7c" stroke-width="1.5" marker-end="url(#rs-ar)"/>
+
+          <rect x="40" y="416" width="600" height="20" rx="3" fill="#f0e5c8" stroke="#c9a14a" stroke-width="0.5"/>
+          <text x="340" y="430" font-family="Newsreader" font-style="italic" font-size="12" fill="#0f1419" text-anchor="middle">"Margin fell 4.4pts because markdowns hit 14% vs 6% district average. Discounting issue, not cost issue."</text>
+        </svg>
+      </div>
+
+      <div class="uc-eval">
+        <div class="uc-eval-head">§ Evaluation results · structured-aware</div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">SQL <em>generation accuracy</em></div>
+            <div class="metric-meta">structured-rag specific</div>
+            <p class="metric-body">The generated query matches what an analyst would have written: correct tables joined, correct grouping, correct date filter. Evaluated against 200 golden queries.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">0.91</div>
+            <div class="max">/ 1.00</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name"><em>Execution</em> success rate</div>
+            <div class="metric-meta">SQL runs without error</div>
+            <p class="metric-body">Of 1,000 manager queries last week, 97% executed cleanly; 3% threw schema errors (missing columns, ambiguous joins) — caught and retried with a clarifying loop.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">0.97</div>
+            <div class="max">runs clean</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Numeric <em>correctness</em></div>
+            <div class="metric-meta">vs. analyst-verified truth</div>
+            <p class="metric-body">When the SQL ran, the figures returned matched the analyst's hand-built reference query 100% of the time. The warehouse is the source of truth; the LLM cannot fabricate a number.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">1.00</div>
+            <div class="max">data is truth</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name"><em>Faithfulness</em></div>
+            <div class="metric-meta">explanation vs. data</div>
+            <p class="metric-body">The plain-English explanation cites only numbers that appeared in the result set. No invented figures, no extrapolation. <code>"4.4pts"</code> = <code>22.6 − 18.2</code>.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">1.00</div>
+            <div class="max">grounded</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Answer <em>relevance</em></div>
+            <div class="metric-meta">question intent match</div>
+            <p class="metric-body">The manager asked <em>why</em> margin dropped, not just by how much. The system correctly identified markdowns as the driver and named the lever — not just stated the gap.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">0.93</div>
+            <div class="max">/ 1.00</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Schema-grounding <em>ambiguity</em></div>
+            <div class="metric-meta">column-name confusion</div>
+            <p class="metric-body">Across 200 queries, 8 had ambiguous columns (3 tables with a <code>price</code> column). System resolved 6 correctly using business-glossary RAG; 2 needed a clarifying follow-up.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val warn">0.75</div>
+            <div class="max">8 ambiguous</div>
+          </div>
+        </div>
+
+        <div class="insight">
+          <div class="ihead">What the metrics tell us</div>
+          <p>Structured RAG <strong>moves the failure mode upstream</strong>: numbers can't be hallucinated because they come from the warehouse, so faithfulness on figures is essentially free. The risk is in <em>writing the wrong query</em>. Investment shifts to <strong>schema documentation, a business glossary, and few-shot examples</strong> — the LLM needs to know that "margin" means <code>(revenue − cogs)/revenue</code>, not <code>gross_margin_field</code>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ USE CASE 3: GRAPH RAG · LEGAL ============ -->
+<section class="uc graph">
+  <div class="wrap">
+    <div class="uc-banner">
+      <div class="uc-id">03</div>
+      <div class="uc-title-block">
+        <div class="eyebrow">Graph RAG · Legal · Contract intelligence</div>
+        <h2>Contract Obligation <em>Networks</em></h2>
+      </div>
+      <div class="uc-chips">
+        <div class="uc-chip">MULTI-HOP</div>
+        <div class="uc-chip">RELATIONAL</div>
+      </div>
+    </div>
+
+    <div class="scene">
+      <p><strong>The setting.</strong> A global engineering group has 14,000 active contracts across 38 subsidiaries. A regulatory change forces a question: <em>"Which of our contracts contain a most-favoured-nation clause that, if triggered by our pending deal with Customer X, would automatically force price changes in upstream supplier agreements?"</em> The answer is a chain — <strong>customer contract → MFN clause → linked supplier contract → pricing schedule</strong>. No single document holds it.</p>
+    </div>
+
+    <div class="uc-body">
+      <div class="uc-diagram">
+        <div class="uc-diagram-caption">
+          <span>Diagram 2.1 — Multi-hop traversal with evaluation hooks</span>
+          <span class="r">→ Connected obligations</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 440" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="g-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#6b4ba8" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <rect x="20" y="20" width="640" height="56" rx="6" fill="#ffffff" stroke="#6b4ba8" stroke-width="1.5"/>
+          <text x="35" y="42" font-family="JetBrains Mono" font-size="10" fill="#3f2a6e" font-weight="600">LEGAL TEAM ASKS:</text>
+          <text x="35" y="64" font-family="Newsreader" font-style="italic" font-size="15" fill="#0f1419">"Which upstream supplier prices auto-change if our Customer-X deal triggers an MFN clause?"</text>
+
+          <line x1="340" y1="80" x2="340" y2="100" stroke="#6b4ba8" stroke-width="1.5" marker-end="url(#g-ar)"/>
+
+          <rect x="240" y="105" width="200" height="40" rx="6" fill="#e2d8f0" stroke="#6b4ba8" stroke-width="1.5"/>
+          <text x="340" y="124" font-family="Inter" font-size="12" font-weight="500" fill="#3f2a6e" text-anchor="middle">Parse → 3-hop pattern</text>
+          <text x="340" y="138" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">Customer → MFN → Supplier</text>
+
+          <line x1="340" y1="145" x2="340" y2="170" stroke="#6b4ba8" stroke-width="1.5" marker-end="url(#g-ar)"/>
+
+          <rect x="20" y="175" width="640" height="180" rx="6" fill="#f7f4ed" stroke="#3f2a6e" stroke-width="1"/>
+          <text x="35" y="194" font-family="JetBrains Mono" font-size="10" font-weight="600" fill="#3f2a6e">CONTRACT GRAPH TRAVERSAL — relevant subgraph returned:</text>
+          <line x1="35" y1="200" x2="645" y2="200" stroke="#e0dccf"/>
+
+          <line x1="120" y1="265" x2="280" y2="220" stroke="#6b4ba8" stroke-width="2"/>
+          <line x1="280" y1="220" x2="440" y2="265" stroke="#6b4ba8" stroke-width="2"/>
+          <line x1="440" y1="265" x2="560" y2="220" stroke="#6b4ba8" stroke-width="2"/>
+          <line x1="440" y1="265" x2="560" y2="310" stroke="#6b4ba8" stroke-width="2"/>
+          <line x1="120" y1="265" x2="120" y2="325" stroke="#9aa3ae" stroke-width="1" stroke-dasharray="3 2"/>
+
+          <text x="195" y="246" font-family="JetBrains Mono" font-size="9" fill="#3f2a6e" font-style="italic">contains</text>
+          <text x="355" y="246" font-family="JetBrains Mono" font-size="9" fill="#3f2a6e" font-style="italic">cross-refs</text>
+          <text x="495" y="240" font-family="JetBrains Mono" font-size="9" fill="#3f2a6e" font-style="italic">price_link</text>
+          <text x="495" y="290" font-family="JetBrains Mono" font-size="9" fill="#3f2a6e" font-style="italic">price_link</text>
+
+          <rect x="60" y="245" width="120" height="40" rx="4" fill="#d4eae3" stroke="#2d7a64" stroke-width="1.5"/>
+          <text x="120" y="263" font-family="Inter" font-size="11" font-weight="500" fill="#1a4a3c" text-anchor="middle">Customer-X MSA</text>
+          <text x="120" y="278" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">contract C-7821</text>
+
+          <text x="120" y="335" font-family="JetBrains Mono" font-size="9" fill="#6b7480" text-anchor="middle">HOP 0 · start</text>
+
+          <rect x="220" y="200" width="120" height="40" rx="4" fill="#e2d8f0" stroke="#6b4ba8" stroke-width="1.5"/>
+          <text x="280" y="218" font-family="Inter" font-size="11" font-weight="500" fill="#3f2a6e" text-anchor="middle">MFN clause</text>
+          <text x="280" y="232" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">§14.2 — most fav.</text>
+
+          <rect x="380" y="245" width="120" height="40" rx="4" fill="#e2d8f0" stroke="#6b4ba8" stroke-width="1.5"/>
+          <text x="440" y="263" font-family="Inter" font-size="11" font-weight="500" fill="#3f2a6e" text-anchor="middle">Pricing index</text>
+          <text x="440" y="277" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">obligation node</text>
+
+          <rect x="500" y="200" width="130" height="40" rx="4" fill="#f4d9c6" stroke="#b85a2e" stroke-width="1.5"/>
+          <text x="565" y="218" font-family="Inter" font-size="11" font-weight="500" fill="#6e3216" text-anchor="middle">Supplier A SLA</text>
+          <text x="565" y="232" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">contract S-3104 ⚠</text>
+
+          <rect x="500" y="290" width="130" height="40" rx="4" fill="#f4d9c6" stroke="#b85a2e" stroke-width="1.5"/>
+          <text x="565" y="308" font-family="Inter" font-size="11" font-weight="500" fill="#6e3216" text-anchor="middle">Supplier B SLA</text>
+          <text x="565" y="322" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">contract S-4517 ⚠</text>
+
+          <line x1="340" y1="360" x2="340" y2="385" stroke="#6b4ba8" stroke-width="1.5" marker-end="url(#g-ar)"/>
+
+          <rect x="20" y="390" width="640" height="36" rx="6" fill="#3f2a6e"/>
+          <text x="340" y="412" font-family="Newsreader" font-style="italic" font-size="14" fill="#f0e5c8" text-anchor="middle">2 supplier contracts auto-trigger price adjustments · paths cited · obligations enumerated</text>
+        </svg>
+      </div>
+
+      <div class="uc-eval">
+        <div class="uc-eval-head">§ Evaluation results · graph-aware</div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Path <em>validity</em></div>
+            <div class="metric-meta">graph-rag specific</div>
+            <p class="metric-body">Every edge in the traced path (<code>contains</code>, <code>cross-refs</code>, <code>price_link</code>) corresponds to an actual relationship sourced from the parsed contract text. No invented edges.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">1.00</div>
+            <div class="max">all edges real</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Subgraph <em>completeness</em></div>
+            <div class="metric-meta">vs. legal ground truth</div>
+            <p class="metric-body">Legal team's manual review found 3 affected suppliers. The traversal surfaced 2 — Supplier C was missed because of an unlinked subsidiary reference. Material gap.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val warn">0.67</div>
+            <div class="max">2 of 3</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Context <em>precision</em></div>
+            <div class="metric-meta">P @ subgraph</div>
+            <p class="metric-body">5 nodes returned, 5 are relevant. Graph traversal yields far less noise than vector top-k — only matching paths are walked.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">1.00</div>
+            <div class="max">5 of 5</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name"><em>Faithfulness</em></div>
+            <div class="metric-meta">claims per path</div>
+            <p class="metric-body">Every claim in the answer maps to a graph path + a source document. No fabrication possible — the structure forbids it.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">1.00</div>
+            <div class="max">grounded</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name"><em>Citation</em> coverage</div>
+            <div class="metric-meta">edge + source</div>
+            <p class="metric-body">Each finding cites both the source paragraph and the graph edge ID. Audit-ready by construction.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">1.00</div>
+            <div class="max">2 of 2</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Answer <em>correctness</em></div>
+            <div class="metric-meta">vs. SME-graded</div>
+            <p class="metric-body">Of the 2 suppliers surfaced, both are correctly characterised — but the missing Supplier C drags overall correctness down. SME-graded.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val warn">0.67</div>
+            <div class="max">incomplete</div>
+          </div>
+        </div>
+
+        <div class="insight">
+          <div class="ihead">What the metrics tell us</div>
+          <p>Graph RAG <strong>swaps the failure mode</strong>: precision and faithfulness become near-trivially high, because the structure of the graph constrains answers. The real risk migrates to <em>completeness</em> — did the graph contain the edge we needed? Here, a subsidiary linkage was missing, so the system missed Supplier C entirely. The investment must shift from retrieval tuning to <strong>graph hygiene</strong>: entity resolution, edge extraction quality, and coverage audits.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ USE CASE 4: AGENTIC RAG · CONSULTING ============ -->
+<section class="uc agent">
+  <div class="wrap">
+    <div class="uc-banner">
+      <div class="uc-id">04</div>
+      <div class="uc-title-block">
+        <div class="eyebrow">Agentic RAG · Consulting · Research synthesis</div>
+        <h2>Market Entry <em>Research Agent</em></h2>
+      </div>
+      <div class="uc-chips">
+        <div class="uc-chip">MULTI-TOOL</div>
+        <div class="uc-chip">ITERATIVE</div>
+      </div>
+    </div>
+
+    <div class="scene">
+      <p><strong>The setting.</strong> A strategy consulting firm's senior partner asks: <em>"Should our client enter the Brazilian EV-charging market in 2026? Give me the demand outlook, the competitive landscape, the regulatory situation, and the top three risks — with sources."</em> No single retrieval answers this. The agent must <strong>plan, route, retrieve, evaluate, loop, and synthesise</strong> — across the firm's research library, public filings, news, and external market databases.</p>
+    </div>
+
+    <div class="uc-body">
+      <div class="uc-diagram">
+        <div class="uc-diagram-caption">
+          <span>Diagram 3.1 — Plan → act → reflect, with eval points</span>
+          <span class="r">→ Iterative loop</span>
+        </div>
+        <svg class="diagram-svg" viewBox="0 0 680 460" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="a-ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M2 1L8 5L2 9" fill="none" stroke="#b85a2e" stroke-width="1.5" stroke-linecap="round"/>
+            </marker>
+          </defs>
+
+          <rect x="20" y="20" width="640" height="50" rx="6" fill="#ffffff" stroke="#b85a2e" stroke-width="1.5"/>
+          <text x="35" y="42" font-family="JetBrains Mono" font-size="10" fill="#6e3216" font-weight="600">PARTNER ASKS:</text>
+          <text x="35" y="60" font-family="Newsreader" font-style="italic" font-size="14" fill="#0f1419">"Brazilian EV-charging market entry 2026 — demand, competition, regulation, top-3 risks. Sources."</text>
+
+          <line x1="340" y1="74" x2="340" y2="92" stroke="#b85a2e" stroke-width="1.5" marker-end="url(#a-ar)"/>
+
+          <rect x="240" y="96" width="200" height="44" rx="6" fill="#f4d9c6" stroke="#b85a2e" stroke-width="1.5"/>
+          <text x="340" y="115" font-family="Inter" font-size="12" font-weight="500" fill="#6e3216" text-anchor="middle">Plan: 4 sub-questions</text>
+          <text x="340" y="131" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">→ pick tool per sub-q</text>
+
+          <line x1="340" y1="142" x2="340" y2="160" stroke="#b85a2e" stroke-width="1.5"/>
+          <line x1="100" y1="160" x2="580" y2="160" stroke="#b85a2e" stroke-width="1.5"/>
+          <line x1="100" y1="160" x2="100" y2="180" stroke="#b85a2e" stroke-width="1.5" marker-end="url(#a-ar)"/>
+          <line x1="260" y1="160" x2="260" y2="180" stroke="#b85a2e" stroke-width="1.5" marker-end="url(#a-ar)"/>
+          <line x1="420" y1="160" x2="420" y2="180" stroke="#b85a2e" stroke-width="1.5" marker-end="url(#a-ar)"/>
+          <line x1="580" y1="160" x2="580" y2="180" stroke="#b85a2e" stroke-width="1.5" marker-end="url(#a-ar)"/>
+
+          <rect x="40" y="185" width="120" height="58" rx="4" fill="#ffffff" stroke="#b85a2e" stroke-width="1"/>
+          <text x="100" y="201" font-family="JetBrains Mono" font-size="9" fill="#6e3216" font-weight="600" text-anchor="middle">Q1 · DEMAND</text>
+          <text x="100" y="217" font-family="Inter" font-size="11" font-weight="500" fill="#0f1419" text-anchor="middle">EV-charging size</text>
+          <text x="100" y="232" font-family="JetBrains Mono" font-size="9" fill="#2d7a64" text-anchor="middle">tool: market DB</text>
+
+          <rect x="200" y="185" width="120" height="58" rx="4" fill="#ffffff" stroke="#b85a2e" stroke-width="1"/>
+          <text x="260" y="201" font-family="JetBrains Mono" font-size="9" fill="#6e3216" font-weight="600" text-anchor="middle">Q2 · COMPETITION</text>
+          <text x="260" y="217" font-family="Inter" font-size="11" font-weight="500" fill="#0f1419" text-anchor="middle">Active operators</text>
+          <text x="260" y="232" font-family="JetBrains Mono" font-size="9" fill="#2d7a64" text-anchor="middle">tool: web + filings</text>
+
+          <rect x="360" y="185" width="120" height="58" rx="4" fill="#ffffff" stroke="#b85a2e" stroke-width="1"/>
+          <text x="420" y="201" font-family="JetBrains Mono" font-size="9" fill="#6e3216" font-weight="600" text-anchor="middle">Q3 · REGULATION</text>
+          <text x="420" y="217" font-family="Inter" font-size="11" font-weight="500" fill="#0f1419" text-anchor="middle">ANEEL framework</text>
+          <text x="420" y="232" font-family="JetBrains Mono" font-size="9" fill="#2d7a64" text-anchor="middle">tool: research lib</text>
+
+          <rect x="520" y="185" width="120" height="58" rx="4" fill="#ffffff" stroke="#b85a2e" stroke-width="1"/>
+          <text x="580" y="201" font-family="JetBrains Mono" font-size="9" fill="#6e3216" font-weight="600" text-anchor="middle">Q4 · RISKS</text>
+          <text x="580" y="217" font-family="Inter" font-size="11" font-weight="500" fill="#0f1419" text-anchor="middle">Top three risks</text>
+          <text x="580" y="232" font-family="JetBrains Mono" font-size="9" fill="#2d7a64" text-anchor="middle">tool: synth. of 1-3</text>
+
+          <line x1="100" y1="243" x2="100" y2="263" stroke="#b85a2e" stroke-width="0.5" stroke-dasharray="2 2"/>
+          <line x1="260" y1="243" x2="260" y2="263" stroke="#b85a2e" stroke-width="0.5" stroke-dasharray="2 2"/>
+          <line x1="420" y1="243" x2="420" y2="263" stroke="#b85a2e" stroke-width="0.5" stroke-dasharray="2 2"/>
+          <line x1="580" y1="243" x2="580" y2="263" stroke="#b85a2e" stroke-width="0.5" stroke-dasharray="2 2"/>
+
+          <rect x="40" y="265" width="120" height="36" rx="4" fill="#d4eae3" stroke="#2d7a64" stroke-width="0.5"/>
+          <text x="100" y="283" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1a4a3c" text-anchor="middle">✓ sufficient</text>
+          <text x="100" y="295" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">8 data points</text>
+
+          <rect x="200" y="265" width="120" height="36" rx="4" fill="#fcebeb" stroke="#a32d2d" stroke-width="0.5"/>
+          <text x="260" y="283" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#791f1f" text-anchor="middle">⚠ thin</text>
+          <text x="260" y="295" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">only 2 names</text>
+
+          <rect x="360" y="265" width="120" height="36" rx="4" fill="#d4eae3" stroke="#2d7a64" stroke-width="0.5"/>
+          <text x="420" y="283" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1a4a3c" text-anchor="middle">✓ sufficient</text>
+          <text x="420" y="295" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">3 sources cited</text>
+
+          <rect x="520" y="265" width="120" height="36" rx="4" fill="#d4eae3" stroke="#2d7a64" stroke-width="0.5"/>
+          <text x="580" y="283" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1a4a3c" text-anchor="middle">✓ sufficient</text>
+          <text x="580" y="295" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">3 risks ranked</text>
+
+          <path d="M 260 301 Q 260 322 220 322 L 200 322" fill="none" stroke="#b85a2e" stroke-width="1.5" stroke-dasharray="3 2" marker-end="url(#a-ar)"/>
+
+          <rect x="40" y="312" width="160" height="32" rx="4" fill="#f4d9c6" stroke="#b85a2e" stroke-width="1"/>
+          <text x="120" y="324" font-family="JetBrains Mono" font-size="9" fill="#6e3216" font-weight="600" text-anchor="middle">REFLECT → LOOP</text>
+          <text x="120" y="338" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">retry Q2 · broader query</text>
+
+          <line x1="120" y1="345" x2="260" y2="345" stroke="#b85a2e" stroke-width="0.5" stroke-dasharray="3 2"/>
+          <line x1="260" y1="345" x2="260" y2="358" stroke="#b85a2e" stroke-width="1.5" marker-end="url(#a-ar)"/>
+
+          <rect x="200" y="360" width="120" height="32" rx="4" fill="#d4eae3" stroke="#2d7a64" stroke-width="0.5"/>
+          <text x="260" y="372" font-family="JetBrains Mono" font-size="9" font-weight="600" fill="#1a4a3c" text-anchor="middle">✓ round 2</text>
+          <text x="260" y="386" font-family="JetBrains Mono" font-size="9" fill="#2e3640" text-anchor="middle">6 names · ok</text>
+
+          <line x1="340" y1="396" x2="340" y2="412" stroke="#b85a2e" stroke-width="1.5" marker-end="url(#a-ar)"/>
+
+          <rect x="160" y="416" width="360" height="36" rx="6" fill="#6e3216"/>
+          <text x="340" y="438" font-family="Newsreader" font-style="italic" font-size="13" fill="#f0e5c8" text-anchor="middle">Synthesised market-entry brief · 4 sections · 11 citations</text>
+        </svg>
+      </div>
+
+      <div class="uc-eval">
+        <div class="uc-eval-head">§ Evaluation results · agent-aware</div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Tool-call <em>accuracy</em></div>
+            <div class="metric-meta">agent-rag specific</div>
+            <p class="metric-body">For 4 sub-questions, the agent picked the right tool 4 times (market DB for demand, web for competitors, library for regulation, synthesis for risks). All correct.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">1.00</div>
+            <div class="max">4 of 4</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Trajectory <em>efficiency</em></div>
+            <div class="metric-meta">tool calls vs. minimum</div>
+            <p class="metric-body">Optimal trajectory = 4 calls. Agent took 5 (one retry on Q2). Reasonable — the retry was justified by the self-check, not a wandering loop.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">0.80</div>
+            <div class="max">5 of 4 ideal</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Context <em>recall</em></div>
+            <div class="metric-meta">across all sub-tasks</div>
+            <p class="metric-body">Did the union of all tool returns cover what an SME would have wanted? Mostly yes; one minor regulatory update from May 2025 wasn't surfaced.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">0.92</div>
+            <div class="max">/ 1.00</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name"><em>Faithfulness</em></div>
+            <div class="metric-meta">11 claims · grounded</div>
+            <p class="metric-body">Each of 11 claims in the brief is traceable to a tool output. The agent did not invent figures or names — the loop discipline holds.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">1.00</div>
+            <div class="max">11 of 11</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name"><em>Citation</em> coverage</div>
+            <div class="metric-meta">claims with named source</div>
+            <p class="metric-body">11 substantive claims, 11 cite a source (market DB report, news article, internal memo). Auditable end-to-end.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">1.00</div>
+            <div class="max">11 of 11</div>
+          </div>
+        </div>
+
+        <div class="metric-row">
+          <div>
+            <div class="metric-name">Answer <em>relevance</em></div>
+            <div class="metric-meta">vs. partner's question</div>
+            <p class="metric-body">All four requested sections present, in the requested order, at the requested depth. Top-3 risks rank-ordered as asked.</p>
+          </div>
+          <div class="metric-score">
+            <div class="val good">0.96</div>
+            <div class="max">/ 1.00</div>
+          </div>
+        </div>
+
+        <div class="insight">
+          <div class="ihead">What the metrics tell us</div>
+          <p>Agentic RAG <strong>adds two new axes</strong> — tool choice and trajectory length — that standard metrics can't see. Faithfulness and citation stay strong because the loop forces sourcing. The watch-list moves to <em>efficiency</em>: an agent that takes 17 tool calls to answer a 4-call question is expensive, slow, and signals a planning bug. <strong>Cost-per-query becomes a first-class metric</strong>, alongside quality.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DECISION TABLE ============ -->
+<section class="decision">
+  <div class="wrap">
+    <div class="eyebrow">§ 02 · The decision framework</div>
+    <h2>When to <em>reach for which</em>.</h2>
+    <p class="decision-intro">The patterns are not a hierarchy — agentic isn't "better than" standard. Each is the right answer to a different shape of question. The table below is the practitioner's first cut: nine dimensions, four patterns, one row per decision you need to make before kicking off a project.</p>
+
+    <div class="table-wrap">
+      <table class="decision-table">
+        <thead>
+          <tr>
+            <th style="width: 220px;">Dimension</th>
+            <th>
+              <span class="tname">RAG · Unstructured</span>
+              <span class="ttag">retrieve text → answer</span>
+            </th>
+            <th>
+              <span class="tname">RAG · Structured</span>
+              <span class="ttag">query data → explain</span>
+            </th>
+            <th>
+              <span class="tname">Graph RAG</span>
+              <span class="ttag">traverse → answer</span>
+            </th>
+            <th>
+              <span class="tname">Agentic RAG</span>
+              <span class="ttag">plan → loop → answer</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-label">Question shape <span class="sub">what is being asked</span></td>
+            <td><strong>Single-hop lookup</strong>"What's our refund policy?" "Is X covered?" One fact, one passage.</td>
+            <td><strong>Numeric / aggregate</strong>"What's my margin?" "How many sold last week?" Computable from tables.</td>
+            <td><strong>Multi-hop relationship</strong>"Who owns whom, three hops out?" "Which suppliers are price-linked?"</td>
+            <td><strong>Open-ended research</strong>"Should we enter market X?" — requires gathering, judging, synthesising.</td>
+          </tr>
+          <tr class="alt">
+            <td class="row-label">Data shape <span class="sub">how knowledge is stored</span></td>
+            <td><strong>Text in documents</strong>Policies, manuals, FAQs, contracts read as prose chunks.</td>
+            <td><strong>Rows and columns</strong>Tables in a warehouse — sales, inventory, finance, CRM records.</td>
+            <td><strong>Entities and relations</strong>Connections between things matter more than the prose of any one doc.</td>
+            <td><strong>Mixed and live</strong>Documents, databases, APIs, the open web, internal CRM and warehouses.</td>
+          </tr>
+          <tr>
+            <td class="row-label">Question count per query <span class="sub">cognitive load</span></td>
+            <td><span class="badge green">ONE</span> Atomic. One retrieval cycle. Done in 1–2 seconds.</td>
+            <td><span class="badge cyan">ONE QUERY</span> One SQL statement, possibly with joins. Computed, not retrieved.</td>
+            <td><span class="badge purple">ONE STRUCTURAL</span> One traversal pattern, possibly across many hops.</td>
+            <td><span class="badge orange">MANY</span> The agent decomposes into sub-questions, each answered.</td>
+          </tr>
+          <tr class="alt">
+            <td class="row-label">Latency budget <span class="sub">how fast must it answer</span></td>
+            <td><strong>Sub-second to ~2s</strong>Suitable for live chat, IVR, in-app assist.</td>
+            <td><strong>2–10 seconds</strong>SQL generation + warehouse round-trip. Fine for interactive dashboards.</td>
+            <td><strong>1–5 seconds</strong>Traversal + generation. Tolerable for analyst-grade workflows.</td>
+            <td><strong>10s to several minutes</strong>Plans, multiple tools, loops. Not for live chat — for prepared briefs.</td>
+          </tr>
+          <tr>
+            <td class="row-label">Cost per query <span class="sub">tokens and tool spend</span></td>
+            <td><strong>Lowest</strong>One embedding, one search, one generation. Pennies.</td>
+            <td><strong>Low</strong>Two LLM calls (write SQL, explain result) + warehouse compute. Pennies + DB cost.</td>
+            <td><strong>Low–medium</strong>One graph query (cheap), one generation. Graph DB infra is the fixed cost.</td>
+            <td><strong>Highest</strong>Multiple LLM calls per query + tool API costs. Watch the unit economics.</td>
+          </tr>
+          <tr class="alt">
+            <td class="row-label">Critical eval metric <span class="sub">where it usually fails</span></td>
+            <td><strong>Context precision &amp; recall</strong>Retrieve the right chunks, not too many of the wrong ones.</td>
+            <td><strong>SQL accuracy &amp; schema grounding</strong>Did the generated query answer the right question against the right columns?</td>
+            <td><strong>Subgraph completeness</strong>Did we capture the right paths? Did entity resolution work?</td>
+            <td><strong>Tool-call accuracy &amp; trajectory length</strong>Did the agent pick the right tool and stop at the right time?</td>
+          </tr>
+          <tr>
+            <td class="row-label">Audit profile <span class="sub">for regulators and lawyers</span></td>
+            <td><strong>Strong</strong>Citation per claim → traceable to a passage in a versioned doc.</td>
+            <td><strong>Very strong</strong>Every number traces to a SQL query against a logged warehouse snapshot. Re-runnable.</td>
+            <td><strong>Strongest</strong>Citation per claim + graph edge ID + source. Defensible by construction.</td>
+            <td><strong>Strong but verbose</strong>Each claim traceable, but trajectory must also be auditable (which tool, when).</td>
+          </tr>
+          <tr class="alt">
+            <td class="row-label">Engineering effort <span class="sub">to get to production</span></td>
+            <td><span class="badge green">WEEKS</span> Embed, index, retrieve, generate. Mature tooling.</td>
+            <td><span class="badge cyan">WEEKS–MONTHS</span> Schema docs, business glossary, few-shot SQL examples, guardrails for writes.</td>
+            <td><span class="badge purple">MONTHS</span> Entity extraction, entity resolution, schema design, graph store ops.</td>
+            <td><span class="badge orange">MONTHS+</span> Tool wrappers, planner prompts, eval harness, cost guardrails, human-in-the-loop.</td>
+          </tr>
+          <tr>
+            <td class="row-label">Best-fit industries <span class="sub">where it ships first</span></td>
+            <td>Insurance &amp; banking ops, customer support, internal knowledge base, HR.</td>
+            <td>Retail &amp; CPG store ops, finance &amp; FP&amp;A self-serve, supply chain analytics, operations dashboards.</td>
+            <td>Financial crime &amp; KYC, pharma &amp; biomed, legal &amp; contracts, fraud, supply-chain mapping.</td>
+            <td>Consulting &amp; research, sales operations, strategic intelligence, incident triage, M&amp;A.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="picker">
+      <h3><em>Decide</em> in four lines.</h3>
+      <div class="picker-grid">
+        <div class="picker-card rag">
+          <h4>Pick <em>RAG · Unstructured</em></h4>
+          <div class="pick-line"><strong>IF</strong> the answer lives in a passage</div>
+          <div class="pick-line"><strong>AND</strong> one retrieval is enough</div>
+          <div class="pick-line"><strong>AND</strong> you need it in under 2 seconds</div>
+        </div>
+        <div class="picker-card rag-str">
+          <h4>Pick <em>RAG · Structured</em></h4>
+          <div class="pick-line"><strong>IF</strong> the answer is a number</div>
+          <div class="pick-line"><strong>AND</strong> the data is in a warehouse</div>
+          <div class="pick-line"><strong>AND</strong> figures must be exact, not estimated</div>
+        </div>
+        <div class="picker-card graph">
+          <h4>Pick <em>Graph RAG</em></h4>
+          <div class="pick-line"><strong>IF</strong> the answer is a path</div>
+          <div class="pick-line"><strong>AND</strong> relationships matter more than prose</div>
+          <div class="pick-line"><strong>AND</strong> auditors will ask for the trail</div>
+        </div>
+        <div class="picker-card agent">
+          <h4>Pick <em>Agentic RAG</em></h4>
+          <div class="pick-line"><strong>IF</strong> the answer requires deciding</div>
+          <div class="pick-line"><strong>AND</strong> sources are many and mixed</div>
+          <div class="pick-line"><strong>AND</strong> minutes-not-seconds is acceptable</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL ============ -->
+<section class="final">
+  <div class="wrap">
+    <div class="final-mark">§</div>
+    <p class="final-quote">A RAG you can't measure is a RAG you can't trust. The pattern doesn't matter <em>if you don't know what good looks like.</em></p>
+    <div class="colophon">Four Patterns · Twelve Metrics · One Choice</div>
+  </div>
+</section>
+
+</body>
+</html>
