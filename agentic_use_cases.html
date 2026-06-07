@@ -1,0 +1,1655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI in Practice — Business Use Case Playbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,500&family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f4efe4; --paper-2:#ece3d2; --paper-card:#fbf8f1;
+  --ink:#191b20; --ink-soft:#4d505a; --ink-faint:#787b85;
+  --navy:#0f141d; --navy-2:#161d2a;
+  --accent:#bb5e1f; --accent-deep:#9c4c14; --teal:#1d5d57; --gold:#d8a23f;
+  --line:rgba(25,27,32,.14); --line-strong:rgba(25,27,32,.28); --blueline:rgba(216,162,63,.20);
+  --shadow:0 1px 2px rgba(20,22,28,.05),0 8px 28px -12px rgba(20,22,28,.22);
+  --shadow-lift:0 2px 4px rgba(20,22,28,.06),0 22px 48px -18px rgba(20,22,28,.34);
+  --sev-high:#b23b2e; --sev-med:#bb5e1f; --sev-low:#1d5d57;
+  --serif:"Fraunces",Georgia,serif; --sans:"Archivo",-apple-system,sans-serif; --mono:"JetBrains Mono",monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.68;font-weight:400;-webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(circle at 12% 8%,rgba(187,94,31,.05),transparent 38%),radial-gradient(circle at 88% 92%,rgba(29,93,87,.05),transparent 42%)}
+::selection{background:var(--accent);color:#fff}
+
+/* progress + hud */
+#progress{position:fixed;top:0;left:0;height:3px;width:0;z-index:120;background:linear-gradient(90deg,var(--accent),var(--gold));transition:width .12s linear}
+#hud{position:fixed;top:18px;right:18px;z-index:115;display:flex;gap:8px;align-items:center;background:rgba(15,20,29,.92);color:#f4efe4;border:1px solid rgba(216,162,63,.3);
+  padding:7px 13px;border-radius:100px;font-family:var(--mono);font-size:11px;letter-spacing:.04em;box-shadow:var(--shadow);backdrop-filter:blur(8px);opacity:0;transform:translateY(-8px);transition:opacity .4s,transform .4s;pointer-events:none}
+#hud.show{opacity:1;transform:translateY(0)}
+#hud b{color:var(--gold);font-weight:700}
+#hud .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px var(--gold)}
+
+/* layout */
+.shell{display:grid;grid-template-columns:248px 1fr;gap:46px;max-width:1300px;margin:0 auto;padding:0 28px}
+main{min-width:0;max-width:900px}
+.wrap{max-width:1180px;margin:0 auto;padding:0 28px}
+
+/* side nav */
+nav#toc{position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;padding:40px 0 60px;scrollbar-width:thin;scrollbar-color:var(--line-strong) transparent}
+nav#toc::-webkit-scrollbar{width:5px}
+nav#toc::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:4px}
+.toc-brand{font-family:var(--serif);font-weight:600;font-size:15px;line-height:1.25;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--line);letter-spacing:-.01em}
+.toc-brand span{display:block;font-family:var(--mono);font-size:9.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-top:6px}
+nav#toc ol{list-style:none;margin:0;padding:0}
+nav#toc a{display:flex;gap:10px;align-items:baseline;text-decoration:none;color:var(--ink-soft);font-size:13px;line-height:1.32;padding:7px 0;border-left:2px solid transparent;padding-left:12px;margin-left:-12px;transition:color .2s,border-color .2s;font-weight:500}
+nav#toc a .n{font-family:var(--mono);font-size:10px;color:var(--ink-faint);min-width:20px;font-weight:500}
+nav#toc a:hover{color:var(--ink)}
+nav#toc a.active{color:var(--accent-deep);border-color:var(--accent);font-weight:600}
+nav#toc a.active .n{color:var(--accent)}
+.toc-meta{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);line-height:1.9;letter-spacing:.02em}
+
+/* hero */
+header.hero{background:var(--navy);color:#f4efe4;position:relative;overflow:hidden;border-bottom:3px solid var(--accent)}
+header.hero::before{content:"";position:absolute;inset:0;opacity:.5;background-image:linear-gradient(var(--blueline) 1px,transparent 1px),linear-gradient(90deg,var(--blueline) 1px,transparent 1px);background-size:34px 34px;mask-image:radial-gradient(circle at 72% 35%,#000,transparent 78%)}
+header.hero::after{content:"";position:absolute;width:520px;height:520px;right:-120px;top:-160px;border-radius:50%;background:radial-gradient(circle,rgba(187,94,31,.28),transparent 64%);filter:blur(8px)}
+.hero-inner{position:relative;z-index:2;max-width:1180px;margin:0 auto;padding:76px 28px 64px}
+.kicker{display:inline-flex;gap:10px;align-items:center;font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:26px;font-weight:500}
+.kicker::before{content:"";width:30px;height:1px;background:var(--gold)}
+header.hero h1{font-family:var(--serif);font-weight:600;font-size:clamp(2.6rem,6.2vw,4.7rem);line-height:1;letter-spacing:-.025em;margin:0 0 22px;max-width:18ch}
+header.hero h1 em{font-style:italic;color:var(--gold);font-weight:500}
+.hero-sub{font-size:clamp(1.05rem,1.8vw,1.3rem);color:#cdc6b8;max-width:62ch;line-height:1.55}
+.hero-meta{display:flex;flex-wrap:wrap;gap:0;margin-top:42px;border-top:1px solid rgba(216,162,63,.26);border-bottom:1px solid rgba(216,162,63,.26)}
+.hero-meta div{padding:18px 30px 18px 0;margin-right:30px;border-right:1px solid rgba(244,239,228,.12)}
+.hero-meta div:last-child{border-right:none}
+.hero-meta .lab{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.hero-meta .val{font-family:var(--serif);font-size:1.42rem;font-weight:600;color:#f4efe4;line-height:1.1}
+.hero-meta .val small{font-size:.6em;color:#cdc6b8;font-weight:400;font-family:var(--sans)}
+
+/* sections */
+section.mod{padding:60px 0 18px;scroll-margin-top:20px;border-top:1px solid var(--line)}
+section.mod:first-of-type{border-top:none}
+.mod-head{display:flex;align-items:flex-start;gap:18px;margin-bottom:8px}
+.mod-num{font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;background:var(--ink);width:38px;height:38px;border-radius:9px;display:grid;place-items:center;flex-shrink:0;margin-top:6px;box-shadow:var(--shadow)}
+.mod-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);font-weight:600;display:flex;align-items:center;gap:9px}
+.mod-tag .time{background:var(--paper-2);color:var(--ink-soft);padding:2px 9px;border-radius:100px;border:1px solid var(--line);letter-spacing:.04em}
+h2.mod-title{font-family:var(--serif);font-weight:600;font-size:clamp(1.8rem,3.6vw,2.6rem);line-height:1.04;letter-spacing:-.02em;margin:6px 0 0}
+.mod-body{margin-top:24px}
+.mod-body>p,.lead{font-size:1.02rem;line-height:1.72;color:var(--ink)}
+.lead{font-size:1.16rem;line-height:1.6;color:var(--ink-soft);margin:0 0 24px}
+.lead strong{color:var(--ink);font-weight:600}
+h3{font-family:var(--serif);font-weight:600;font-size:1.4rem;letter-spacing:-.01em;margin:40px 0 12px;line-height:1.18}
+h4{font-family:var(--sans);font-weight:700;font-size:.82rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-deep);margin:28px 0 10px}
+p{margin:0 0 16px}
+strong{font-weight:700;color:var(--ink)}
+ul,ol{margin:14px 0 20px;padding-left:0;list-style:none}
+.mod-body li{position:relative;padding-left:26px;margin-bottom:10px;line-height:1.58}
+.mod-body ul li::before{content:"";position:absolute;left:4px;top:10px;width:7px;height:7px;border:1.5px solid var(--accent);border-radius:2px;transform:rotate(45deg)}
+.mod-body ol{counter-reset:li}
+.mod-body ol li{counter-increment:li}
+.mod-body ol li::before{content:counter(li,decimal-leading-zero);position:absolute;left:0;top:1px;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--accent)}
+li strong{color:var(--ink)}
+
+/* boxes */
+.box{border-radius:14px;padding:22px 26px;margin:24px 0;position:relative;box-shadow:var(--shadow)}
+.box .box-lab{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:11px}
+.box p:last-child,.box ul:last-child,.box ol:last-child{margin-bottom:0}
+.box.def{background:var(--paper-card);border:1px solid var(--line);border-left:4px solid var(--teal)}
+.box.def .box-lab{color:var(--teal)}
+.box.framework{background:#fbf8f1;border:1px solid var(--line);border-left:4px solid var(--accent)}
+.box.framework .box-lab{color:var(--accent-deep)}
+.box.note{background:linear-gradient(180deg,#16202c,#0f141d);border:1px solid rgba(216,162,63,.22);color:#ddd6c8}
+.box.note .box-lab{color:var(--gold)}
+.box.note strong{color:#fff}
+.box.warn{background:#fbf2ea;border:1px solid #e4c4a6;border-left:4px solid var(--accent)}
+.box.warn .box-lab{color:var(--accent-deep)}
+
+/* pull quote */
+.pull{font-family:var(--serif);font-weight:500;font-style:italic;font-size:1.45rem;line-height:1.34;color:var(--ink);border-left:3px solid var(--accent);padding:6px 0 6px 26px;margin:32px 0;letter-spacing:-.01em}
+.pull span{color:var(--accent-deep);font-style:normal;font-weight:600}
+
+/* tables */
+.tbl-wrap{overflow-x:auto;margin:22px 0;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow)}
+table{border-collapse:collapse;width:100%;font-size:.85rem;background:var(--paper-card)}
+th{background:var(--ink);color:#f4efe4;font-family:var(--sans);font-weight:600;text-align:left;padding:12px 15px;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase}
+td{padding:12px 15px;border-top:1px solid var(--line);vertical-align:top;line-height:1.5}
+tr:nth-child(even) td{background:rgba(236,227,210,.36)}
+td strong{color:var(--accent-deep)}
+.mono-cell{font-family:var(--mono);font-size:.77rem;color:var(--teal);font-weight:500}
+
+/* severity pills */
+.sev{display:inline-block;font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 9px;border-radius:100px;color:#fff;white-space:nowrap}
+.sev.h{background:var(--sev-high)} .sev.m{background:var(--sev-med)} .sev.l{background:var(--sev-low)}
+
+/* grids / cards */
+.grid{display:grid;gap:18px;margin:24px 0}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.card{background:var(--paper-card);border:1px solid var(--line);border-radius:14px;padding:22px;box-shadow:var(--shadow);transition:transform .25s,box-shadow .25s}
+.card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lift)}
+.card .ct{font-family:var(--serif);font-weight:600;font-size:1.14rem;margin:0 0 8px;letter-spacing:-.01em;line-height:1.16}
+.card .cn{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:11px;font-weight:600}
+.card p{font-size:.92rem;margin-bottom:0;color:var(--ink-soft)}
+/* component / anatomy mini cards */
+.comp{display:grid;grid-template-columns:repeat(auto-fit,minmax(168px,1fr));gap:14px;margin:24px 0}
+.comp .c{background:var(--paper-card);border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow)}
+.comp .c .h{font-family:var(--serif);font-weight:600;font-size:1.04rem;margin-bottom:6px;display:flex;align-items:center;gap:9px}
+.comp .c .h .num{font-family:var(--mono);font-size:10px;color:#fff;background:var(--accent);width:20px;height:20px;border-radius:5px;display:grid;place-items:center;font-weight:700}
+.comp .c p{font-size:.85rem;color:var(--ink-soft);margin:0;line-height:1.5}
+
+/* the four lenses strip */
+.lenses{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:14px;overflow:hidden;margin:26px 0}
+.lenses .ln{background:var(--paper-card);padding:20px 18px}
+.lenses .ln .ic{font-family:var(--mono);font-size:11px;font-weight:700;color:#fff;background:var(--accent);width:26px;height:26px;border-radius:7px;display:grid;place-items:center;margin-bottom:11px}
+.lenses .ln h5{font-family:var(--serif);font-weight:600;font-size:1.05rem;margin:0 0 5px;color:var(--ink)}
+.lenses .ln p{font-size:.82rem;color:var(--ink-soft);margin:0;line-height:1.5}
+
+/* case banner */
+.case-banner{background:linear-gradient(120deg,var(--navy),var(--navy-2));color:#f4efe4;border-radius:16px 16px 0 0;padding:26px 30px;position:relative;overflow:hidden;border-bottom:2px solid var(--accent);margin-top:8px}
+.case-banner::before{content:"";position:absolute;inset:0;opacity:.4;background-image:linear-gradient(var(--blueline) 1px,transparent 1px),linear-gradient(90deg,var(--blueline) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(circle at 85% 30%,#000,transparent 80%)}
+.case-banner .cb-in{position:relative;z-index:2}
+.case-banner .dom{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:9px}
+.case-banner h3{font-family:var(--serif);color:#f4efe4;margin:0;font-size:1.72rem;font-weight:600;line-height:1.08;letter-spacing:-.01em}
+.case-banner .cap{color:#cdc6b8;font-size:.96rem;margin:10px 0 0;max-width:60ch}
+.case-shell{border:1px solid var(--line);border-top:none;border-radius:0 0 16px 16px;background:var(--paper-card);padding:4px 30px 30px;box-shadow:var(--shadow);margin-bottom:30px}
+
+/* org spec sheet */
+.spec{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:22px 0}
+.spec .sp{background:var(--paper-card);padding:14px 16px}
+.spec .sp .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);font-weight:700;margin-bottom:4px}
+.spec .sp .v{font-size:.92rem;color:var(--ink);line-height:1.45}
+
+/* architecture legend */
+.arch-legend{display:flex;flex-wrap:wrap;gap:16px;margin:10px 0 0;font-family:var(--mono);font-size:10.5px;color:#9a917f;justify-content:center}
+.arch-legend span{display:inline-flex;align-items:center;gap:7px}
+.arch-legend i{width:13px;height:13px;border-radius:3px;display:inline-block}
+
+/* flow chips (agent roster) */
+.roster{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+.roster span{background:var(--paper-2);border:1px solid var(--line);border-radius:8px;padding:5px 12px;font-size:.8rem;font-family:var(--mono);color:var(--teal);font-weight:500}
+.roster span b{color:var(--accent-deep);font-weight:700}
+
+/* metric callout strip */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin:22px 0}
+.metrics .m{background:var(--paper-card);padding:18px;text-align:center}
+.metrics .m .num{font-family:var(--serif);font-weight:700;font-size:1.7rem;color:var(--accent-deep);line-height:1;letter-spacing:-.02em}
+.metrics .m .lab{font-size:.76rem;color:var(--ink-soft);margin-top:7px;line-height:1.35}
+
+/* blueprint (dark) */
+section.blueprint{background:var(--navy);color:#ddd6c8;margin:0;border-radius:14px;border:1px solid rgba(216,162,63,.2);position:relative;overflow:hidden}
+section.blueprint::before{content:"";position:absolute;inset:0;opacity:.4;pointer-events:none;background-image:linear-gradient(var(--blueline) 1px,transparent 1px),linear-gradient(90deg,var(--blueline) 1px,transparent 1px);background-size:30px 30px}
+.bp-inner{position:relative;z-index:2;padding:30px 28px}
+section.blueprint h4{color:var(--gold)}
+section.blueprint p{color:#c9c0ad}
+section.blueprint strong{color:#fff}
+.bp-lab{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:600;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.bp-lab::before{content:"";width:26px;height:1px;background:var(--gold)}
+
+/* svg figure */
+figure{margin:24px 0 8px;text-align:center}
+figure svg{max-width:100%;height:auto}
+figcaption{font-family:var(--mono);font-size:11px;color:#9a917f;letter-spacing:.04em;margin-top:12px;text-align:center}
+
+/* facilitator/notes toggle */
+.facil{margin:22px 0;border:1px dashed var(--line-strong);border-radius:12px;background:rgba(236,227,210,.4)}
+.facil summary{cursor:pointer;padding:14px 18px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent-deep);font-weight:700;list-style:none;display:flex;align-items:center;gap:10px}
+.facil summary::-webkit-details-marker{display:none}
+.facil summary::before{content:"▸";transition:transform .2s;color:var(--accent)}
+.facil[open] summary::before{transform:rotate(90deg)}
+.facil .fc{padding:0 18px 18px;font-size:.92rem;color:var(--ink-soft)}
+.facil .fc p:last-child{margin-bottom:0}
+
+/* glossary */
+.gloss{columns:2;column-gap:36px;margin:22px 0}
+.gloss .gt{break-inside:avoid;margin-bottom:16px}
+.gloss .gt dt{font-family:var(--serif);font-weight:600;font-size:1rem;color:var(--ink)}
+.gloss .gt dd{margin:2px 0 0;font-size:.88rem;color:var(--ink-soft);line-height:1.5}
+
+/* footer */
+footer{background:var(--navy);color:#9a917f;padding:50px 0 40px;margin-top:60px;border-top:3px solid var(--accent)}
+footer .wrap{max-width:1180px}
+footer .ft-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:36px}
+footer h5{font-family:var(--serif);color:#f4efe4;font-size:1.1rem;margin:0 0 12px;font-weight:600}
+footer a{color:#c9c0ad;text-decoration:none;display:block;padding:3px 0;font-size:.88rem;transition:color .2s}
+footer a:hover{color:var(--gold)}
+footer .ft-note{font-size:.78rem;line-height:1.6;color:#857c6c}
+footer .ft-bottom{border-top:1px solid rgba(216,162,63,.18);margin-top:34px;padding-top:22px;font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:#6f6757;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+
+/* responsive */
+@media(max-width:980px){
+  .shell{grid-template-columns:1fr;gap:0}
+  nav#toc{display:none}
+  main{max-width:760px;margin:0 auto}
+  .g3,.g2,.lenses,.spec{grid-template-columns:1fr}
+  .gloss{columns:1}
+  footer .ft-grid{grid-template-columns:1fr;gap:24px}
+  .case-banner,.case-shell{padding-left:20px;padding-right:20px}
+}
+@media(max-width:560px){#hud{display:none}.hero-inner{padding:54px 22px 44px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.reveal{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="hud"><span class="dot"></span><span>CASE&nbsp;<b id="hud-mod">00</b></span></div>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="kicker">Executive Playbook · Applied Agentic AI</div>
+    <h1>Agentic AI <em>in practice</em>: four businesses, four architectures</h1>
+    <p class="hero-sub">A working playbook for senior leaders. Four real-world scenarios across four industries and four distinct organisation profiles — each dissected the same way: the agentic architecture that delivers it, how the system is evaluated, and the risks that must be controlled before it is trusted to act.</p>
+    <div class="hero-meta">
+      <div><div class="lab">Domains</div><div class="val">4 <small>industries</small></div></div>
+      <div><div class="lab">Org profiles</div><div class="val">4 <small>distinct shapes</small></div></div>
+      <div><div class="lab">Per case</div><div class="val">Architecture · Eval · Risk</div></div>
+      <div><div class="lab">Audience</div><div class="val">Board &amp; C-suite</div></div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+  <nav id="toc">
+    <div class="toc-brand">Agentic AI in Practice<span>Use-Case Playbook</span></div>
+    <ol>
+      <li><a href="#found"><span class="n">0.1</span><span>Agent vs. agentic system</span></a></li>
+      <li><a href="#m0"><span class="n">0.2</span><span>How to read each case</span></a></li>
+      <li><a href="#m1"><span class="n">01</span><span>Financial services · AML investigation</span></a></li>
+      <li><a href="#m2"><span class="n">02</span><span>Healthcare · Prior authorisation</span></a></li>
+      <li><a href="#m3"><span class="n">03</span><span>Retail · Merchandising &amp; service</span></a></li>
+      <li><a href="#m4"><span class="n">04</span><span>Manufacturing · Supply-chain response</span></a></li>
+      <li><a href="#m5"><span class="n">05</span><span>Cross-case synthesis</span></a></li>
+      <li><a href="#m6"><span class="n">06</span><span>Enterprise architecture &amp; tech stack</span></a></li>
+      <li><a href="#m7"><span class="n">07</span><span>The agentic tech stack</span></a></li>
+      <li><a href="#gloss"><span class="n">★</span><span>Glossary</span></a></li>
+    </ol>
+    <div class="toc-meta">FOUR LENSES PER CASE<br>PROFILE · ARCHITECTURE<br>EVALUATION · RISK<br>—<br>2026 TOOLING SNAPSHOT</div>
+  </nav>
+
+  <main>
+  <section class="mod" id="found" data-case="00">
+    <div class="mod-head">
+      <div class="mod-num">0.1</div>
+      <div><div class="mod-tag">Foundations <span class="time">definitions</span></div>
+      <h2 class="mod-title">Agent vs. agentic system</h2></div>
+    </div>
+    <div class="mod-body">
+      <p class="lead">Before the cases, two terms worth pinning down — because they are used loosely and the difference matters for how you build, evaluate and govern. An <strong>AI agent</strong> is a single goal-directed worker. An <strong>agentic AI system</strong> is the whole engineered solution those workers live in. One is a component; the other is the product.</p>
+
+      <h3>1 · What is an AI agent?</h3>
+      <div class="box def reveal">
+        <div class="box-lab">Definition · AI agent</div>
+        <p>An <strong>AI agent</strong> is a single unit, built around a language model, that pursues a goal over multiple steps rather than producing a one-shot answer. It takes in context, <strong>reasons and plans</strong>, <strong>uses tools to act</strong> on the world, observes what happened, and repeats — looping until the goal is met or it hands off. The defining move is that it <em>acts</em>, not just responds.</p>
+      </div>
+      <p>That makes an agent different from a plain chatbot or a single model call. A chatbot answers a question; an agent can look something up, decide what to do, do it, check the result, and try again. Four ingredients make it work, plus the loop that ties them together.</p>
+
+      <figure class="reveal">
+        <svg viewBox="0 0 720 236" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The agent loop: an agent perceives context, reasons and plans, acts using tools, and observes results, iterating until the goal is met; underneath sit its four ingredients — model, instructions, memory and tools.">
+          <defs>
+            <marker id="afa" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#9c4c14"/></marker>
+          </defs>
+          <!-- return loop -->
+          <path d="M610,46 L610,22 L94,22 L94,44" fill="none" stroke="#9c4c14" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#afa)"/>
+          <text x="352" y="16" text-anchor="middle" fill="#9c4c14" font-family="JetBrains Mono,monospace" font-size="10" font-weight="700">iterate until the goal is met</text>
+          <!-- nodes -->
+          <g font-family="Archivo,sans-serif" font-weight="700" font-size="13">
+            <rect x="18"  y="46" width="152" height="58" rx="11" fill="#fbf8f1" stroke="#bb5e1f" stroke-width="1.6"/>
+            <text x="94"  y="73" text-anchor="middle" fill="#191b20">Perceive</text>
+            <rect x="190" y="46" width="152" height="58" rx="11" fill="#fbf8f1" stroke="#bb5e1f" stroke-width="1.6"/>
+            <text x="266" y="73" text-anchor="middle" fill="#191b20">Reason &amp; plan</text>
+            <rect x="362" y="46" width="152" height="58" rx="11" fill="#fbf8f1" stroke="#1d5d57" stroke-width="1.8"/>
+            <text x="438" y="73" text-anchor="middle" fill="#191b20">Act · use tools</text>
+            <rect x="534" y="46" width="152" height="58" rx="11" fill="#fbf8f1" stroke="#bb5e1f" stroke-width="1.6"/>
+            <text x="610" y="73" text-anchor="middle" fill="#191b20">Observe</text>
+          </g>
+          <g font-family="JetBrains Mono,monospace" font-size="9" fill="#787b85">
+            <text x="94"  y="91" text-anchor="middle">context &amp; goal</text>
+            <text x="266" y="91" text-anchor="middle">decide next step</text>
+            <text x="438" y="91" text-anchor="middle">call APIs / functions</text>
+            <text x="610" y="91" text-anchor="middle">read the result</text>
+          </g>
+          <line x1="170" y1="75" x2="188" y2="75" stroke="#9c4c14" stroke-width="1.5" marker-end="url(#afa)"/>
+          <line x1="342" y1="75" x2="360" y2="75" stroke="#9c4c14" stroke-width="1.5" marker-end="url(#afa)"/>
+          <line x1="514" y1="75" x2="532" y2="75" stroke="#9c4c14" stroke-width="1.5" marker-end="url(#afa)"/>
+          <!-- ingredients bar -->
+          <rect x="18" y="158" width="668" height="62" rx="12" fill="#0f141d"/>
+          <text x="34" y="178" fill="#d8a23f" font-family="JetBrains Mono,monospace" font-size="9" font-weight="700" letter-spacing="1.5">WHAT'S INSIDE EACH AGENT</text>
+          <g font-family="Archivo,sans-serif" font-size="10.5" font-weight="600" fill="#f4efe4">
+            <rect x="34"  y="186" width="150" height="26" rx="7" fill="#1b2433"/><text x="109" y="203" text-anchor="middle">Model · reasoning core</text>
+            <rect x="194" y="186" width="150" height="26" rx="7" fill="#1b2433"/><text x="269" y="203" text-anchor="middle">Instructions / goal</text>
+            <rect x="354" y="186" width="150" height="26" rx="7" fill="#1b2433"/><text x="429" y="203" text-anchor="middle">Memory / context</text>
+            <rect x="514" y="186" width="158" height="26" rx="7" fill="#173f3a"/><text x="593" y="203" text-anchor="middle" fill="#cfeae6">Tools · APIs &amp; functions</text>
+          </g>
+        </svg>
+        <figcaption style="color:#787b85">An agent is a model wrapped in a goal, memory and tools, running a perceive–reason–act–observe loop.</figcaption>
+      </figure>
+
+      <h4>Examples of single AI agents</h4>
+      <ul class="reveal">
+        <li>A <strong>coding agent</strong> told "make this failing test pass" — it reads the repository, edits files, runs the test, sees the error, and keeps revising until it is green.</li>
+        <li>A <strong>customer-service agent</strong> that looks up an order through an API, checks the returns policy, and issues a refund within an allowed limit.</li>
+        <li>A <strong>research agent</strong> that searches the web, opens and reads pages, and assembles a cited summary on a topic.</li>
+        <li>A <strong>scheduling agent</strong> that reads a calendar, finds workable times, and sends the invitations.</li>
+      </ul>
+      <div class="box note reveal">
+        <div class="box-lab">Tie-in</div>
+        <p>Every worker in the cases ahead is an individual AI agent — the <strong>Transaction analyser</strong> in the bank, the <strong>Pricing &amp; promo</strong> agent in the retailer, each <strong>simulation agent</strong> in the manufacturer. On its own, each is just one agent doing one job.</p>
+      </div>
+
+      <h4>Where "agent" sits among the words it's confused with</h4>
+      <p>It helps to place <em>agent</em> next to its neighbours. A widely-shared 2×2 sorts AI systems by two dials: how much it runs without you (<strong>automation</strong>, low&rarr;high, left&rarr;right) and how deeply the system is woven into your tools and workflows (<strong>integration</strong>, low&rarr;high, bottom&rarr;top).</p>
+      <figure class="reveal">
+        <svg viewBox="0 0 700 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A 2x2 framework. Horizontal axis is automation from low to high; vertical axis is integration from low to high. Bottom-left: Assistants (ChatGPT, Gemini, Claude). Top-left: Copilots (GitHub Copilot, Microsoft Copilot). Bottom-right: Autopilots (automated social media posting). Top-right, highlighted: Agents (internal chatbots, automated sales, call transcription).">
+          <defs>
+            <marker id="qax" markerWidth="10" markerHeight="10" refX="7" refY="5" orient="auto"><path d="M0,1 L9,5 L0,9 Z" fill="#9a917f"/></marker>
+          </defs>
+          <!-- agents highlight -->
+          <rect x="372" y="46" width="294" height="209" rx="8" fill="#f6e4d3" stroke="#bb5e1f" stroke-width="1.6"/>
+          <!-- dividers -->
+          <line x1="370" y1="44" x2="370" y2="466" stroke="#cfc6b4" stroke-width="1.3" stroke-dasharray="5 5"/>
+          <line x1="74" y1="257" x2="666" y2="257" stroke="#cfc6b4" stroke-width="1.3" stroke-dasharray="5 5"/>
+          <!-- axes -->
+          <line x1="70" y1="478" x2="70" y2="34" stroke="#9a917f" stroke-width="2" marker-end="url(#qax)"/>
+          <line x1="62" y1="470" x2="686" y2="470" stroke="#9a917f" stroke-width="2" marker-end="url(#qax)"/>
+          <!-- quadrant titles + examples -->
+          <g text-anchor="middle" font-family="Fraunces,serif" font-weight="700">
+            <text x="222" y="86" fill="#9c4c14" font-size="22">Copilots</text>
+            <text x="520" y="86" fill="#9c4c14" font-size="22">Agents</text>
+            <text x="222" y="300" fill="#9c4c14" font-size="22">Assistants</text>
+            <text x="520" y="300" fill="#9c4c14" font-size="22">Autopilots</text>
+          </g>
+          <g text-anchor="middle" font-family="Archivo,sans-serif">
+            <!-- copilots -->
+            <text x="222" y="120" fill="#bb5e1f" font-size="12" font-weight="700">Examples</text>
+            <text x="222" y="142" fill="#4d505a" font-size="13">GitHub Copilot</text>
+            <text x="222" y="162" fill="#4d505a" font-size="13">Microsoft Copilot</text>
+            <!-- agents -->
+            <text x="520" y="120" fill="#bb5e1f" font-size="12" font-weight="700">Examples</text>
+            <text x="520" y="142" fill="#4d505a" font-size="13">Internal chatbots</text>
+            <text x="520" y="162" fill="#4d505a" font-size="13">Automated sales</text>
+            <text x="520" y="182" fill="#4d505a" font-size="13">Call transcription</text>
+            <!-- assistants -->
+            <text x="222" y="334" fill="#bb5e1f" font-size="12" font-weight="700">Examples</text>
+            <text x="222" y="356" fill="#4d505a" font-size="13">ChatGPT</text>
+            <text x="222" y="376" fill="#4d505a" font-size="13">Gemini</text>
+            <text x="222" y="396" fill="#4d505a" font-size="13">Claude</text>
+            <!-- autopilots -->
+            <text x="520" y="334" fill="#bb5e1f" font-size="12" font-weight="700">Examples</text>
+            <text x="520" y="356" fill="#4d505a" font-size="13">Automated social-</text>
+            <text x="520" y="376" fill="#4d505a" font-size="13">media posting</text>
+          </g>
+          <!-- axis labels -->
+          <g font-family="JetBrains Mono,monospace" fill="#787b85" font-size="11">
+            <text x="378" y="503" text-anchor="middle" font-weight="700" letter-spacing="1">AUTOMATION →</text>
+            <text x="120" y="492" text-anchor="middle" font-size="9.5">low</text>
+            <text x="612" y="492" text-anchor="middle" font-size="9.5">high</text>
+            <text x="44" y="250" text-anchor="middle" font-weight="700" letter-spacing="1" transform="rotate(-90 44 250)">INTEGRATION →</text>
+            <text x="58" y="452" text-anchor="middle" font-size="9.5" transform="rotate(-90 58 452)">low</text>
+            <text x="58" y="70" text-anchor="middle" font-size="9.5" transform="rotate(-90 58 70)">high</text>
+          </g>
+        </svg>
+        <figcaption style="color:#787b85">Assistants answer when asked; copilots suggest while you decide; autopilots run a fixed routine; agents act independently toward a goal.</figcaption>
+      </figure>
+      <p>Read the four corners as a progression. <strong>Assistants</strong> respond when prompted and leave you in control. <strong>Copilots</strong> work alongside you inside your tools, proposing as you go, but you still accept or reject. <strong>Autopilots</strong> run a fixed routine on their own without reasoning about it. <strong>Agents</strong> sit top-right — highly automated <em>and</em> deeply integrated — pursuing a goal over multiple steps and acting through your systems to reach it. That corner is what this playbook is about. The boundaries blur in practice, and products migrate toward it as they take on more automation and tie into more systems, so treat the placement as a way to think, not a hard taxonomy.</p>
+
+      <h4>Levels of autonomy</h4>
+      <p>Autonomy isn't all-or-nothing. It runs along a spectrum — and within any single use case it is a <strong>dial you set deliberately</strong>, not a fixed property of "the AI". At one end the model only answers; at the other, systems of agents run a whole outcome.</p>
+
+      <figure class="reveal">
+        <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The autonomy spectrum from LLM to agentic AI: an LLM answers; a copilot assists with human approval per action; an AI agent does a task autonomously; agentic AI coordinates many agents to run an outcome.">
+          <defs><linearGradient id="specA21" x1="0" x2="1"><stop offset="0" stop-color="#1d5d57"/><stop offset="1" stop-color="#bb5e1f"/></linearGradient></defs>
+          <rect x="40" y="246" width="680" height="6" rx="3" fill="url(#specA21)"/>
+          <text x="40" y="284" font-family="JetBrains Mono,monospace" font-size="10" fill="#787b85">LESS AUTONOMY · MORE HUMAN CONTROL</text>
+          <text x="720" y="284" text-anchor="end" font-family="JetBrains Mono,monospace" font-size="10" fill="#787b85">MORE AUTONOMY · MORE CONSEQUENCE</text>
+          <g font-family="Archivo,sans-serif">
+            <g>
+              <rect x="40" y="40" width="160" height="186" rx="10" fill="#fbf8f1" stroke="#1d5d57" stroke-width="1.5"/>
+              <circle cx="120" cy="246" r="7" fill="#1d5d57"/>
+              <text x="120" y="68" text-anchor="middle" font-family="Fraunces,serif" font-size="15" font-weight="600" fill="#191b20">LLM</text>
+              <text x="120" y="86" text-anchor="middle" font-size="10.5" fill="#4d505a">Chat / completion</text>
+              <line x1="58" y1="98" x2="182" y2="98" stroke="#e0d7c4"/>
+              <text x="120" y="120" text-anchor="middle" font-size="10" fill="#787b85">text → text</text>
+              <text x="120" y="138" text-anchor="middle" font-size="10" fill="#787b85">no memory</text>
+              <text x="120" y="156" text-anchor="middle" font-size="10" fill="#787b85">no tools</text>
+              <text x="120" y="174" text-anchor="middle" font-size="10" fill="#787b85">no action</text>
+              <text x="120" y="206" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#1d5d57">"answers"</text>
+            </g>
+            <g>
+              <rect x="220" y="40" width="160" height="186" rx="10" fill="#fbf8f1" stroke="#3f7d62" stroke-width="1.5"/>
+              <circle cx="300" cy="246" r="7" fill="#3f7d62"/>
+              <text x="300" y="68" text-anchor="middle" font-family="Fraunces,serif" font-size="15" font-weight="600" fill="#191b20">Copilot</text>
+              <text x="300" y="86" text-anchor="middle" font-size="10.5" fill="#4d505a">Assisted workflow</text>
+              <line x1="238" y1="98" x2="362" y2="98" stroke="#e0d7c4"/>
+              <text x="300" y="120" text-anchor="middle" font-size="10" fill="#787b85">suggests in context</text>
+              <text x="300" y="138" text-anchor="middle" font-size="10" fill="#787b85">human approves</text>
+              <text x="300" y="156" text-anchor="middle" font-size="10" fill="#787b85">each action</text>
+              <text x="300" y="206" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#3f7d62">"assists"</text>
+            </g>
+            <g>
+              <rect x="400" y="40" width="160" height="186" rx="10" fill="#fbf8f1" stroke="#bb5e1f" stroke-width="1.5"/>
+              <circle cx="480" cy="246" r="7" fill="#bb5e1f"/>
+              <text x="480" y="68" text-anchor="middle" font-family="Fraunces,serif" font-size="15" font-weight="600" fill="#191b20">AI Agent</text>
+              <text x="480" y="86" text-anchor="middle" font-size="10.5" fill="#4d505a">Single autonomous</text>
+              <line x1="418" y1="98" x2="542" y2="98" stroke="#e0d7c4"/>
+              <text x="480" y="120" text-anchor="middle" font-size="10" fill="#787b85">plans multi-step</text>
+              <text x="480" y="138" text-anchor="middle" font-size="10" fill="#787b85">uses tools</text>
+              <text x="480" y="156" text-anchor="middle" font-size="10" fill="#787b85">acts, then checks</text>
+              <text x="480" y="206" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#bb5e1f">"does a task"</text>
+            </g>
+            <g>
+              <rect x="580" y="40" width="140" height="186" rx="10" fill="#0f141d" stroke="#d8a23f" stroke-width="1.5"/>
+              <circle cx="650" cy="246" r="8" fill="#d8a23f"/>
+              <text x="650" y="68" text-anchor="middle" font-family="Fraunces,serif" font-size="15" font-weight="700" fill="#f4efe4">Agentic AI</text>
+              <text x="650" y="86" text-anchor="middle" font-size="10.5" fill="#d8a23f">Multi-agent system</text>
+              <line x1="598" y1="98" x2="702" y2="98" stroke="#3a4453"/>
+              <text x="650" y="120" text-anchor="middle" font-size="10" fill="#c9c0ad">agents coordinate</text>
+              <text x="650" y="138" text-anchor="middle" font-size="10" fill="#c9c0ad">delegate &amp; compose</text>
+              <text x="650" y="156" text-anchor="middle" font-size="10" fill="#c9c0ad">runs a process</text>
+              <text x="650" y="206" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#d8a23f">"runs an outcome"</text>
+            </g>
+          </g>
+        </svg>
+        <figcaption style="color:#787b85">Fig 2.1 — The autonomy spectrum. The jump that matters most is from copilot to agent: control shifts from per-action to per-goal.</figcaption>
+      </figure>
+
+      <p>More granularly, it pays to borrow how the automotive industry grades self-driving and talk about a system's autonomy in <strong>levels</strong>. The level is a choice you make per use case — matched to how reversible and consequential the actions are.</p>
+      <div class="tbl-wrap reveal">
+        <table>
+          <thead><tr><th style="width:8%">Level</th><th style="width:24%">Posture</th><th>Human role</th><th>Where it fits</th></tr></thead>
+          <tbody>
+            <tr><td class="mono-cell">L0</td><td><strong>Manual</strong></td><td>Human does everything; AI not involved</td><td>Highest-stakes, novel judgement</td></tr>
+            <tr><td class="mono-cell">L1</td><td><strong>Assisted</strong></td><td>AI drafts; human edits &amp; executes</td><td>Document drafting, summarisation</td></tr>
+            <tr><td class="mono-cell">L2</td><td><strong>Human-in-the-loop</strong></td><td>Agent proposes an action; human approves <em>before</em> it executes</td><td>Customer refunds, code merges, payments</td></tr>
+            <tr><td class="mono-cell">L3</td><td><strong>Human-on-the-loop</strong></td><td>Agent acts; human monitors &amp; can intervene/override</td><td>Triage, routing, monitoring at scale</td></tr>
+            <tr><td class="mono-cell">L4</td><td><strong>Conditional autonomy</strong></td><td>Agent acts independently within a defined envelope; escalates edge cases</td><td>Reconciliation, routine procurement</td></tr>
+            <tr><td class="mono-cell">L5</td><td><strong>Full autonomy</strong></td><td>Agent owns the outcome; humans review in aggregate</td><td>Rare today; only fully reversible, low-stakes work</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="box framework reveal">
+        <div class="box-lab">Framework · the autonomy / consequence rule</div>
+        <p>Grant the <strong>lowest level of autonomy that still captures the value</strong>, and raise it only as evidence of reliability accumulates. The right starting level turns on two questions: <em>how reversible is the action?</em> and <em>how costly is a wrong one?</em> Reversible and cheap → start higher (L3–L4). Irreversible or expensive → start lower (L1–L2), with a human gate, regardless of how confident the demo looked.</p>
+      </div>
+      <details class="facil reveal">
+        <summary>Facilitator note · the highest-leverage idea</summary>
+        <div class="fc"><p>If an audience remembers one thing, make it this: autonomy is a dial you set per use case, not a property of "the AI." Most failed agentic pilots set the dial too high too early — granting L4 autonomy to a process whose mistakes were expensive and hard to reverse. Every case in this playbook picks its level deliberately.</p></div>
+      </details>
+
+      <h3>Anatomy of an AI agent</h3>
+      <p>Strip away the marketing and every agent is the same loop wrapped around five components. Knowing the parts lets you see where an agent will fail — and where the money goes.</p>
+
+      <h4>The agent loop</h4>
+      <p>We sketched this loop earlier; here it is in full, including the <strong>reflection</strong> step that separates robust agents from brittle ones. An agent is not a single call to a model — it is a loop: the model thinks, chooses an action, the action runs in the real world, the result comes back, and the model reconsiders. The loop repeats until the goal is met or a stop condition fires.</p>
+      <figure class="reveal">
+        <svg viewBox="0 0 620 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The perceive, reason, act, observe, reflect agent loop circling a central goal with a stop rule.">
+          <defs>
+            <marker id="ahanat" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#bb5e1f"/></marker>
+          </defs>
+          <g font-family="Archivo,sans-serif" font-size="13">
+            <circle cx="310" cy="180" r="52" fill="#0f141d" stroke="#d8a23f" stroke-width="2"/>
+            <text x="310" y="174" text-anchor="middle" fill="#d8a23f" font-family="Fraunces,serif" font-size="14" font-weight="600">GOAL</text>
+            <text x="310" y="192" text-anchor="middle" fill="#c9c0ad" font-size="10">+ stop rule</text>
+            <g>
+              <circle cx="310" cy="52" r="40" fill="#fbf8f1" stroke="#1d5d57" stroke-width="1.5"/>
+              <text x="310" y="48" text-anchor="middle" font-family="Fraunces,serif" font-weight="600" font-size="13">Perceive</text>
+              <text x="310" y="64" text-anchor="middle" font-size="9.5" fill="#787b85">read state</text>
+            </g>
+            <g>
+              <circle cx="520" cy="130" r="40" fill="#fbf8f1" stroke="#1d5d57" stroke-width="1.5"/>
+              <text x="520" y="126" text-anchor="middle" font-family="Fraunces,serif" font-weight="600" font-size="13">Reason</text>
+              <text x="520" y="142" text-anchor="middle" font-size="9.5" fill="#787b85">plan / decide</text>
+            </g>
+            <g>
+              <circle cx="470" cy="300" r="40" fill="#fbf8f1" stroke="#bb5e1f" stroke-width="1.5"/>
+              <text x="470" y="296" text-anchor="middle" font-family="Fraunces,serif" font-weight="600" font-size="13">Act</text>
+              <text x="470" y="312" text-anchor="middle" font-size="9.5" fill="#787b85">call a tool</text>
+            </g>
+            <g>
+              <circle cx="150" cy="300" r="40" fill="#fbf8f1" stroke="#1d5d57" stroke-width="1.5"/>
+              <text x="150" y="296" text-anchor="middle" font-family="Fraunces,serif" font-weight="600" font-size="13">Observe</text>
+              <text x="150" y="312" text-anchor="middle" font-size="9.5" fill="#787b85">read result</text>
+            </g>
+            <g>
+              <circle cx="100" cy="130" r="40" fill="#fbf8f1" stroke="#1d5d57" stroke-width="1.5"/>
+              <text x="100" y="126" text-anchor="middle" font-family="Fraunces,serif" font-weight="600" font-size="13">Reflect</text>
+              <text x="100" y="142" text-anchor="middle" font-size="9.5" fill="#787b85">good enough?</text>
+            </g>
+            <path d="M345,68 A150 150 0 0 1 487,108" fill="none" stroke="#bb5e1f" stroke-width="2" marker-end="url(#ahanat)"/>
+            <path d="M533,168 A150 150 0 0 1 500,268" fill="none" stroke="#bb5e1f" stroke-width="2" marker-end="url(#ahanat)"/>
+            <path d="M432,322 A150 150 0 0 1 190,322" fill="none" stroke="#bb5e1f" stroke-width="2" marker-end="url(#ahanat)"/>
+            <path d="M118,266 A150 150 0 0 1 92,170" fill="none" stroke="#bb5e1f" stroke-width="2" marker-end="url(#ahanat)"/>
+            <path d="M128,98 A150 150 0 0 1 272,60" fill="none" stroke="#bb5e1f" stroke-width="2" marker-end="url(#ahanat)"/>
+          </g>
+        </svg>
+        <figcaption style="color:#787b85">Fig 3.1 — The agentic loop. Each pass is one model call plus one real-world action; the loop is what turns "answering" into "doing."</figcaption>
+      </figure>
+      <p>Two practical consequences follow. First, <strong>agents are loops, so they consume model calls repeatedly</strong> — cost scales with the number of steps, not the number of requests. Second, <strong>every pass through "Act" touches a real system</strong>; that is precisely where permissions, logging and guardrails must live.</p>
+
+      <h4>The five components</h4>
+      <div class="comp reveal">
+        <div class="c"><div class="h"><span class="num">1</span>Model</div><p>The reasoning engine that plans and decides. The choice trades off capability, latency and cost — many systems use a strong model for planning and cheaper ones for routine sub-steps.</p></div>
+        <div class="c"><div class="h"><span class="num">2</span>Memory</div><p><em>Short-term</em> (the working context of the current task) and <em>long-term</em> (facts, past interactions and knowledge retrieved on demand). Poor memory is the most common cause of agents "forgetting" or repeating themselves.</p></div>
+        <div class="c"><div class="h"><span class="num">3</span>Tools</div><p>The agent's hands: APIs, databases, search, code execution, other software. An agent is only as capable as the tools it can call — and only as safe as those tools' permissions.</p></div>
+        <div class="c"><div class="h"><span class="num">4</span>Planning</div><p>How the agent decomposes a goal into steps and sequences them. Ranges from simple step-by-step reasoning to explicit plans it can revise mid-task.</p></div>
+        <div class="c"><div class="h"><span class="num">5</span>Orchestration</div><p>The control logic that runs the loop: when to stop, when to retry, when to escalate to a human, how to handle errors. This is where reliability is engineered.</p></div>
+      </div>
+      <div class="box note reveal">
+        <div class="box-lab">Where quality actually comes from</div>
+        <p>Leaders often assume agent quality is mostly about the model. In knowledge-intensive use cases it usually isn't. Industry benchmarking through 2026 attributes the majority of an agent's real-world performance to the quality of the <strong>context it retrieves</strong> — the data, documents and memory feeding the model — rather than the model itself. <strong>Your proprietary data and how you wire it in is the moat; the model is increasingly a commodity.</strong></p>
+      </div>
+
+      <h4>Agentic design patterns</h4>
+      <p>A handful of reusable patterns underpin almost every production system. You don't need to implement them, but recognising them helps you read a proposal critically.</p>
+      <div class="grid g2 reveal">
+        <div class="card"><div class="cn">Pattern · reasoning</div><div class="ct">Reason-and-act (ReAct)</div><p>The agent alternates between thinking and acting, using each observation to inform the next thought. The default backbone of single agents.</p></div>
+        <div class="card"><div class="cn">Pattern · quality</div><div class="ct">Reflection</div><p>The agent critiques its own output and revises it — or a second "critic" agent reviews the first. A cheap, high-impact way to raise reliability.</p></div>
+        <div class="card"><div class="cn">Pattern · structure</div><div class="ct">Planning &amp; decomposition</div><p>The agent first writes an explicit plan, then executes the steps. Useful for long, multi-stage tasks where drift is a risk.</p></div>
+        <div class="card"><div class="cn">Pattern · scale</div><div class="ct">Orchestrator–workers</div><p>A lead agent breaks the goal into sub-tasks, dispatches them to specialised workers, then synthesises the results. The core of agentic AI.</p></div>
+      </div>
+      <div class="box framework reveal">
+        <div class="box-lab">Framework · workflows vs. agents</div>
+        <p>A critical distinction from current engineering practice: a <strong>workflow</strong> follows a predefined path (the steps are fixed in code; the model fills in the blanks), whereas an <strong>agent</strong> dynamically decides its own steps. Workflows are more predictable, cheaper and easier to govern; agents are more flexible but less deterministic. <strong>The mature default is to use the simplest thing that works</strong> — start with a structured workflow and add open-ended agency only where the problem genuinely demands it. Many "agentic" projects fail because they reached for full autonomy when a deterministic workflow would have been safer and cheaper.</p>
+      </div>
+
+      <h3>2 · What is an agentic AI system?</h3>
+      <div class="box def reveal">
+        <div class="box-lab">Definition · agentic AI system</div>
+        <p>An <strong>agentic AI system</strong> is the complete architecture in which one or more agents do real work safely and reliably. It is the agents <em>plus</em> everything around them: an <strong>orchestration</strong> that coordinates them, <strong>grounded knowledge</strong> they retrieve from, <strong>tools</strong> reached over governed protocols, the <strong>human gates and guardrails</strong> on consequential action, and the <strong>observability, identity and evaluation</strong> that make it trustworthy. The agent is the engine; the agentic system is the whole vehicle.</p>
+      </div>
+      <p>A single capable agent rarely solves a business problem by itself. Production work needs several specialists coordinated, anchored in the organisation's real data, allowed to touch real systems only within limits, watched, and owned by a named human. That engineered whole is the agentic system.</p>
+
+      <h4>Examples of agentic AI systems</h4>
+      <ul class="reveal">
+        <li>The <strong>AML investigation system</strong> in Case 01 — a lead orchestrator, four worker agents, retrieval over policy and prior cases, scoped read-only tools and a human filing gate — is an agentic system.</li>
+        <li>The <strong>retail merchandising fleet</strong> in Case 03 — a supervisor plus operational agents acting inside a deterministic guardrail envelope, with a kill switch — is an agentic system.</li>
+        <li>A <strong>software-engineering system</strong> that pairs a planner, a coder, a reviewer and a test-runner agent over a codebase, behind code review.</li>
+        <li>A <strong>supply-chain control tower</strong> that senses, simulates and recommends, with a planner committing the action — Case 04.</li>
+      </ul>
+
+      <h3>Holding the two apart</h3>
+      <div class="tbl-wrap reveal">
+        <table>
+          <thead><tr><th>&nbsp;</th><th>AI agent</th><th>Agentic AI system</th></tr></thead>
+          <tbody>
+            <tr><td><strong>What it is</strong></td><td>A single goal-directed worker built on a model</td><td>The full deployed solution one or more agents live in</td></tr>
+            <tr><td><strong>Scope</strong></td><td>One job, one loop</td><td>Coordination, data, tools, controls, governance</td></tr>
+            <tr><td><strong>Analogy</strong></td><td>An employee</td><td>The team, its tools, its policies and its oversight</td></tr>
+            <tr><td><strong>You evaluate</strong></td><td>Its task success, reasoning path and tool use</td><td>End-to-end outcomes, guardrails, safety and business value</td></tr>
+            <tr><td><strong>In this playbook</strong></td><td>Each worker inside a figure</td><td>Each whole case — the figure plus its gates and rails</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="box framework reveal">
+        <div class="box-lab">Why the distinction matters</div>
+        <p>Buying or building a clever <strong>agent</strong> is the easy 20%. The value — and nearly all the risk — lives in the surrounding <strong>system</strong>: the grounding, the permissions, the human gate, the evaluation and the audit trail. That is exactly why the rest of this playbook examines whole systems, not agents in isolation.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mod" id="m0" data-case="00">
+    <div class="mod-head">
+      <div class="mod-num">0.2</div>
+      <div><div class="mod-tag">Orientation <span class="time">read first</span></div>
+      <h2 class="mod-title">How to read each case</h2></div>
+    </div>
+    <div class="mod-body reveal">
+      <p class="lead">Every case in this playbook is built the same way, so you can compare them directly. Each one moves through <strong>four lenses</strong> — the organisation it lives in, the agentic architecture that delivers it, how the system is evaluated, and the risks that must be controlled. The technology is broadly the same across all four; what changes is how context, consequence and regulation reshape it.</p>
+
+      <div class="lenses">
+        <div class="ln"><div class="ic">A</div><h5>The organisation</h5><p>Size, ownership, regulatory exposure and operating model. The profile determines how much autonomy is tolerable and where value sits.</p></div>
+        <div class="ln"><div class="ic">B</div><h5>The architecture</h5><p>The agents, tools, data and orchestration that do the work — plus the human gates and governance rails wrapped around them.</p></div>
+        <div class="ln"><div class="ic">C</div><h5>The evaluation</h5><p>How you know it works <em>and keeps working</em>: offline test suites, online quality sampling, business outcomes and guardrail metrics.</p></div>
+        <div class="ln"><div class="ic">D</div><h5>The risk posture</h5><p>What can go wrong, how badly, and the concrete mitigation for each — the controls that earn the right to let the system act.</p></div>
+      </div>
+
+      <div class="box framework reveal">
+        <div class="box-lab">Framework · the autonomy / consequence rule</div>
+        <p>One idea runs through all four cases. <strong>The level of autonomy a business grants an agent should be inversely proportional to the cost of being wrong.</strong> Where an error is cheap and reversible, agents can act freely. Where an error is expensive, regulated, or irreversible — a wrongful denial of care, a mis-filed regulatory report, a bad commitment to a customer — a human gate sits between the agent's recommendation and the real-world action. Read each architecture diagram by first finding that gate.</p>
+      </div>
+
+      <h3>The four cases at a glance</h3>
+      <p>Four industries, four genuinely different organisation profiles, four different multi-agent topologies and four different autonomy postures.</p>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Case</th><th>Domain</th><th>Organisation profile</th><th>What the agents do</th><th>Topology</th><th>Autonomy</th></tr></thead>
+          <tbody>
+            <tr><td><strong>01</strong></td><td>Financial services</td><td>Global Tier-1 bank (highly regulated, very large)</td><td>Financial-crime / AML alert investigation</td><td class="mono-cell">Orchestrator–workers</td><td>Recommend; human files</td></tr>
+            <tr><td><strong>02</strong></td><td>Healthcare</td><td>Regional non-profit health system (mid-size, mission-led)</td><td>Prior authorisation &amp; care coordination</td><td class="mono-cell">Sequential + HITL</td><td>Auto-approve; human denies</td></tr>
+            <tr><td><strong>03</strong></td><td>Retail</td><td>PE-backed mid-market omnichannel retailer (lean, growth-pressured)</td><td>Merchandising operations &amp; customer service</td><td class="mono-cell">Hierarchical, mixed</td><td>Autonomous within envelopes</td></tr>
+            <tr><td><strong>04</strong></td><td>Manufacturing</td><td>Multinational industrial conglomerate (multi-BU, decentralised)</td><td>Supply-chain disruption response</td><td class="mono-cell">Monitor + simulate</td><td>Monitor auto; human commits</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="box note reveal">
+        <div class="box-lab">A note on the diagrams</div>
+        <p>The architectures shown are <strong>illustrative reference patterns</strong>, not vendor blueprints. Product and framework names reflect an early-2026 snapshot of a fast-moving market; the <em>shapes</em> — orchestrator with specialist workers, retrieval grounded in governed knowledge, tools reached over open protocols, a human gate before consequential action — are durable and worth committing to memory.</p>
+      </div>
+    </div>
+  </section>
+  <section class="mod" id="m1" data-case="01">
+    <div class="mod-head">
+      <div class="mod-num">01</div>
+      <div><div class="mod-tag">Case one <span class="time">Financial services</span></div>
+      <h2 class="mod-title">The financial-crime investigator</h2></div>
+    </div>
+    <div class="mod-body">
+      <div class="case-banner reveal">
+        <div class="cb-in">
+          <div class="dom">Financial services · Global Tier-1 bank</div>
+          <h3>Anti-money-laundering alert investigation</h3>
+          <p class="cap">An agentic system triages and investigates transaction-monitoring alerts end to end — gathering evidence, resolving entities, screening for sanctions and adverse media, and drafting a defensible case narrative — so human investigators spend their time deciding, not assembling.</p>
+        </div>
+      </div>
+      <div class="case-shell">
+
+        <h4>A · The organisation</h4>
+        <div class="spec reveal">
+          <div class="sp"><div class="k">Profile</div><div class="v">Global systemically-important bank; hundreds of thousands of staff; operations across dozens of jurisdictions.</div></div>
+          <div class="sp"><div class="k">Pressure</div><div class="v">Tens of thousands of monitoring alerts per month; ~90–95% are false positives; investigator backlogs and turnover are chronic.</div></div>
+          <div class="sp"><div class="k">Regulatory exposure</div><div class="v">Extreme. BSA/AML, sanctions regimes, and model-risk supervision; multi-hundred-million-dollar fines for systemic failures.</div></div>
+          <div class="sp"><div class="k">Why agentic</div><div class="v">Investigation is multi-step evidence work across many systems — a natural fit for a planning agent that orchestrates retrieval and reasoning, with a human owning the filing decision.</div></div>
+        </div>
+
+        <h4>B · The agentic architecture</h4>
+        <p>The pattern is <strong>orchestrator–workers</strong>. A lead agent decomposes each alert into an investigation plan and dispatches specialist worker agents in parallel; it then synthesises their findings into a single draft case. Crucially, the system <strong>recommends but never files</strong> — every Suspicious Activity Report passes through a human investigator.</p>
+
+        <div class="roster reveal">
+          <span><b>Lead</b> · Investigation orchestrator</span>
+          <span>Transaction analyser</span>
+          <span>Entity resolution</span>
+          <span>Sanctions &amp; adverse-media</span>
+          <span>Narrative drafter</span>
+        </div>
+
+        <section class="blueprint reveal">
+          <div class="bp-inner">
+            <div class="bp-lab">Figure 1 · Orchestrator–workers investigation architecture</div>
+            <figure>
+              <svg viewBox="0 0 780 470" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="AML investigation architecture: an alert triggers an orchestrator that dispatches four worker agents over a shared tool and knowledge layer, then routes a draft case through a human analyst gate before filing.">
+                <defs>
+                  <marker id="ar1" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#9a917f"/></marker>
+                  <marker id="ar1g" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#d8a23f"/></marker>
+                </defs>
+                <!-- trigger -->
+                <rect x="290" y="8" width="200" height="40" rx="9" fill="#1b2433" stroke="#7d8590"/>
+                <text x="390" y="26" text-anchor="middle" fill="#f4efe4" font-family="Archivo,sans-serif" font-size="12.5" font-weight="700">Monitoring alert</text>
+                <text x="390" y="40" text-anchor="middle" fill="#c9c0ad" font-family="JetBrains Mono,monospace" font-size="9.5">transaction pattern flagged</text>
+                <line x1="390" y1="48" x2="390" y2="70" stroke="#9a917f" stroke-width="1.5" marker-end="url(#ar1)"/>
+                <!-- orchestrator -->
+                <rect x="250" y="72" width="280" height="56" rx="11" fill="#23262f" stroke="#d8a23f" stroke-width="2"/>
+                <text x="390" y="94" text-anchor="middle" fill="#f4efe4" font-family="Fraunces,serif" font-size="15" font-weight="600">Investigation Lead · Orchestrator</text>
+                <text x="390" y="113" text-anchor="middle" fill="#d8b98a" font-family="JetBrains Mono,monospace" font-size="9.5">plan · route · synthesise · decide-to-escalate</text>
+                <!-- fan to workers -->
+                <line x1="320" y1="128" x2="95"  y2="168" stroke="#9a917f" stroke-width="1.3" marker-end="url(#ar1)"/>
+                <line x1="360" y1="128" x2="283" y2="168" stroke="#9a917f" stroke-width="1.3" marker-end="url(#ar1)"/>
+                <line x1="420" y1="128" x2="497" y2="168" stroke="#9a917f" stroke-width="1.3" marker-end="url(#ar1)"/>
+                <line x1="460" y1="128" x2="685" y2="168" stroke="#9a917f" stroke-width="1.3" marker-end="url(#ar1)"/>
+                <!-- workers -->
+                <g font-family="Archivo,sans-serif" font-size="11.5" font-weight="700">
+                  <rect x="12"  y="170" width="172" height="50" rx="9" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                  <text x="98"  y="191" text-anchor="middle" fill="#f4efe4">Transaction analyser</text>
+                  <rect x="206" y="170" width="172" height="50" rx="9" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                  <text x="292" y="191" text-anchor="middle" fill="#f4efe4">Entity resolution</text>
+                  <rect x="400" y="170" width="180" height="50" rx="9" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                  <text x="490" y="191" text-anchor="middle" fill="#f4efe4">Sanctions &amp; media</text>
+                  <rect x="602" y="170" width="166" height="50" rx="9" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                  <text x="685" y="191" text-anchor="middle" fill="#f4efe4">Narrative drafter</text>
+                </g>
+                <g font-family="JetBrains Mono,monospace" font-size="8.5" fill="#9aa0ab">
+                  <text x="98"  y="208" text-anchor="middle">flows · counterparties</text>
+                  <text x="292" y="208" text-anchor="middle">link customer graph</text>
+                  <text x="490" y="208" text-anchor="middle">watchlists · news</text>
+                  <text x="685" y="208" text-anchor="middle">cite evidence</text>
+                </g>
+                <!-- to tools -->
+                <line x1="98"  y1="220" x2="98"  y2="250" stroke="#9a917f" stroke-width="1.2" marker-end="url(#ar1)"/>
+                <line x1="292" y1="220" x2="292" y2="250" stroke="#9a917f" stroke-width="1.2" marker-end="url(#ar1)"/>
+                <line x1="490" y1="220" x2="490" y2="250" stroke="#9a917f" stroke-width="1.2" marker-end="url(#ar1)"/>
+                <line x1="685" y1="220" x2="685" y2="250" stroke="#9a917f" stroke-width="1.2" marker-end="url(#ar1)"/>
+                <!-- tools & knowledge band -->
+                <rect x="12" y="252" width="756" height="70" rx="11" fill="#12161f" stroke="#1d5d57" stroke-width="1.6"/>
+                <text x="26" y="270" fill="#7fd3c9" font-family="JetBrains Mono,monospace" font-size="9" font-weight="700" letter-spacing="1.5">TOOLS &amp; KNOWLEDGE · reached over MCP, read-only scopes</text>
+                <g font-family="Archivo,sans-serif" font-size="10" font-weight="600" fill="#dfe3e8">
+                  <rect x="26"  y="282" width="130" height="30" rx="7" fill="#1b2433"/><text x="91"  y="301" text-anchor="middle">Core banking / payments</text>
+                  <rect x="166" y="282" width="120" height="30" rx="7" fill="#1b2433"/><text x="226" y="301" text-anchor="middle">KYC customer graph</text>
+                  <rect x="296" y="282" width="120" height="30" rx="7" fill="#1b2433"/><text x="356" y="301" text-anchor="middle">Sanctions &amp; watchlists</text>
+                  <rect x="426" y="282" width="118" height="30" rx="7" fill="#1b2433"/><text x="485" y="301" text-anchor="middle">Case management</text>
+                  <rect x="554" y="282" width="200" height="30" rx="7" fill="#173f3a"/><text x="654" y="301" text-anchor="middle" fill="#cfeae6">RAG: AML policy + prior SARs</text>
+                </g>
+                <!-- synthesise back up to human gate -->
+                <line x1="530" y1="100" x2="600" y2="100" stroke="#d8a23f" stroke-width="1.4"/>
+                <path d="M600,100 L600,360 L470,360" fill="none" stroke="#d8a23f" stroke-width="1.4" marker-end="url(#ar1g)"/>
+                <text x="610" y="230" fill="#d8a23f" font-family="JetBrains Mono,monospace" font-size="8.5" transform="rotate(90 610 230)">draft case + evidence</text>
+                <!-- human gate -->
+                <polygon points="390,330 470,360 390,390 310,360" fill="#d8a23f" stroke="#b07d1f"/>
+                <text x="390" y="357" text-anchor="middle" fill="#1a1205" font-family="Archivo,sans-serif" font-size="11.5" font-weight="800">HUMAN GATE</text>
+                <text x="390" y="372" text-anchor="middle" fill="#3a2a08" font-family="JetBrains Mono,monospace" font-size="8.5">investigator review</text>
+                <line x1="390" y1="390" x2="390" y2="416" stroke="#9a917f" stroke-width="1.5" marker-end="url(#ar1)"/>
+                <!-- outcome -->
+                <rect x="270" y="418" width="240" height="40" rx="9" fill="#1b2433" stroke="#7d8590"/>
+                <text x="390" y="436" text-anchor="middle" fill="#f4efe4" font-family="Archivo,sans-serif" font-size="12" font-weight="700">File SAR · escalate · or close</text>
+                <text x="390" y="450" text-anchor="middle" fill="#c9c0ad" font-family="JetBrains Mono,monospace" font-size="9">decision &amp; accountability stay human</text>
+              </svg>
+              <div class="arch-legend">
+                <span><i style="background:#d8a23f"></i>orchestrator &amp; gate</span>
+                <span><i style="background:#bb5e1f"></i>worker agents</span>
+                <span><i style="background:#1d5d57"></i>tools &amp; knowledge</span>
+                <span><i style="background:#7d8590"></i>trigger / outcome</span>
+              </div>
+              <figcaption>The lead agent plans and synthesises; workers gather evidence in parallel; nothing is filed without an investigator.</figcaption>
+            </figure>
+            <p style="font-size:.9rem;margin:14px 0 0">Two cross-cutting rails wrap the whole flow. <strong>Observability</strong> records every prompt, tool call and intermediate finding to an immutable audit trail — essential when a regulator later asks why a report was or was not filed. <strong>Identity &amp; least-privilege</strong> means each tool is reached with read-only, scoped credentials; no agent can move money or alter a customer record.</p>
+          </div>
+        </section>
+
+        <h4>C · Evaluating the system</h4>
+        <p>Because a missed case is a regulatory failure and a false case wastes scarce investigators, evaluation is taken as seriously as the model itself. It runs on three horizons: an offline test suite that gates every change, continuous online quality sampling, and the business outcomes that justify the programme.</p>
+        <div class="tbl-wrap reveal">
+          <table>
+            <thead><tr><th>Dimension</th><th>How it is measured</th><th>Representative target</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Recall on known cases</strong></td><td>Replay a curated golden set of historically confirmed cases; the system must surface the same red flags</td><td class="mono-cell">&ge; 98% red-flag recall</td></tr>
+              <tr><td><strong>Evidence groundedness</strong></td><td>Every claim in the narrative must cite a retrieved source; sampled and LLM-judged for faithfulness, then human-spot-checked</td><td class="mono-cell">&ge; 99% claims cited; 0 fabricated facts</td></tr>
+              <tr><td><strong>Tool-call accuracy</strong></td><td>Did agents call the right systems with correct parameters? Trajectory evaluation against expert traces</td><td class="mono-cell">&ge; 97% correct calls</td></tr>
+              <tr><td><strong>False-positive reduction</strong></td><td>Share of alerts correctly triaged as low-risk vs. analyst ground truth</td><td class="mono-cell">40–60% effort reduction</td></tr>
+              <tr><td><strong>Investigator override rate</strong></td><td>How often humans materially change the draft disposition — the trust signal watched over time</td><td class="mono-cell">trending down, monitored</td></tr>
+              <tr><td><strong>Latency &amp; cost</strong></td><td>Time and token cost to assemble a complete case package</td><td class="mono-cell">within SLA &amp; unit-cost budget</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box def reveal">
+          <div class="box-lab">Definition · trajectory vs. outcome evaluation</div>
+          <p><strong>Outcome evaluation</strong> asks whether the final answer was right. <strong>Trajectory evaluation</strong> asks whether the agent got there sensibly — the right tools, in a reasonable order, without wasteful or risky detours. Agentic systems need both: a correct conclusion reached by a broken path will eventually fail on a case where the path matters.</p>
+        </div>
+
+        <h4>D · Risks &amp; mitigation</h4>
+        <div class="tbl-wrap reveal">
+          <table>
+            <thead><tr><th>Risk</th><th>Sev.</th><th>Mitigation</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Missed suspicious activity</strong> — agent closes an alert that should have been escalated</td><td><span class="sev h">High</span></td><td>Human gate on every closure of higher-risk alerts; recall floor enforced as a release gate; champion–challenger against the legacy process before any scope expansion</td></tr>
+              <tr><td><strong>Fabricated evidence</strong> in the narrative</td><td><span class="sev h">High</span></td><td>Strict retrieval-grounding with mandatory citations; faithfulness checks; the drafter cannot assert anything not traceable to a tool result</td></tr>
+              <tr><td><strong>Prompt injection</strong> via adverse-media text or transaction memos</td><td><span class="sev h">High</span></td><td>Treat all retrieved content as untrusted data, never instructions; input sanitisation; tools remain read-only so a hijack cannot act</td></tr>
+              <tr><td><strong>Privacy / data leakage</strong> of customer PII</td><td><span class="sev m">Med</span></td><td>Scoped least-privilege access; data minimisation in prompts; no training on customer data; full audit of every retrieval</td></tr>
+              <tr><td><strong>Model-risk / explainability</strong> gaps under supervision</td><td><span class="sev m">Med</span></td><td>Immutable decision trail; documented evals fitted to the bank's model-risk framework; agent registered as a governed model</td></tr>
+              <tr><td><strong>Automation bias</strong> — investigators rubber-stamp drafts</td><td><span class="sev m">Med</span></td><td>Surface uncertainty and dissenting evidence; periodic blind-review audits; track and act on override rates</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box note reveal">
+          <div class="box-lab">Why this shape</div>
+          <p>In a Tier-1 bank the cost of being wrong is measured in regulatory enforcement, so autonomy is deliberately low: the agents do the <strong>labour</strong> of investigation and a human keeps the <strong>decision</strong>. The return is not headcount removal but throughput and consistency — more alerts cleared, with a defensible, audited rationale behind every one.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+  <section class="mod" id="m2" data-case="02">
+    <div class="mod-head">
+      <div class="mod-num">02</div>
+      <div><div class="mod-tag">Case two <span class="time">Healthcare</span></div>
+      <h2 class="mod-title">The prior-authorisation coordinator</h2></div>
+    </div>
+    <div class="mod-body">
+      <div class="case-banner reveal">
+        <div class="cb-in">
+          <div class="dom">Healthcare · Regional non-profit health system</div>
+          <h3>Prior authorisation &amp; care coordination</h3>
+          <p class="cap">An agentic pipeline reads incoming authorisation requests, checks them against payer medical policy and clinical guidelines, confirms eligibility, and clears the clearly-approvable cases automatically — routing every denial or doubtful case to a licensed clinician. Staff stop chasing paperwork and start coordinating care.</p>
+        </div>
+      </div>
+      <div class="case-shell">
+
+        <h4>A · The organisation</h4>
+        <div class="spec reveal">
+          <div class="sp"><div class="k">Profile</div><div class="v">Regional non-profit health system; a handful of hospitals and clinics; mission-driven, margin-thin, perennially short of administrative staff.</div></div>
+          <div class="sp"><div class="k">Pressure</div><div class="v">Prior authorisation is slow, manual and a leading cause of care delays and clinician burnout; payer rules differ and change constantly.</div></div>
+          <div class="sp"><div class="k">Regulatory exposure</div><div class="v">High and patient-facing. HIPAA, clinical-safety duties, payer contracts, and emerging rules on automated coverage decisions.</div></div>
+          <div class="sp"><div class="k">Why agentic</div><div class="v">The work is a sequence of reference-and-check steps against documents — ideal for a grounded pipeline — but the duty of care means a human must own any decision that withholds treatment.</div></div>
+        </div>
+
+        <h4>B · The agentic architecture</h4>
+        <p>The pattern is a <strong>sequential pipeline with a human-in-the-loop gate</strong>. Each stage hands a structured result to the next. The defining design choice is an <strong>autonomy asymmetry</strong>: because granting care is low-harm and withholding it is high-harm, the system may <em>approve</em> a clearly-eligible request on its own, but it may never <em>deny</em> — denials and ambiguous cases always go to a clinician.</p>
+
+        <div class="roster reveal">
+          <span>Intake &amp; extraction</span>
+          <span>Clinical-criteria</span>
+          <span>Eligibility &amp; benefits</span>
+          <span>Decision</span>
+          <span><b>Gate</b> · Clinician</span>
+          <span>Care coordination</span>
+        </div>
+
+        <section class="blueprint reveal">
+          <div class="bp-inner">
+            <div class="bp-lab">Figure 2 · Sequential pipeline with clinician gate</div>
+            <figure>
+              <svg viewBox="0 0 780 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Prior-authorisation pipeline: intake, clinical-criteria, eligibility and decision stages run in sequence over a knowledge layer; clear approvals are issued automatically while denials and doubtful cases route to a clinician gate.">
+                <defs>
+                  <marker id="ar2" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#9a917f"/></marker>
+                  <marker id="ar2t" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#5fb3a8"/></marker>
+                  <marker id="ar2g" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#d8a23f"/></marker>
+                </defs>
+                <!-- trigger -->
+                <rect x="12" y="10" width="250" height="38" rx="9" fill="#1b2433" stroke="#7d8590"/>
+                <text x="137" y="28" text-anchor="middle" fill="#f4efe4" font-family="Archivo,sans-serif" font-size="12" font-weight="700">Prior-auth request received</text>
+                <text x="137" y="42" text-anchor="middle" fill="#c9c0ad" font-family="JetBrains Mono,monospace" font-size="9">order + clinical documents</text>
+                <line x1="95" y1="48" x2="95" y2="72" stroke="#9a917f" stroke-width="1.4" marker-end="url(#ar2)"/>
+                <!-- pipeline stages -->
+                <g font-family="Archivo,sans-serif" font-weight="700">
+                  <rect x="12"  y="74" width="170" height="54" rx="9" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                  <text x="97"  y="97"  text-anchor="middle" fill="#f4efe4" font-size="12">Intake &amp; extraction</text>
+                  <rect x="206" y="74" width="180" height="54" rx="9" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                  <text x="296" y="97"  text-anchor="middle" fill="#f4efe4" font-size="12">Clinical-criteria</text>
+                  <rect x="410" y="74" width="170" height="54" rx="9" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                  <text x="495" y="97"  text-anchor="middle" fill="#f4efe4" font-size="12">Eligibility &amp; benefits</text>
+                  <rect x="604" y="74" width="164" height="54" rx="9" fill="#23262f" stroke="#d8a23f" stroke-width="1.8"/>
+                  <text x="686" y="97"  text-anchor="middle" fill="#f4efe4" font-size="12">Decision</text>
+                </g>
+                <g font-family="JetBrains Mono,monospace" font-size="8.5" fill="#9aa0ab">
+                  <text x="97"  y="114" text-anchor="middle">structure the case</text>
+                  <text x="296" y="114" text-anchor="middle">medical necessity</text>
+                  <text x="495" y="114" text-anchor="middle">coverage &amp; network</text>
+                  <text x="686" y="114" text-anchor="middle">approve / route</text>
+                </g>
+                <line x1="182" y1="101" x2="204" y2="101" stroke="#9a917f" stroke-width="1.4" marker-end="url(#ar2)"/>
+                <line x1="386" y1="101" x2="408" y2="101" stroke="#9a917f" stroke-width="1.4" marker-end="url(#ar2)"/>
+                <line x1="580" y1="101" x2="602" y2="101" stroke="#9a917f" stroke-width="1.4" marker-end="url(#ar2)"/>
+                <!-- knowledge band -->
+                <rect x="120" y="150" width="470" height="58" rx="11" fill="#12161f" stroke="#1d5d57" stroke-width="1.6"/>
+                <text x="134" y="168" fill="#7fd3c9" font-family="JetBrains Mono,monospace" font-size="9" font-weight="700" letter-spacing="1.2">GROUNDED KNOWLEDGE · retrieval with provenance</text>
+                <g font-family="Archivo,sans-serif" font-size="10" font-weight="600" fill="#dfe3e8">
+                  <rect x="134" y="178" width="150" height="24" rx="6" fill="#173f3a"/><text x="209" y="194" text-anchor="middle" fill="#cfeae6">Payer medical policy</text>
+                  <rect x="292" y="178" width="150" height="24" rx="6" fill="#173f3a"/><text x="367" y="194" text-anchor="middle" fill="#cfeae6">Clinical guidelines</text>
+                  <rect x="450" y="178" width="126" height="24" rx="6" fill="#1b2433"/><text x="513" y="194" text-anchor="middle">Member eligibility</text>
+                </g>
+                <line x1="296" y1="150" x2="296" y2="130" stroke="#1d5d57" stroke-width="1.3" marker-end="url(#ar2)"/>
+                <line x1="495" y1="150" x2="495" y2="130" stroke="#1d5d57" stroke-width="1.3" marker-end="url(#ar2)"/>
+                <!-- decision branches -->
+                <line x1="686" y1="128" x2="686" y2="150" stroke="#9a917f" stroke-width="1.4"/>
+                <!-- approve lane (left/auto) -->
+                <path d="M686,150 L686,240 L250,240" fill="none" stroke="#5fb3a8" stroke-width="1.6" marker-end="url(#ar2t)"/>
+                <text x="500" y="234" text-anchor="middle" fill="#5fb3a8" font-family="JetBrains Mono,monospace" font-size="9">clear approval · autonomous</text>
+                <rect x="60" y="222" width="190" height="40" rx="9" fill="#13322e" stroke="#5fb3a8" stroke-width="1.6"/>
+                <text x="155" y="240" text-anchor="middle" fill="#d7f1ec" font-family="Archivo,sans-serif" font-size="11.5" font-weight="700">Issue authorisation</text>
+                <text x="155" y="254" text-anchor="middle" fill="#9fd6cd" font-family="JetBrains Mono,monospace" font-size="8.5">notify provider &amp; patient</text>
+                <line x1="155" y1="262" x2="155" y2="290" stroke="#9a917f" stroke-width="1.4" marker-end="url(#ar2)"/>
+                <rect x="40" y="292" width="230" height="40" rx="9" fill="#1b2433" stroke="#7d8590"/>
+                <text x="155" y="310" text-anchor="middle" fill="#f4efe4" font-family="Archivo,sans-serif" font-size="11.5" font-weight="700">Care-coordination agent</text>
+                <text x="155" y="324" text-anchor="middle" fill="#c9c0ad" font-family="JetBrains Mono,monospace" font-size="8.5">schedule · follow-up · close loop</text>
+                <!-- deny lane (human gate) -->
+                <path d="M686,150 L686,360 L548,360" fill="none" stroke="#d8a23f" stroke-width="1.6" marker-end="url(#ar2g)"/>
+                <text x="700" y="250" fill="#d8a23f" font-family="JetBrains Mono,monospace" font-size="8.5" transform="rotate(90 700 250)">deny or doubtful</text>
+                <polygon points="468,330 548,360 468,390 388,360" fill="#d8a23f" stroke="#b07d1f"/>
+                <text x="468" y="357" text-anchor="middle" fill="#1a1205" font-family="Archivo,sans-serif" font-size="11" font-weight="800">HUMAN GATE</text>
+                <text x="468" y="372" text-anchor="middle" fill="#3a2a08" font-family="JetBrains Mono,monospace" font-size="8.5">clinician review</text>
+                <line x1="468" y1="390" x2="468" y2="414" stroke="#9a917f" stroke-width="1.4" marker-end="url(#ar2)"/>
+                <rect x="348" y="416" width="240" height="38" rx="9" fill="#1b2433" stroke="#7d8590"/>
+                <text x="468" y="434" text-anchor="middle" fill="#f4efe4" font-family="Archivo,sans-serif" font-size="11.5" font-weight="700">Deny · pend · or approve</text>
+                <text x="468" y="448" text-anchor="middle" fill="#c9c0ad" font-family="JetBrains Mono,monospace" font-size="8.5">a licensed human decides</text>
+              </svg>
+              <div class="arch-legend">
+                <span><i style="background:#bb5e1f"></i>pipeline stages</span>
+                <span><i style="background:#5fb3a8"></i>autonomous approve path</span>
+                <span><i style="background:#d8a23f"></i>clinician gate</span>
+                <span><i style="background:#1d5d57"></i>grounded knowledge</span>
+              </div>
+              <figcaption>The system can grant care on its own; it can never withhold it. Every denial is a human clinical decision.</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <h4>C · Evaluating the system</h4>
+        <p>Evaluation centres on two things a health system cannot get wrong: <strong>clinical safety</strong> (never auto-approving something inappropriate, never wrongly steering toward denial) and <strong>equity</strong> (the system must not disadvantage any patient group). Speed matters, but only after safety is proven.</p>
+        <div class="tbl-wrap reveal">
+          <table>
+            <thead><tr><th>Dimension</th><th>How it is measured</th><th>Representative target</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Auto-approval precision</strong></td><td>Of cases auto-approved, the share a clinician audit confirms were correctly approvable</td><td class="mono-cell">&ge; 99.5% (very low tolerance)</td></tr>
+              <tr><td><strong>Criteria-matching accuracy</strong></td><td>Agreement with clinician judgement on a golden set spanning common and edge-case requests</td><td class="mono-cell">&ge; 95% vs. expert label</td></tr>
+              <tr><td><strong>Grounding / citation</strong></td><td>Every necessity finding cites the specific policy or guideline clause; faithfulness checked</td><td class="mono-cell">100% of findings cited</td></tr>
+              <tr><td><strong>Appropriate abstention</strong></td><td>Share of low-confidence or novel cases correctly routed to the clinician rather than auto-handled</td><td class="mono-cell">high recall on "should escalate"</td></tr>
+              <tr><td><strong>Fairness / equity audit</strong></td><td>Approval and routing rates compared across demographic and coverage groups for disparate impact</td><td class="mono-cell">no statistically significant disparity</td></tr>
+              <tr><td><strong>Turnaround time</strong></td><td>Median decision time vs. the manual baseline</td><td class="mono-cell">days &rarr; hours</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box framework reveal">
+          <div class="box-lab">Framework · evaluate the abstention, not just the answer</div>
+          <p>In high-consequence settings the most important behaviour is often <strong>knowing when to stop</strong>. A system that confidently handles 100% of cases is more dangerous than one that handles 80% and reliably escalates the rest. So a core metric is the quality of the escalation decision itself — does the agent route the genuinely hard cases to humans?</p>
+        </div>
+
+        <h4>D · Risks &amp; mitigation</h4>
+        <div class="tbl-wrap reveal">
+          <table>
+            <thead><tr><th>Risk</th><th>Sev.</th><th>Mitigation</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Inappropriate denial of care</strong> via automation</td><td><span class="sev h">High</span></td><td>Architectural rule: the agent cannot deny — denials are always a licensed-clinician decision with documented rationale</td></tr>
+              <tr><td><strong>Wrongful auto-approval</strong> of unsafe or non-covered care</td><td><span class="sev h">High</span></td><td>Conservative confidence threshold; auto-approve only well-inside-policy cases; high precision enforced as a release gate; continuous audit</td></tr>
+              <tr><td><strong>Bias / inequitable outcomes</strong> across patient groups</td><td><span class="sev h">High</span></td><td>Pre-deployment and ongoing fairness testing; demographic outcome monitoring; diverse golden datasets; remediation triggers</td></tr>
+              <tr><td><strong>PHI exposure</strong> (HIPAA)</td><td><span class="sev h">High</span></td><td>Minimum-necessary data in prompts; no training on PHI; encryption and scoped access; complete audit trail; business-associate-grade controls</td></tr>
+              <tr><td><strong>Stale or misread policy</strong> as rules change</td><td><span class="sev m">Med</span></td><td>Single governed source of truth for policy with versioning; retrieval cites the active clause; change-detection re-runs the eval suite</td></tr>
+              <tr><td><strong>Patient transparency &amp; appeal</strong></td><td><span class="sev m">Med</span></td><td>Disclose AI assistance; preserve a clear human-decision and appeal pathway; explain the basis for any adverse decision</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box note reveal">
+          <div class="box-lab">Why this shape</div>
+          <p>The asymmetry is the whole design. Letting agents <strong>say yes</strong> removes the administrative drag that delays care; reserving <strong>every no</strong> for a clinician keeps the duty of care — and its accountability — firmly with a human. Value shows up as faster approvals and reclaimed staff time, not as removing humans from the decision that matters most.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+  <section class="mod" id="m3" data-case="03">
+    <div class="mod-head">
+      <div class="mod-num">03</div>
+      <div><div class="mod-tag">Case three <span class="time">Retail</span></div>
+      <h2 class="mod-title">The merchandising &amp; service operator</h2></div>
+    </div>
+    <div class="mod-body">
+      <div class="case-banner reveal">
+        <div class="cb-in">
+          <div class="dom">Retail · PE-backed mid-market omnichannel retailer</div>
+          <h3>Merchandising operations &amp; customer service</h3>
+          <p class="cap">A supervisor agent coordinates a team of operational agents that replenish stock, tune pricing and promotions, maintain the catalogue, and answer customers — all acting on their own, but only ever inside hard, deterministic guardrails. Anything that exceeds those limits stops for a human.</p>
+        </div>
+      </div>
+      <div class="case-shell">
+
+        <h4>A · The organisation</h4>
+        <div class="spec reveal">
+          <div class="sp"><div class="k">Profile</div><div class="v">Private-equity-backed mid-market retailer; selling across web, marketplaces and stores; lean team under an explicit efficiency-and-growth mandate.</div></div>
+          <div class="sp"><div class="k">Pressure</div><div class="v">Thousands of SKUs, constant price moves and a flood of routine customer queries — far more operational decisions than the team can make by hand.</div></div>
+          <div class="sp"><div class="k">Regulatory exposure</div><div class="v">Moderate. Consumer protection, advertising and pricing rules, payment and data-privacy obligations — but errors are largely reversible.</div></div>
+          <div class="sp"><div class="k">Why agentic</div><div class="v">High volume, low individual stakes, fast feedback — the profile where genuine autonomy pays off, provided it is fenced by firm operating limits.</div></div>
+        </div>
+
+        <h4>B · The agentic architecture</h4>
+        <p>The pattern is <strong>hierarchical with mixed autonomy</strong>. A supervisor agent routes work to specialist operational agents that act <strong>autonomously inside a guardrail envelope</strong> — deterministic, code-enforced limits such as margin floors, reorder budgets and refund caps. The model proposes; the envelope decides what is allowed to happen. Anything outside the envelope routes to a human, and an always-available kill switch can pause the fleet instantly.</p>
+
+        <div class="roster reveal">
+          <span><b>Supervisor</b></span>
+          <span>Replenishment</span>
+          <span>Pricing &amp; promo</span>
+          <span>Catalogue</span>
+          <span>Customer service</span>
+          <span><b>Limit</b> · guardrail envelope</span>
+        </div>
+
+        <section class="blueprint reveal">
+          <div class="bp-inner">
+            <div class="bp-lab">Figure 3 · Hierarchical fleet inside a guardrail envelope</div>
+            <figure>
+              <svg viewBox="0 0 780 392" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Retail architecture: a supervisor agent directs four operational agents that act autonomously inside a deterministic guardrail envelope over commerce tools, with out-of-envelope actions routed to a human and a kill switch available.">
+                <defs>
+                  <marker id="ar3" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#9a917f"/></marker>
+                  <marker id="ar3t" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#5fb3a8"/></marker>
+                  <marker id="ar3g" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#d8a23f"/></marker>
+                </defs>
+                <!-- trigger + kill switch -->
+                <rect x="12" y="8" width="600" height="32" rx="8" fill="#1b2433" stroke="#7d8590"/>
+                <text x="312" y="29" text-anchor="middle" fill="#dfe3e8" font-family="JetBrains Mono,monospace" font-size="9.5">CONTINUOUS EVENTS · low-stock signals · demand shifts · customer messages</text>
+                <rect x="624" y="8" width="144" height="32" rx="8" fill="#3a1714" stroke="#b23b2e" stroke-width="1.6"/>
+                <text x="696" y="28" text-anchor="middle" fill="#f0b8b0" font-family="Archivo,sans-serif" font-size="11" font-weight="700">⏻ Kill switch</text>
+                <!-- supervisor -->
+                <rect x="285" y="50" width="210" height="46" rx="11" fill="#23262f" stroke="#d8a23f" stroke-width="2"/>
+                <text x="390" y="72" text-anchor="middle" fill="#f4efe4" font-family="Fraunces,serif" font-size="14.5" font-weight="600">Merchandising-ops supervisor</text>
+                <text x="390" y="89" text-anchor="middle" fill="#d8b98a" font-family="JetBrains Mono,monospace" font-size="9">route work · set goals · monitor fleet</text>
+                <!-- envelope -->
+                <rect x="10" y="112" width="602" height="102" rx="12" fill="none" stroke="#d8a23f" stroke-width="1.6" stroke-dasharray="7 5"/>
+                <text x="22" y="128" fill="#d8a23f" font-family="JetBrains Mono,monospace" font-size="8.5" font-weight="700" letter-spacing="1">GUARDRAIL ENVELOPE · margin floor · reorder budget · refund cap · brand &amp; pricing rules (code-enforced)</text>
+                <!-- agents -->
+                <g font-family="Archivo,sans-serif" font-weight="700" font-size="11">
+                  <rect x="20"  y="138" width="140" height="56" rx="9" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                  <text x="90"  y="162" text-anchor="middle" fill="#f4efe4">Replenishment</text>
+                  <rect x="168" y="138" width="140" height="56" rx="9" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                  <text x="238" y="162" text-anchor="middle" fill="#f4efe4">Pricing &amp; promo</text>
+                  <rect x="316" y="138" width="140" height="56" rx="9" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                  <text x="386" y="162" text-anchor="middle" fill="#f4efe4">Catalogue</text>
+                  <rect x="464" y="138" width="140" height="56" rx="9" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                  <text x="534" y="162" text-anchor="middle" fill="#f4efe4">Customer service</text>
+                </g>
+                <g font-family="JetBrains Mono,monospace" font-size="8" fill="#9aa0ab">
+                  <text x="90"  y="180" text-anchor="middle">reorder in budget</text>
+                  <text x="238" y="180" text-anchor="middle">price within floor</text>
+                  <text x="386" y="180" text-anchor="middle">enrich listings</text>
+                  <text x="534" y="180" text-anchor="middle">refund under cap</text>
+                </g>
+                <line x1="330" y1="96" x2="120" y2="136" stroke="#9a917f" stroke-width="1.2" marker-end="url(#ar3)"/>
+                <line x1="365" y1="96" x2="248" y2="136" stroke="#9a917f" stroke-width="1.2" marker-end="url(#ar3)"/>
+                <line x1="415" y1="96" x2="386" y2="136" stroke="#9a917f" stroke-width="1.2" marker-end="url(#ar3)"/>
+                <line x1="450" y1="96" x2="534" y2="136" stroke="#9a917f" stroke-width="1.2" marker-end="url(#ar3)"/>
+                <!-- tools band -->
+                <rect x="10" y="300" width="602" height="60" rx="11" fill="#12161f" stroke="#1d5d57" stroke-width="1.6"/>
+                <text x="24" y="318" fill="#7fd3c9" font-family="JetBrains Mono,monospace" font-size="9" font-weight="700" letter-spacing="1.2">TOOLS &amp; DATA · scoped write access, every action logged</text>
+                <g font-family="Archivo,sans-serif" font-size="9.5" font-weight="600" fill="#dfe3e8">
+                  <rect x="24"  y="328" width="108" height="24" rx="6" fill="#1b2433"/><text x="78"  y="344" text-anchor="middle">Commerce platform</text>
+                  <rect x="140" y="328" width="100" height="24" rx="6" fill="#1b2433"/><text x="190" y="344" text-anchor="middle">Inventory / ERP</text>
+                  <rect x="248" y="328" width="96"  height="24" rx="6" fill="#1b2433"/><text x="296" y="344" text-anchor="middle">Pricing engine</text>
+                  <rect x="352" y="328" width="96"  height="24" rx="6" fill="#1b2433"/><text x="400" y="344" text-anchor="middle">CRM / helpdesk</text>
+                  <rect x="456" y="328" width="148" height="24" rx="6" fill="#173f3a"/><text x="530" y="344" text-anchor="middle" fill="#cfeae6">Payments / refunds (scoped)</text>
+                </g>
+                <line x1="90"  y1="214" x2="90"  y2="298" stroke="#5fb3a8" stroke-width="1.4" marker-end="url(#ar3t)"/>
+                <line x1="238" y1="214" x2="238" y2="298" stroke="#5fb3a8" stroke-width="1.4" marker-end="url(#ar3t)"/>
+                <line x1="386" y1="214" x2="386" y2="298" stroke="#5fb3a8" stroke-width="1.4" marker-end="url(#ar3t)"/>
+                <line x1="534" y1="214" x2="534" y2="298" stroke="#5fb3a8" stroke-width="1.4" marker-end="url(#ar3t)"/>
+                <text x="624" y="296" fill="#5fb3a8" font-family="JetBrains Mono,monospace" font-size="8.5">auto-commit</text>
+                <!-- out of envelope gate -->
+                <line x1="612" y1="150" x2="648" y2="150" stroke="#d8a23f" stroke-width="1.5" marker-end="url(#ar3g)"/>
+                <polygon points="700,118 744,150 700,182 656,150" fill="#d8a23f" stroke="#b07d1f"/>
+                <text x="700" y="147" text-anchor="middle" fill="#1a1205" font-family="Archivo,sans-serif" font-size="10.5" font-weight="800">SPEND GATE</text>
+                <text x="700" y="161" text-anchor="middle" fill="#3a2a08" font-family="JetBrains Mono,monospace" font-size="8">exceeds limit</text>
+                <line x1="700" y1="182" x2="700" y2="206" stroke="#9a917f" stroke-width="1.4" marker-end="url(#ar3)"/>
+                <rect x="628" y="208" width="144" height="46" rx="9" fill="#1b2433" stroke="#7d8590"/>
+                <text x="700" y="228" text-anchor="middle" fill="#f4efe4" font-family="Archivo,sans-serif" font-size="11" font-weight="700">Human approves</text>
+                <text x="700" y="243" text-anchor="middle" fill="#c9c0ad" font-family="JetBrains Mono,monospace" font-size="8">out-of-envelope action</text>
+              </svg>
+              <div class="arch-legend">
+                <span><i style="background:#d8a23f"></i>supervisor · envelope · gate</span>
+                <span><i style="background:#bb5e1f"></i>operational agents</span>
+                <span><i style="background:#5fb3a8"></i>autonomous commit</span>
+                <span><i style="background:#b23b2e"></i>kill switch</span>
+              </div>
+              <figcaption>Agents act freely inside hard limits; the deterministic envelope, not the model, decides what is permitted.</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <h4>C · Evaluating the system</h4>
+        <p>With higher autonomy, evaluation shifts toward <strong>business outcomes and the behaviour of the guardrails</strong>. Because feedback is fast and errors are mostly reversible, much of the evaluation happens online — measured experiments against a held-out control, not just offline tests.</p>
+        <div class="tbl-wrap reveal">
+          <table>
+            <thead><tr><th>Dimension</th><th>How it is measured</th><th>Representative target</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Business lift</strong></td><td>A/B or geo holdout on margin, sell-through, stockouts and service CSAT vs. a human-run control</td><td class="mono-cell">positive, significant lift</td></tr>
+              <tr><td><strong>Guardrail integrity</strong></td><td>Count of attempted out-of-envelope actions correctly blocked; target is zero breaches reaching production</td><td class="mono-cell">0 envelope breaches</td></tr>
+              <tr><td><strong>Service resolution quality</strong></td><td>First-contact resolution and LLM-judged + human-sampled response quality and tone</td><td class="mono-cell">&ge; human-agent baseline</td></tr>
+              <tr><td><strong>Escalation precision</strong></td><td>Share of cases escalated that genuinely needed a human (avoiding both over- and under-escalation)</td><td class="mono-cell">well-calibrated</td></tr>
+              <tr><td><strong>Reversal / complaint rate</strong></td><td>Autonomous actions later reversed by a human or generating complaints</td><td class="mono-cell">low and falling</td></tr>
+              <tr><td><strong>Unit economics</strong></td><td>Cost per decision and per resolved contact, including model spend</td><td class="mono-cell">below human cost-to-serve</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box def reveal">
+          <div class="box-lab">Definition · the guardrail envelope</div>
+          <p>An <strong>envelope</strong> is a set of <em>deterministic, non-AI</em> limits enforced in code around the agents: maximum reorder spend, minimum margin, refund ceilings, approved-supplier lists, brand rules. The probabilistic model can be creative inside the envelope but physically cannot act outside it. This "non-deterministic core, deterministic boundary" pattern is what makes higher autonomy safe.</p>
+        </div>
+
+        <h4>D · Risks &amp; mitigation</h4>
+        <div class="tbl-wrap reveal">
+          <table>
+            <thead><tr><th>Risk</th><th>Sev.</th><th>Mitigation</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Runaway action</strong> — e.g. an agent loops on reordering or repricing</td><td><span class="sev h">High</span></td><td>Hard envelopes (budget/margin caps); rate limits and circuit breakers; one-click kill switch; anomaly alerts on action volume</td></tr>
+              <tr><td><strong>Pricing / promo errors</strong> harming margin or breaching ad rules</td><td><span class="sev m">Med</span></td><td>Margin floors and price-change ceilings enforced in code; staged rollout; automatic rollback on metric regression</td></tr>
+              <tr><td><strong>Bad customer-service responses</strong> (wrong info, poor tone, over-refunding)</td><td><span class="sev m">Med</span></td><td>Grounding in policy and catalogue; refund cap per interaction; tone/quality sampling; easy human handoff</td></tr>
+              <tr><td><strong>Prompt injection</strong> via customer messages or product feeds</td><td><span class="sev m">Med</span></td><td>Treat inbound text as data not instructions; sanitise feeds; scoped tools so a hijack stays within the envelope</td></tr>
+              <tr><td><strong>Cost runaway</strong> from high call volume</td><td><span class="sev m">Med</span></td><td>Per-task token budgets; cheaper models for routine steps; cost dashboards with alerts</td></tr>
+              <tr><td><strong>Drift</strong> as catalogue, season or demand changes</td><td><span class="sev l">Low</span></td><td>Continuous online metrics; periodic re-evaluation; control group retained to detect degradation</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box note reveal">
+          <div class="box-lab">Why this shape</div>
+          <p>This is the inverse of the bank. Cheap, reversible, high-volume decisions justify real autonomy — so the agents <strong>act</strong> and humans supervise the <strong>exceptions</strong>. The safety does not come from a person checking each action; it comes from the deterministic envelope and the kill switch. Value is direct: margin, availability and service capacity that scale without scaling headcount.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+  <section class="mod" id="m4" data-case="04">
+    <div class="mod-head">
+      <div class="mod-num">04</div>
+      <div><div class="mod-tag">Case four <span class="time">Manufacturing</span></div>
+      <h2 class="mod-title">The supply-chain disruption responder</h2></div>
+    </div>
+    <div class="mod-body">
+      <div class="case-banner reveal">
+        <div class="cb-in">
+          <div class="dom">Manufacturing · Multinational industrial conglomerate</div>
+          <h3>Supply-chain disruption response</h3>
+          <p class="cap">Always-on monitoring agents watch for disruption across suppliers, logistics, weather and demand. When something credible breaks, a response orchestrator spins up simulation agents to model mitigation options against a digital twin, ranks them by cost and impact, and hands a planner a decision-ready brief — but the commitment stays human.</p>
+        </div>
+      </div>
+      <div class="case-shell">
+
+        <h4>A · The organisation</h4>
+        <div class="spec reveal">
+          <div class="sp"><div class="k">Profile</div><div class="v">Multinational industrial conglomerate; multiple business units with their own P&amp;Ls; decentralised, with a shared technology platform.</div></div>
+          <div class="sp"><div class="k">Pressure</div><div class="v">Sprawling multi-tier supplier networks; disruptions (port closures, supplier failures, weather) detected late and resolved manually under time pressure.</div></div>
+          <div class="sp"><div class="k">Regulatory exposure</div><div class="v">Moderate but varied — trade, safety and OT/IT-security obligations differ by unit and geography; commitments move real money.</div></div>
+          <div class="sp"><div class="k">Why agentic</div><div class="v">Continuous sensing across many feeds plus rapid option-modelling is beyond manual reach; a planner can then choose well from agent-prepared scenarios.</div></div>
+        </div>
+
+        <h4>B · The agentic architecture</h4>
+        <p>The pattern is <strong>autonomous monitoring feeding human-gated simulation</strong>. Monitoring agents run continuously — sensing is cheap and reversible, so it is fully autonomous. On a credible signal, an orchestrator launches parallel <strong>simulation agents</strong> to model mitigations against a digital twin, then ranks them. Because committing a mitigation spends money and reallocates capacity, a <strong>planner commits</strong> the chosen plan; only then do execution systems act.</p>
+
+        <div class="roster reveal">
+          <span><b>Monitor</b> · always-on</span>
+          <span><b>Orchestrator</b></span>
+          <span>Reroute</span>
+          <span>Alt-supplier</span>
+          <span>Expedite</span>
+          <span>Reallocate</span>
+          <span><b>Gate</b> · Planner commits</span>
+        </div>
+
+        <section class="blueprint reveal">
+          <div class="bp-inner">
+            <div class="bp-lab">Figure 4 · Autonomous monitoring, human-gated simulation</div>
+            <figure>
+              <svg viewBox="0 0 780 466" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Manufacturing architecture: always-on monitoring agents detect disruption across feeds; a response orchestrator launches parallel simulation agents against a digital twin and knowledge base, ranks mitigation options, and a human planner commits before execution systems act.">
+                <defs>
+                  <marker id="ar4" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#9a917f"/></marker>
+                  <marker id="ar4t" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#5fb3a8"/></marker>
+                  <marker id="ar4g" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0,1 L8,4.5 L0,8 Z" fill="#d8a23f"/></marker>
+                </defs>
+                <!-- feeds -->
+                <g font-family="Archivo,sans-serif" font-size="9.5" font-weight="600" fill="#dfe3e8">
+                  <rect x="12"  y="10" width="145" height="28" rx="6" fill="#1b2433" stroke="#566069"/><text x="84"  y="28" text-anchor="middle">Supplier signals</text>
+                  <rect x="162" y="10" width="145" height="28" rx="6" fill="#1b2433" stroke="#566069"/><text x="234" y="28" text-anchor="middle">Logistics &amp; ports</text>
+                  <rect x="312" y="10" width="145" height="28" rx="6" fill="#1b2433" stroke="#566069"/><text x="384" y="28" text-anchor="middle">Weather / geo news</text>
+                  <rect x="462" y="10" width="148" height="28" rx="6" fill="#1b2433" stroke="#566069"/><text x="536" y="28" text-anchor="middle">Inventory &amp; demand</text>
+                </g>
+                <!-- knowledge tall box right -->
+                <rect x="636" y="86" width="132" height="150" rx="11" fill="#12161f" stroke="#1d5d57" stroke-width="1.6"/>
+                <text x="702" y="104" text-anchor="middle" fill="#7fd3c9" font-family="JetBrains Mono,monospace" font-size="8" font-weight="700">KNOWLEDGE · RAG</text>
+                <g font-family="Archivo,sans-serif" font-size="9.5" fill="#cfeae6" font-weight="600">
+                  <text x="702" y="128" text-anchor="middle">Supplier master</text>
+                  <text x="702" y="150" text-anchor="middle">Contracts &amp; SLAs</text>
+                  <text x="702" y="172" text-anchor="middle">BOMs &amp; network</text>
+                  <text x="702" y="194" text-anchor="middle">Response playbooks</text>
+                  <text x="702" y="218" text-anchor="middle" fill="#9fd6cd">Digital-twin model</text>
+                </g>
+                <line x1="636" y1="146" x2="462" y2="146" stroke="#1d5d57" stroke-width="1.3" marker-end="url(#ar4)"/>
+                <line x1="636" y1="232" x2="556" y2="232" stroke="#1d5d57" stroke-width="1.3" marker-end="url(#ar4)"/>
+                <!-- monitoring -->
+                <rect x="92" y="56" width="438" height="44" rx="10" fill="#0f2e2a" stroke="#5fb3a8" stroke-width="1.8"/>
+                <text x="311" y="74" text-anchor="middle" fill="#d7f1ec" font-family="Archivo,sans-serif" font-size="12.5" font-weight="700">Monitoring agents · always-on detection</text>
+                <text x="311" y="90" text-anchor="middle" fill="#9fd6cd" font-family="JetBrains Mono,monospace" font-size="8.5">fully autonomous · sensing is cheap &amp; reversible</text>
+                <line x1="84"  y1="38" x2="160" y2="54" stroke="#9a917f" stroke-width="1.1" marker-end="url(#ar4)"/>
+                <line x1="234" y1="38" x2="270" y2="54" stroke="#9a917f" stroke-width="1.1" marker-end="url(#ar4)"/>
+                <line x1="384" y1="38" x2="350" y2="54" stroke="#9a917f" stroke-width="1.1" marker-end="url(#ar4)"/>
+                <line x1="536" y1="38" x2="460" y2="54" stroke="#9a917f" stroke-width="1.1" marker-end="url(#ar4)"/>
+                <line x1="311" y1="100" x2="311" y2="118" stroke="#9a917f" stroke-width="1.4" marker-end="url(#ar4)"/>
+                <text x="322" y="114" fill="#5fb3a8" font-family="JetBrains Mono,monospace" font-size="8">credible disruption</text>
+                <!-- orchestrator -->
+                <rect x="160" y="120" width="300" height="50" rx="11" fill="#23262f" stroke="#d8a23f" stroke-width="2"/>
+                <text x="311" y="141" text-anchor="middle" fill="#f4efe4" font-family="Fraunces,serif" font-size="14" font-weight="600">Disruption-response orchestrator</text>
+                <text x="311" y="159" text-anchor="middle" fill="#d8b98a" font-family="JetBrains Mono,monospace" font-size="9">assess · simulate · rank options</text>
+                <line x1="311" y1="170" x2="311" y2="188" stroke="#9a917f" stroke-width="1.4" marker-end="url(#ar4)"/>
+                <text x="322" y="184" fill="#d8b98a" font-family="JetBrains Mono,monospace" font-size="8">spawn scenarios</text>
+                <!-- simulation cluster -->
+                <rect x="70" y="190" width="486" height="84" rx="12" fill="none" stroke="#bb5e1f" stroke-width="1.5" stroke-dasharray="7 5"/>
+                <text x="82" y="206" fill="#cf8a4f" font-family="JetBrains Mono,monospace" font-size="8.5" font-weight="700" letter-spacing="1">SCENARIO SIMULATION · parallel what-if vs. digital twin</text>
+                <g font-family="Archivo,sans-serif" font-size="10.5" font-weight="700" fill="#f4efe4">
+                  <rect x="84"  y="214" width="104" height="46" rx="8" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.4"/><text x="136" y="241" text-anchor="middle">Reroute</text>
+                  <rect x="200" y="214" width="104" height="46" rx="8" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.4"/><text x="252" y="241" text-anchor="middle">Alt-supplier</text>
+                  <rect x="316" y="214" width="104" height="46" rx="8" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.4"/><text x="368" y="241" text-anchor="middle">Expedite</text>
+                  <rect x="432" y="214" width="112" height="46" rx="8" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.4"/><text x="488" y="241" text-anchor="middle">Reallocate</text>
+                </g>
+                <line x1="311" y1="274" x2="311" y2="292" stroke="#9a917f" stroke-width="1.4" marker-end="url(#ar4)"/>
+                <!-- ranked options -->
+                <rect x="186" y="294" width="250" height="34" rx="8" fill="#1b2433" stroke="#7d8590"/>
+                <text x="311" y="315" text-anchor="middle" fill="#f4efe4" font-family="Archivo,sans-serif" font-size="11" font-weight="700">Ranked mitigation options · cost &amp; impact</text>
+                <line x1="311" y1="328" x2="311" y2="334" stroke="#9a917f" stroke-width="1.4"/>
+                <!-- human gate -->
+                <polygon points="311,334 393,360 311,386 229,360" fill="#d8a23f" stroke="#b07d1f"/>
+                <text x="311" y="357" text-anchor="middle" fill="#1a1205" font-family="Archivo,sans-serif" font-size="11" font-weight="800">HUMAN GATE</text>
+                <text x="311" y="372" text-anchor="middle" fill="#3a2a08" font-family="JetBrains Mono,monospace" font-size="8.5">planner commits</text>
+                <line x1="311" y1="386" x2="311" y2="404" stroke="#9a917f" stroke-width="1.4" marker-end="url(#ar4)"/>
+                <!-- execution -->
+                <rect x="150" y="406" width="322" height="42" rx="9" fill="#1b2433" stroke="#7d8590"/>
+                <text x="311" y="425" text-anchor="middle" fill="#f4efe4" font-family="Archivo,sans-serif" font-size="11.5" font-weight="700">Execution · ERP · procurement · logistics</text>
+                <text x="311" y="440" text-anchor="middle" fill="#c9c0ad" font-family="JetBrains Mono,monospace" font-size="8.5">scoped write access · only after commit</text>
+              </svg>
+              <div class="arch-legend">
+                <span><i style="background:#5fb3a8"></i>autonomous monitoring</span>
+                <span><i style="background:#d8a23f"></i>orchestrator · gate</span>
+                <span><i style="background:#bb5e1f"></i>simulation agents</span>
+                <span><i style="background:#1d5d57"></i>knowledge &amp; twin</span>
+              </div>
+              <figcaption>Sensing runs free; spending does not. The agents prepare the decision; the planner makes it.</figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <h4>C · Evaluating the system</h4>
+        <p>Evaluation splits cleanly along the autonomy line. The <strong>monitoring</strong> half is judged on detection quality; the <strong>simulation</strong> half on whether its recommended plans hold up against reality and against what expert planners would have chosen.</p>
+        <div class="tbl-wrap reveal">
+          <table>
+            <thead><tr><th>Dimension</th><th>How it is measured</th><th>Representative target</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Detection recall &amp; lead time</strong></td><td>Share of real disruptions caught, and how much earlier than the manual baseline</td><td class="mono-cell">high recall · earlier warning</td></tr>
+              <tr><td><strong>Alert precision</strong></td><td>Share of raised alerts that were genuinely actionable (controlling alert fatigue)</td><td class="mono-cell">low false-alarm rate</td></tr>
+              <tr><td><strong>Simulation fidelity</strong></td><td>Back-test predicted cost/impact of options against realised outcomes on historical disruptions</td><td class="mono-cell">predictions track reality</td></tr>
+              <tr><td><strong>Recommendation quality</strong></td><td>Planner agreement with the top-ranked option; share of agent options expert-rated viable</td><td class="mono-cell">&ge; expert-planner parity</td></tr>
+              <tr><td><strong>Decision-to-action time</strong></td><td>Elapsed time from signal to committed mitigation vs. baseline</td><td class="mono-cell">hours &rarr; minutes to brief</td></tr>
+              <tr><td><strong>Cross-BU consistency</strong></td><td>Comparable behaviour and governance across business units on a shared eval suite</td><td class="mono-cell">consistent, audited</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box framework reveal">
+          <div class="box-lab">Framework · evaluate sensing and acting separately</div>
+          <p>When a system has an autonomous half and a human-gated half, evaluate them as two systems. Monitoring lives or dies on the <strong>recall/precision trade-off</strong> — miss too little, cry wolf too often. Simulation is judged on <strong>decision quality</strong> — would a good planner have chosen what the agents surfaced, and did reality bear out the modelled costs? Blurring the two hides where the system is actually weak.</p>
+        </div>
+
+        <h4>D · Risks &amp; mitigation</h4>
+        <div class="tbl-wrap reveal">
+          <table>
+            <thead><tr><th>Risk</th><th>Sev.</th><th>Mitigation</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Premature autonomous action</strong> committing spend on a false signal</td><td><span class="sev h">High</span></td><td>Architectural gate: agents may sense and simulate but never commit; a planner authorises every money-moving action</td></tr>
+              <tr><td><strong>Flawed simulation</strong> leading to a costly wrong plan</td><td><span class="sev h">High</span></td><td>Validated digital-twin and back-tested models; present uncertainty and several ranked options, not one answer; planner judgement on top</td></tr>
+              <tr><td><strong>Alert fatigue</strong> from low-precision monitoring</td><td><span class="sev m">Med</span></td><td>Tune precision; severity-rank alerts; require corroborating signals before escalation; track and act on false-alarm rate</td></tr>
+              <tr><td><strong>OT / IT security &amp; data poisoning</strong> via external feeds</td><td><span class="sev h">High</span></td><td>Segment agents from operational-technology networks; validate and provenance-check feeds; treat external data as untrusted</td></tr>
+              <tr><td><strong>Inconsistent governance</strong> across decentralised BUs</td><td><span class="sev m">Med</span></td><td>Central platform with shared guardrails, identity and audit; per-BU scoping; one eval and oversight standard</td></tr>
+              <tr><td><strong>Over-reliance</strong> eroding planners' own resilience skills</td><td><span class="sev l">Low</span></td><td>Keep humans deciding; periodic manual exercises; treat agent output as decision support, not the decision</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="box note reveal">
+          <div class="box-lab">Why this shape</div>
+          <p>Speed of <em>insight</em> is the prize; speed of <em>commitment</em> is the danger. So the architecture maximises autonomous sensing and option-generation — the slow, manual parts today — while keeping the money-moving decision with a planner. The conglomerate gains earlier warning and far richer choices under pressure, without handing irreversible spend to a model.</p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+  <section class="mod" id="m5" data-case="05">
+    <div class="mod-head">
+      <div class="mod-num">05</div>
+      <div><div class="mod-tag">Read across <span class="time">Synthesis</span></div>
+      <h2 class="mod-title">What the four cases share</h2></div>
+    </div>
+    <div class="mod-body">
+      <p class="lead">Place the four cases side by side and the same skeleton appears every time. What differs is one dial — <strong>how much the business lets the agents do on their own</strong> — and that dial is set almost entirely by the cost of being wrong.</p>
+
+      <h3>The autonomy spectrum</h3>
+      <p>The same technology sits at very different points on the autonomy spectrum depending on context. Cheap, reversible, high-volume work earns real autonomy; costly, regulated, irreversible decisions keep a human in the loop.</p>
+      <figure class="reveal">
+        <svg viewBox="0 0 760 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Autonomy spectrum: retail sits at high autonomy with cheap reversible errors; manufacturing and healthcare sit in the middle with mixed or asymmetric autonomy; the bank sits at low autonomy where errors are costly and regulated.">
+          <defs>
+            <linearGradient id="spec" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#1d5d57"/><stop offset="1" stop-color="#bb5e1f"/>
+            </linearGradient>
+          </defs>
+          <rect x="40" y="92" width="680" height="20" rx="10" fill="url(#spec)"/>
+          <text x="40" y="135" fill="#4d505a" font-family="JetBrains Mono,monospace" font-size="10">▲ higher autonomy</text>
+          <text x="40" y="150" fill="#787b85" font-family="JetBrains Mono,monospace" font-size="9">cheap · reversible · high-volume errors</text>
+          <text x="720" y="135" text-anchor="end" fill="#4d505a" font-family="JetBrains Mono,monospace" font-size="10">lower autonomy ▲</text>
+          <text x="720" y="150" text-anchor="end" fill="#787b85" font-family="JetBrains Mono,monospace" font-size="9">costly · irreversible · regulated errors</text>
+          <!-- markers -->
+          <g font-family="Archivo,sans-serif">
+            <!-- retail -->
+            <circle cx="120" cy="102" r="9" fill="#1d5d57" stroke="#fbf8f1" stroke-width="2.5"/>
+            <line x1="120" y1="92" x2="120" y2="60" stroke="#1d5d57" stroke-width="1.4"/>
+            <text x="120" y="50" text-anchor="middle" font-size="12" font-weight="700" fill="#191b20">03 · Retail</text>
+            <text x="120" y="36" text-anchor="middle" font-size="9.5" fill="#4d505a" font-family="JetBrains Mono,monospace">act within envelopes</text>
+            <!-- manufacturing -->
+            <circle cx="330" cy="102" r="9" fill="#3f7d63" stroke="#fbf8f1" stroke-width="2.5"/>
+            <line x1="330" y1="112" x2="330" y2="158" stroke="#3f7d63" stroke-width="1.4"/>
+            <text x="330" y="174" text-anchor="middle" font-size="12" font-weight="700" fill="#191b20">04 · Manufacturing</text>
+            <text x="330" y="190" text-anchor="middle" font-size="9.5" fill="#4d505a" font-family="JetBrains Mono,monospace">sense auto · commit gated</text>
+            <!-- healthcare -->
+            <circle cx="510" cy="102" r="9" fill="#8a5a37" stroke="#fbf8f1" stroke-width="2.5"/>
+            <line x1="510" y1="92" x2="510" y2="60" stroke="#8a5a37" stroke-width="1.4"/>
+            <text x="510" y="50" text-anchor="middle" font-size="12" font-weight="700" fill="#191b20">02 · Healthcare</text>
+            <text x="510" y="36" text-anchor="middle" font-size="9.5" fill="#4d505a" font-family="JetBrains Mono,monospace">approve auto · deny human</text>
+            <!-- bank -->
+            <circle cx="668" cy="102" r="9" fill="#bb5e1f" stroke="#fbf8f1" stroke-width="2.5"/>
+            <line x1="668" y1="112" x2="668" y2="158" stroke="#bb5e1f" stroke-width="1.4"/>
+            <text x="668" y="174" text-anchor="middle" font-size="12" font-weight="700" fill="#191b20">01 · Bank</text>
+            <text x="668" y="190" text-anchor="middle" font-size="9.5" fill="#4d505a" font-family="JetBrains Mono,monospace">recommend · human files</text>
+          </g>
+        </svg>
+        <figcaption style="color:#787b85">Same capability, four settings of one dial — calibrated to consequence, not ambition.</figcaption>
+      </figure>
+
+      <h3>One architectural skeleton</h3>
+      <p>Strip away the domain detail and every case is built from the same six parts. Learn this shape once and you can read any agentic architecture put in front of you.</p>
+      <div class="grid g3 reveal">
+        <div class="card"><div class="cn">Part 1</div><div class="ct">An orchestrator</div><p>A planning agent that decomposes the goal and routes work — the lead investigator, the ops supervisor, the response coordinator.</p></div>
+        <div class="card"><div class="cn">Part 2</div><div class="ct">Specialist workers</div><p>Focused agents that each do one thing well, run in parallel or in sequence, and report back to the orchestrator.</p></div>
+        <div class="card"><div class="cn">Part 3</div><div class="ct">Grounded knowledge</div><p>Retrieval over governed sources with provenance — policy, guidelines, contracts — so claims are cited, not invented.</p></div>
+        <div class="card"><div class="cn">Part 4</div><div class="ct">Tools over protocols</div><p>Scoped, least-privilege access to real systems, increasingly via open protocols, so agents can read and (carefully) act.</p></div>
+        <div class="card"><div class="cn">Part 5</div><div class="ct">A human gate or envelope</div><p>The control on consequential action — a person who commits, or a deterministic limit the model cannot exceed.</p></div>
+        <div class="card"><div class="cn">Part 6</div><div class="ct">Observability &amp; governance</div><p>Immutable audit, identity, evals and a kill switch wrapped around everything — the rails that make trust defensible.</p></div>
+      </div>
+
+      <h3>Evaluation patterns that recur</h3>
+      <p>Across all four, evaluation is continuous, not a launch checkbox, and it consistently spans the same layers.</p>
+      <div class="tbl-wrap reveal">
+        <table>
+          <thead><tr><th>Layer</th><th>What it checks</th><th>Where it showed up</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Offline test suites</strong></td><td>Golden datasets, task success, trajectory and tool-call accuracy — gating every prompt or model change</td><td>All four; strongest where errors are costly (bank, health)</td></tr>
+            <tr><td><strong>Grounding &amp; faithfulness</strong></td><td>Every claim traceable to a retrieved source; no fabrication</td><td>Bank narratives; healthcare necessity findings</td></tr>
+            <tr><td><strong>Online quality sampling</strong></td><td>Human + LLM-judge review of live outputs; A/B against a control</td><td>Retail experiments; ongoing audits everywhere</td></tr>
+            <tr><td><strong>Business outcomes</strong></td><td>The metric that justifies the system — margin, turnaround, lead time, effort saved</td><td>All four, each with its own KPI</td></tr>
+            <tr><td><strong>Abstention / escalation</strong></td><td>Does it route the genuinely hard cases to humans? Often the most important behaviour</td><td>Healthcare and bank especially</td></tr>
+            <tr><td><strong>Fairness &amp; safety</strong></td><td>Disparate-impact and guardrail-integrity checks where people or money are affected</td><td>Healthcare equity; retail envelope integrity</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>The universal risk-and-mitigation map</h3>
+      <p>The headline risks are the same in every case; what changes is their severity and how hard the controls are turned up.</p>
+      <div class="tbl-wrap reveal">
+        <table>
+          <thead><tr><th>Recurring risk</th><th>The recurring mitigation</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Wrong or fabricated output</strong></td><td>Retrieval grounding with citations; offline eval gates; trajectory checks</td></tr>
+            <tr><td><strong>Prompt injection / poisoned data</strong></td><td>Treat all external content as untrusted data, never instructions; sanitise inputs; keep tools scoped so a hijack cannot act</td></tr>
+            <tr><td><strong>Over-action / runaway behaviour</strong></td><td>Human gate at the point of consequence, or a deterministic envelope; rate limits; a kill switch</td></tr>
+            <tr><td><strong>Privacy &amp; data leakage</strong></td><td>Least-privilege scoped access; data minimisation; no training on sensitive data; full audit</td></tr>
+            <tr><td><strong>Bias &amp; unfair outcomes</strong></td><td>Fairness testing pre-launch and in production where people are affected; remediation triggers</td></tr>
+            <tr><td><strong>Accountability &amp; auditability</strong></td><td>Immutable decision trails; named human owner; agents governed as a model and an identity class</td></tr>
+            <tr><td><strong>Automation bias / over-reliance</strong></td><td>Surface uncertainty; track override rates; keep humans genuinely deciding, not rubber-stamping</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pull reveal">The technology is general; the architecture is specific. <span>You design an agentic system not around what the model can do, but around what it costs to be wrong.</span></div>
+
+      <div class="box framework reveal">
+        <div class="box-lab">Framework · five questions to size any agentic use case</div>
+        <ol>
+          <li><strong>What does it cost to be wrong?</strong> Cheap and reversible invites autonomy; costly and irreversible demands a human gate.</li>
+          <li><strong>Where is the gate or envelope?</strong> Name the exact point where a human commits, or the deterministic limit the model cannot cross.</li>
+          <li><strong>What is it grounded in?</strong> Identify the governed source of truth and confirm every claim cites it.</li>
+          <li><strong>How will we know it works — and keeps working?</strong> Define the offline suite, online sampling and the one business metric that justifies it.</li>
+          <li><strong>What is the blast radius if it fails?</strong> Scope tool permissions, add a kill switch, and make sure the worst case is survivable.</li>
+        </ol>
+      </div>
+
+      <details class="facil reveal">
+        <summary>Facilitator note · using these four cases</summary>
+        <div class="fc">
+          <p>Run the cases in order of increasing autonomy comfort or, more powerfully, contrast case 01 (bank) with case 03 (retail) directly — same underlying technology, opposite autonomy postures — to make the consequence-driven design point land. Then ask the room to place one of their own candidate use cases on the autonomy spectrum and walk it through the five questions above. The goal is not to teach the diagrams but to teach the <em>habit</em> of locating the human gate first.</p>
+        </div>
+      </details>
+    </div>
+  </section>
+
+  <section class="mod" id="m6" data-case="06">
+    <div class="mod-head">
+      <div class="mod-num">06</div>
+      <div><div class="mod-tag">Read across <span class="time">Build view</span></div>
+      <h2 class="mod-title">Enterprise architecture &amp; tech stack</h2></div>
+    </div>
+    <div class="mod-body">
+      <p class="lead">The four cases looked like four different systems. Underneath, they draw on <strong>one platform</strong>. "Orchestration" carries two meanings worth separating: how agents are coordinated <em>inside</em> a single system — the topologies you have already seen — and how an enterprise runs its <em>whole estate</em> of agentic systems on shared rails. This section is the build view: the reference architecture and the technology stack that deliver both.</p>
+
+      <h3>The layered reference architecture</h3>
+      <p>Read it as a stack. The lower layers are a shared platform reused across every use case; the upper layers and the orchestration logic are what change from one system to the next. Two concerns run vertically through all of it and are never optional.</p>
+
+      <section class="blueprint reveal">
+        <div class="bp-inner">
+          <div class="bp-lab">Figure 6 · Enterprise agentic platform — layers &amp; cross-cutting rails</div>
+          <figure>
+            <svg viewBox="0 0 780 432" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Layered enterprise agentic architecture: six horizontal layers from experience at the top down to infrastructure, with the agent orchestration layer highlighted, flanked by two vertical rails for governance/identity/security and observability/evaluation.">
+              <!-- left rail: governance -->
+              <rect x="12" y="20" width="86" height="376" rx="11" fill="#12161f" stroke="#d8a23f" stroke-width="1.5" stroke-dasharray="6 5"/>
+              <g transform="rotate(-90 55 208)">
+                <text x="55" y="202" text-anchor="middle" fill="#d8a23f" font-family="Archivo,sans-serif" font-size="12" font-weight="800" letter-spacing="1">GOVERNANCE · IDENTITY · SECURITY</text>
+                <text x="55" y="220" text-anchor="middle" fill="#b69256" font-family="JetBrains Mono,monospace" font-size="8.5">least-privilege · guardrails · audit</text>
+              </g>
+              <!-- right rail: observability -->
+              <rect x="682" y="20" width="86" height="376" rx="11" fill="#12161f" stroke="#5fb3a8" stroke-width="1.5" stroke-dasharray="6 5"/>
+              <g transform="rotate(-90 725 208)">
+                <text x="725" y="202" text-anchor="middle" fill="#5fb3a8" font-family="Archivo,sans-serif" font-size="12" font-weight="800" letter-spacing="1">OBSERVABILITY · EVALUATION</text>
+                <text x="725" y="220" text-anchor="middle" fill="#4f9389" font-family="JetBrains Mono,monospace" font-size="8.5">tracing · evals · cost · drift</text>
+              </g>
+              <!-- center stack -->
+              <g font-family="Archivo,sans-serif">
+                <!-- L1 -->
+                <rect x="110" y="20" width="560" height="52" rx="10" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                <text x="390" y="42" text-anchor="middle" fill="#f4efe4" font-size="13.5" font-weight="700">Experience &amp; interface</text>
+                <text x="390" y="60" text-anchor="middle" fill="#9aa0ab" font-family="JetBrains Mono,monospace" font-size="9">copilots · chat · approval queues · dashboards</text>
+                <!-- L2 hero -->
+                <rect x="110" y="80" width="560" height="52" rx="10" fill="#23262f" stroke="#d8a23f" stroke-width="2.2"/>
+                <text x="390" y="102" text-anchor="middle" fill="#f4efe4" font-size="13.5" font-weight="700">Agent orchestration &amp; runtime</text>
+                <text x="390" y="120" text-anchor="middle" fill="#d8b98a" font-family="JetBrains Mono,monospace" font-size="9">frameworks · planning · memory · multi-agent coordination (A2A)</text>
+                <!-- L3 -->
+                <rect x="110" y="140" width="560" height="52" rx="10" fill="#1b2433" stroke="#bb5e1f" stroke-width="1.6"/>
+                <text x="390" y="162" text-anchor="middle" fill="#f4efe4" font-size="13.5" font-weight="700">Tools &amp; integration</text>
+                <text x="390" y="180" text-anchor="middle" fill="#9aa0ab" font-family="JetBrains Mono,monospace" font-size="9">MCP servers · API gateway · connectors: ERP · CRM · core systems</text>
+                <!-- L4 -->
+                <rect x="110" y="200" width="560" height="52" rx="10" fill="#12161f" stroke="#1d5d57" stroke-width="1.6"/>
+                <text x="390" y="222" text-anchor="middle" fill="#f4efe4" font-size="13.5" font-weight="700">Knowledge &amp; data</text>
+                <text x="390" y="240" text-anchor="middle" fill="#7fb8b0" font-family="JetBrains Mono,monospace" font-size="9">RAG · vector + hybrid search · knowledge graphs · governed sources</text>
+                <!-- L5 -->
+                <rect x="110" y="260" width="560" height="52" rx="10" fill="#12161f" stroke="#1d5d57" stroke-width="1.6"/>
+                <text x="390" y="282" text-anchor="middle" fill="#f4efe4" font-size="13.5" font-weight="700">Model layer</text>
+                <text x="390" y="300" text-anchor="middle" fill="#7fb8b0" font-family="JetBrains Mono,monospace" font-size="9">frontier + small models · model gateway / router · embeddings</text>
+                <!-- L6 -->
+                <rect x="110" y="320" width="560" height="52" rx="10" fill="#12161f" stroke="#1d5d57" stroke-width="1.6"/>
+                <text x="390" y="342" text-anchor="middle" fill="#f4efe4" font-size="13.5" font-weight="700">Infrastructure &amp; compute</text>
+                <text x="390" y="360" text-anchor="middle" fill="#7fb8b0" font-family="JetBrains Mono,monospace" font-size="9">cloud / on-prem · GPU serving · secure execution</text>
+              </g>
+              <!-- hero marker -->
+              <text x="118" y="98" fill="#d8a23f" font-family="JetBrains Mono,monospace" font-size="8" font-weight="700" transform="rotate(-90 118 98)">CORE</text>
+              <!-- caption arrows -->
+              <text x="390" y="392" text-anchor="middle" fill="#9a917f" font-family="JetBrains Mono,monospace" font-size="8.5">upper layers vary by use case ▲ · lower layers are a shared platform ▼</text>
+            </svg>
+            <div class="arch-legend">
+              <span><i style="background:#d8a23f"></i>orchestration core</span>
+              <span><i style="background:#bb5e1f"></i>per-use-case layers</span>
+              <span><i style="background:#1d5d57"></i>shared platform</span>
+              <span><i style="background:#5fb3a8"></i>cross-cutting rails</span>
+            </div>
+            <figcaption>Six layers, two non-negotiable rails. Build the platform once; reshape only the top for each new use case.</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <h3>The technology stack, layer by layer</h3>
+      <p>What sits in each layer, and the kinds of tooling teams reach for in 2026. Treat the named products as <strong>representative examples in a fast-moving market</strong>, not endorsements — the categories are what endure.</p>
+      <div class="tbl-wrap reveal">
+        <table>
+          <thead><tr><th>Layer</th><th>What it does</th><th>Representative tooling · 2026 snapshot</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Experience &amp; interface</strong></td><td>Where humans meet the system — and where they approve consequential actions</td><td>Embedded copilots; chat surfaces in Slack/Teams; human approval queues; BI dashboards; custom web apps</td></tr>
+            <tr><td><strong>Agent orchestration &amp; runtime</strong></td><td>Coordinates agents: planning, memory, state, hand-offs and multi-agent flow — the core</td><td>LangGraph; CrewAI; OpenAI Agents SDK; Google ADK; Microsoft Agent Framework; Anthropic Claude Agent SDK; LlamaIndex</td></tr>
+            <tr><td><strong>Tools &amp; integration</strong></td><td>Lets agents read and act on real systems, with scoped credentials</td><td>MCP servers &amp; registries; API gateways; enterprise connectors (ERP, CRM, core banking, EHR); credential brokers</td></tr>
+            <tr><td><strong>Knowledge &amp; data</strong></td><td>Grounds agents in governed sources so claims are retrieved, not invented</td><td>Vector + hybrid search (pgvector, Elastic, Pinecone, Weaviate); knowledge graphs; RAG pipelines; data catalogues</td></tr>
+            <tr><td><strong>Model layer</strong></td><td>The reasoning core, plus cheaper models for routine steps and a router across them</td><td>Frontier families (Claude, GPT, Gemini) + small/open-weights; model gateways (LiteLLM, cloud gateways); embeddings</td></tr>
+            <tr><td><strong>Infrastructure &amp; compute</strong></td><td>Hosting, serving and secure execution under everything</td><td>Cloud agent platforms (Bedrock AgentCore, Vertex AI, Azure AI Foundry); GPU serving (vLLM); sandboxes</td></tr>
+            <tr><td><strong>Governance · identity · security</strong> <span class="sev m">rail</span></td><td>Treats each agent as a governed identity bounded by policy</td><td>Non-human identity &amp; access (Entra Agent ID, Okta, Ping, Orchid, CyberArk); guardrail/policy engines (NeMo Guardrails, Guardrails AI, Purview); DLP &amp; injection defence</td></tr>
+            <tr><td><strong>Observability · evaluation</strong> <span class="sev l">rail</span></td><td>Full-session tracing, continuous evals and cost/drift monitoring</td><td>LangSmith, Langfuse, Arize Phoenix, Braintrust, Datadog LLM Observability, W&amp;B Weave; OpenTelemetry / OpenInference standards</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>The substrate: two open protocols</h3>
+      <p>Two standards now sit under most enterprise agentic systems, so teams stop hand-building integrations. Both were placed under open, foundation-led governance over the past year, which is what made them safe to standardise on.</p>
+      <div class="box def reveal">
+        <div class="box-lab">Definition · MCP and A2A</div>
+        <p><strong>Model Context Protocol (MCP)</strong> is the <em>vertical</em> standard — how an agent connects to tools and data. Created by Anthropic and donated to the Linux Foundation's Agentic AI Foundation in late 2025, it spawned thousands of reusable servers and is backed across the major model providers. <strong>Agent-to-Agent (A2A)</strong> is the <em>horizontal</em> standard — how agents discover and delegate to one another, including across vendors. Now a Linux Foundation project with adoption across the major clouds and 150+ organisations, it is what lets a multi-agent system span teams and business units. Put simply: <strong>MCP gives an agent hands; A2A gives it colleagues.</strong> Commercial transaction layers for agent-to-agent payments are emerging above these.</p>
+      </div>
+
+      <h3>Choosing an orchestration approach</h3>
+      <p>The topologies from the four cases are choices at the orchestration layer, and the frameworks differ in which they make natural. The consistent 2026 signal: graph-based, checkpointed runtimes are favoured wherever auditability and human-approval steps matter — exactly the regulated cases.</p>
+      <div class="tbl-wrap reveal">
+        <table>
+          <thead><tr><th>Pattern</th><th>Seen in</th><th>What suits it</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Orchestrator–workers</strong></td><td>Case 01 · bank</td><td>Stateful graphs with audit trails and rollback (LangGraph), or explicit hand-offs (OpenAI Agents SDK)</td></tr>
+            <tr><td><strong>Sequential + human gate</strong></td><td>Case 02 · healthcare</td><td>Graph runtimes with checkpoints and built-in human-in-the-loop approval — the regulated default</td></tr>
+            <tr><td><strong>Hierarchical, mixed autonomy</strong></td><td>Case 03 · retail</td><td>Role-based crews (CrewAI) or hierarchical agent trees (Google ADK) wrapped in deterministic guardrails</td></tr>
+            <tr><td><strong>Monitor + simulate</strong></td><td>Case 04 · manufacturing</td><td>Event-driven runtimes with A2A coordination across decentralised business units</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:.95rem;color:var(--ink-soft)">Framework character, broadly: <strong>LangGraph</strong> for stateful, auditable, human-gated workflows; <strong>CrewAI</strong> for fast multi-agent prototyping; <strong>OpenAI Agents SDK</strong> for low-friction hand-off agents; <strong>Google ADK</strong> for Gemini/GCP and A2A-native multi-agent trees; <strong>Microsoft Agent Framework</strong> (the unified successor to AutoGen and Semantic Kernel) for .NET and Azure estates; <strong>Anthropic Claude Agent SDK</strong> for MCP- and skills-native agents.</p>
+
+      <h3>Run it as a platform, not a project</h3>
+      <p>The decisive enterprise move is to stop building one-off agents and stand up a shared platform. A central team owns the <strong>control plane</strong> — model gateway, tool and MCP registry, identity, guardrails, evaluation and observability — while business-unit teams build agents on top within those rails. This is exactly how the decentralised conglomerate in Case 04 keeps consistency without central bottlenecks.</p>
+      <div class="box warn reveal">
+        <div class="box-lab">The identity control plane</div>
+        <p>The fastest-growing risk in 2026 is <strong>agent sprawl</strong>: autonomous identities created without owners, carrying excessive standing privilege. The emerging discipline treats every agent as a <strong>delegated non-human identity</strong> — inventoried, least-privilege by default, with just-in-time rather than standing access, and an auditable chain of delegation. Major platforms now ship agent-specific governance that unifies identity, data-protection and threat controls. The principle is blunt: an agent is a user with superpowers, so govern it like one.</p>
+      </div>
+
+      <div class="pull reveal">Buy an agent and you have a demo. <span>Build the platform — the rails, the protocols, the governance — and you have a capability.</span></div>
+
+      <div class="box note reveal">
+        <div class="box-lab">On the currency of this stack</div>
+        <p>The layers, the two protocols and the two rails are durable; the specific products move every quarter. Analysts expect task-specific agents in a large share of enterprise applications by the end of 2026, and most enterprises are increasing investment — which is precisely why the market churns. Commit to the <strong>architecture</strong>; re-check the <strong>tooling</strong> before you build.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mod" id="m7" data-case="07">
+    <div class="mod-head">
+      <div class="mod-num">07</div>
+      <div><div class="mod-tag">Read across <span class="time">Tooling</span></div>
+      <h2 class="mod-title">The agentic tech stack</h2></div>
+    </div>
+    <div class="mod-body">
+      <p class="lead">You don't need to evaluate tools personally — but you should recognise the categories, so a vendor pitch or a build proposal maps onto a structure you understand. The stack mirrors the architecture: every layer has a market.</p>
+      <div class="box warn reveal">
+        <div class="box-lab">A note on naming the products</div>
+        <p>This space moves monthly. The named products below are illustrative of each <strong>category</strong> as of 2026; treat the <em>categories</em> as durable and the <em>specific names</em> as a current snapshot your technical teams will keep fresh. The strategic point is the shape of the stack, not any single logo.</p>
+      </div>
+
+      <section class="blueprint reveal">
+        <div class="bp-inner">
+          <div class="bp-lab">The stack · by layer</div>
+          <h3 style="color:#f4efe4;margin-top:6px">What sits at each layer</h3>
+          <div class="tbl-wrap" style="border-color:rgba(216,162,63,.3)">
+            <table style="background:transparent">
+              <thead><tr><th style="width:20%">Layer</th><th style="width:38%">What it does</th><th>Representative options (2026)</th></tr></thead>
+              <tbody style="color:#ddd6c8">
+                <tr><td><strong style="color:#d8a23f">Orchestration frameworks</strong></td><td>Define how agents reason, coordinate, hold state and recover</td><td class="mono-cell" style="color:#9fd0c8">LangGraph · CrewAI · Microsoft Agent Framework (AutoGen/AG2) · OpenAI Agents SDK · Google ADK · Claude Agent SDK · LlamaIndex</td></tr>
+                <tr><td><strong style="color:#d8a23f">Foundation models</strong></td><td>The reasoning engines; usually multiple, behind a router</td><td class="mono-cell" style="color:#9fd0c8">Claude · GPT · Gemini families · plus smaller / open models for cheap steps</td></tr>
+                <tr><td><strong style="color:#d8a23f">Tool / integration</strong></td><td>Standardised connection to apps, APIs and data</td><td class="mono-cell" style="color:#9fd0c8">MCP servers &amp; registries · enterprise iPaaS · RPA bridges</td></tr>
+                <tr><td><strong style="color:#d8a23f">Agent interoperability</strong></td><td>Agent-to-agent discovery and delegation across teams / vendors</td><td class="mono-cell" style="color:#9fd0c8">A2A protocol (under the Agentic AI Foundation)</td></tr>
+                <tr><td><strong style="color:#d8a23f">Knowledge / retrieval</strong></td><td>Vector search, knowledge graphs, RAG pipelines</td><td class="mono-cell" style="color:#9fd0c8">Pinecone · Weaviate · pgvector · Elastic · graph DBs · LlamaIndex</td></tr>
+                <tr><td><strong style="color:#d8a23f">Memory / state</strong></td><td>Short- and long-term memory, checkpoints, session state</td><td class="mono-cell" style="color:#9fd0c8">Framework-native stores · Redis · purpose-built memory layers</td></tr>
+                <tr><td><strong style="color:#d8a23f">Observability / eval</strong></td><td>Tracing, debugging, evaluation, monitoring agent behaviour</td><td class="mono-cell" style="color:#9fd0c8">LangSmith · Langfuse · Arize · Braintrust</td></tr>
+                <tr><td><strong style="color:#d8a23f">Guardrails / safety</strong></td><td>Policy enforcement, input / output filtering, permission control</td><td class="mono-cell" style="color:#9fd0c8">Framework guardrails · policy engines · infra-level enforcement</td></tr>
+                <tr><td><strong style="color:#d8a23f">Deployment / runtime</strong></td><td>Where agents run, scale and integrate with enterprise IT</td><td class="mono-cell" style="color:#9fd0c8">Cloud agent platforms (AWS · Azure AI Foundry · Google Vertex) · Kubernetes</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <h3>How teams choose an orchestration framework</h3>
+      <p>The framework decision dominates a build, and there is now reasonable consensus on the trade-offs. You should expect your teams to justify their choice against these lines, and to favour <strong>open protocols over proprietary lock-in</strong>.</p>
+      <div class="tbl-wrap reveal">
+        <table>
+          <thead><tr><th style="width:30%">Choose…</th><th>…when the priority is</th></tr></thead>
+          <tbody>
+            <tr><td><strong>LangGraph</strong></td><td>Production control, auditability and complex stateful workflows with checkpoints and rollback — favoured in regulated, customer-facing settings</td></tr>
+            <tr><td><strong>CrewAI</strong></td><td>Fast prototyping and role-based "crews" that map onto a business-process metaphor; great for internal automation</td></tr>
+            <tr><td><strong>Microsoft Agent Framework / AutoGen</strong></td><td>Deep Azure integration, enterprise reliability and research-style conversational multi-agent work</td></tr>
+            <tr><td><strong>OpenAI Agents SDK / Google ADK / Claude Agent SDK</strong></td><td>Streamlined development inside a chosen model provider's ecosystem</td></tr>
+            <tr><td><strong>LlamaIndex</strong></td><td>Document-heavy, knowledge-work use cases where retrieval quality is the whole game</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="box note reveal">
+        <div class="box-lab">The pattern mature teams converge on</div>
+        <p>Most production systems do not bet on a single framework. The common shape is a <strong>controllable orchestration backbone</strong> (for state, checkpoints and human-in-the-loop gates) that delegates bounded sub-tasks to lighter agents inside it — and underneath, a deliberate investment in <strong>retrieval quality</strong>, since the data feeding the agents, not the framework, accounts for most of the real-world performance in knowledge-intensive work.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="mod" id="gloss" data-case="★">
+    <div class="mod-head">
+      <div class="mod-num">★</div>
+      <div><div class="mod-tag">Reference <span class="time">Glossary</span></div>
+      <h2 class="mod-title">Glossary</h2></div>
+    </div>
+    <div class="mod-body reveal">
+      <dl class="gloss">
+        <div class="gt"><dt>Agentic AI</dt><dd>AI systems that pursue a goal over multiple steps — planning, using tools and acting — rather than answering a single prompt.</dd></div>
+        <div class="gt"><dt>Orchestrator–workers</dt><dd>A topology where a lead agent decomposes a task and dispatches specialist worker agents, then synthesises their results.</dd></div>
+        <div class="gt"><dt>Human-in-the-loop (HITL)</dt><dd>A design where a person must approve or make a specific decision before an agent's recommendation becomes a real-world action.</dd></div>
+        <div class="gt"><dt>Guardrail envelope</dt><dd>Deterministic, code-enforced limits (spend caps, margin floors, refund ceilings) that bound what an autonomous agent is permitted to do.</dd></div>
+        <div class="gt"><dt>Grounding / RAG</dt><dd>Retrieval-augmented generation: anchoring an agent's outputs in retrieved, governed source documents so claims can be cited.</dd></div>
+        <div class="gt"><dt>Trajectory evaluation</dt><dd>Assessing the <em>path</em> an agent took — the tools and steps — not only whether the final answer was correct.</dd></div>
+        <div class="gt"><dt>Abstention / escalation</dt><dd>An agent recognising the limits of its competence and routing a case to a human instead of acting.</dd></div>
+        <div class="gt"><dt>Prompt injection</dt><dd>An attack where malicious instructions hidden in data an agent reads attempt to hijack its behaviour.</dd></div>
+        <div class="gt"><dt>Least privilege</dt><dd>Granting an agent only the minimum, scoped access needed for its task — often read-only — to limit the blast radius.</dd></div>
+        <div class="gt"><dt>Digital twin</dt><dd>A simulation model of a real system (e.g. a supply network) that agents can run what-if scenarios against.</dd></div>
+        <div class="gt"><dt>LLM-as-judge</dt><dd>Using a language model, against a rubric, to score the quality of another model's outputs at scale, validated by human review.</dd></div>
+        <div class="gt"><dt>Automation bias</dt><dd>The human tendency to over-trust an automated recommendation and approve it without genuine scrutiny.</dd></div>
+        <div class="gt"><dt>Kill switch</dt><dd>A control that immediately pauses or halts an agent fleet — essential wherever agents act autonomously.</dd></div>
+        <div class="gt"><dt>Blast radius</dt><dd>The maximum harm an agent could cause if it failed or were compromised — minimised by scoping and gates.</dd></div>
+        <div class="gt"><dt>Orchestration</dt><dd>Coordinating multiple agents toward a goal — and, at enterprise scale, running the whole estate of agentic systems on shared rails.</dd></div>
+        <div class="gt"><dt>MCP &amp; A2A</dt><dd>Open protocols underneath agentic systems: MCP connects an agent to tools and data (vertical); A2A lets agents discover and delegate to each other (horizontal).</dd></div>
+        <div class="gt"><dt>Control plane</dt><dd>The shared platform layer — model gateway, tool registry, identity, guardrails, evaluation, observability — that business teams build agents on top of.</dd></div>
+        <div class="gt"><dt>Non-human identity</dt><dd>An agent treated as a governed identity: inventoried, least-privilege, with just-in-time access and an auditable chain of delegation.</dd></div>
+      </dl>
+      <div class="box note reveal">
+        <div class="box-lab">On the currency of this material</div>
+        <p>The architectural patterns, evaluation layers and risk controls here are durable. Specific product and framework names move quickly; treat them as an early-2026 snapshot and re-check the tooling, not the principles, before you build.</p>
+      </div>
+    </div>
+  </section>
+  </main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="ft-grid">
+      <div>
+        <h5>Agentic AI in Practice</h5>
+        <p class="ft-note">A use-case playbook for senior leadership. Four business scenarios, each analysed through the same four lenses — organisation profile, agentic architecture, system evaluation, and risk with mitigation — so leaders can compare how the same technology is shaped very differently by context, consequence, and regulation.</p>
+      </div>
+      <div>
+        <h5>The four cases</h5>
+        <a href="#m1">01 · Financial services</a>
+        <a href="#m2">02 · Healthcare</a>
+        <a href="#m3">03 · Retail</a>
+        <a href="#m4">04 · Manufacturing</a>
+      </div>
+      <div>
+        <h5>Read across</h5>
+        <a href="#found">Agent vs. agentic system</a>
+        <a href="#m0">How to read each case</a>
+        <a href="#m5">Cross-case synthesis</a>
+        <a href="#m6">Enterprise architecture &amp; stack</a>
+        <a href="#m7">The agentic tech stack</a>
+        <a href="#gloss">Glossary of terms</a>
+      </div>
+    </div>
+    <div class="ft-bottom">
+      <span>EXECUTIVE EDUCATION · APPLIED AGENTIC AI</span>
+      <span>ARCHITECTURES ILLUSTRATIVE · TOOLING CURRENT TO EARLY 2026</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const prog=document.getElementById('progress');
+const hud=document.getElementById('hud'),hudMod=document.getElementById('hud-mod');
+function onScroll(){const h=document.documentElement;const sc=(h.scrollTop)/(h.scrollHeight-h.clientHeight);prog.style.width=(sc*100)+'%';if(h.scrollTop>520)hud.classList.add('show');else hud.classList.remove('show');}
+window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+const links=[...document.querySelectorAll('#toc a')];
+const secs=[...document.querySelectorAll('section.mod')];
+const spy=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){
+  const id=e.target.id;
+  links.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+id));
+  const cs=e.target.getAttribute('data-case');
+  if(cs!==null)hudMod.textContent=cs;
+}});},{rootMargin:'-45% 0px -50% 0px'});
+secs.forEach(s=>spy.observe(s));
+
+const rev=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');rev.unobserve(e.target);}})},{rootMargin:'0px 0px -8% 0px'});
+document.querySelectorAll('.reveal:not(.in)').forEach(el=>rev.observe(el));
+</script>
+</body>
+</html>
