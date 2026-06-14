@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Vibecoding for Executives — The ClientPulse Workshop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFFFFF;
+    --ink: #0E0E10;
+    --ink-2: #4A4A52;
+    --ink-3: #8A8A92;
+    --rule: #DADADC;
+    --rule-soft: #ECECEE;
+    --accent: #2547D0;
+    --accent-soft: #ECF0FF;
+    --highlight: #FFE873;
+    --highlight-soft: #FFF8D1;
+    --mono-bg: #F5F4EF;
+    --max: 1140px;
+    --gutter: clamp(20px, 4vw, 56px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 0 var(--gutter);
+  }
+
+  /* ---------- TYPE ---------- */
+  .display {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    line-height: 0.95;
+  }
+
+  .display em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .eyebrow {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-2);
+  }
+
+  .mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    letter-spacing: -0.01em;
+  }
+
+  /* ---------- TOP BAR ---------- */
+  .topbar {
+    border-bottom: 1px solid var(--ink);
+    padding: 14px 0;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .topbar .wrap {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .topbar .mark {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  .topbar .mark span {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .topbar nav {
+    display: flex;
+    gap: 22px;
+    font-size: 13px;
+    color: var(--ink-2);
+  }
+
+  .topbar nav a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.15s;
+  }
+
+  .topbar nav a:hover { color: var(--accent); }
+
+  @media (max-width: 720px) {
+    .topbar nav { display: none; }
+  }
+
+  /* ---------- HERO ---------- */
+  .hero {
+    padding: 80px 0 64px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .hero-meta {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--rule);
+    margin-bottom: 40px;
+  }
+
+  .hero-meta .cell .label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink-3);
+    margin-bottom: 6px;
+  }
+
+  .hero-meta .cell .val {
+    font-size: 14px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  @media (max-width: 720px) {
+    .hero-meta { grid-template-columns: repeat(2, 1fr); }
+    .hero { padding: 48px 0 40px; }
+  }
+
+  .hero h1 {
+    font-size: clamp(48px, 8vw, 104px);
+    margin-bottom: 28px;
+    max-width: 16ch;
+  }
+
+  .hero .lede {
+    font-size: clamp(17px, 2vw, 20px);
+    color: var(--ink-2);
+    max-width: 62ch;
+    line-height: 1.5;
+  }
+
+  .hero .lede strong { color: var(--ink); font-weight: 600; }
+
+  /* ---------- SECTIONS ---------- */
+  section { padding: 72px 0; border-bottom: 1px solid var(--rule); }
+  section:last-of-type { border-bottom: 0; }
+
+  .section-header {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+    margin-bottom: 48px;
+    align-items: baseline;
+  }
+
+  .section-header .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 500;
+    padding-top: 8px;
+  }
+
+  .section-header h2 {
+    font-size: clamp(32px, 5vw, 52px);
+    max-width: 18ch;
+  }
+
+  @media (max-width: 720px) {
+    section { padding: 56px 0; }
+    .section-header { grid-template-columns: 1fr; gap: 8px; margin-bottom: 32px; }
+  }
+
+  /* ---------- PREMISE BLOCK ---------- */
+  .premise {
+    display: grid;
+    grid-template-columns: 80px 1fr 1fr;
+    gap: 32px;
+    margin-bottom: 32px;
+  }
+
+  .premise .col h3 {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--ink);
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .premise .col p {
+    color: var(--ink-2);
+    font-size: 15px;
+  }
+
+  .premise .spacer { grid-column: 1; }
+
+  @media (max-width: 860px) {
+    .premise { grid-template-columns: 1fr; gap: 28px; }
+    .premise .spacer { display: none; }
+  }
+
+  /* ---------- USE CASE ---------- */
+  .case {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+  }
+
+  .case-body {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 56px;
+  }
+
+  @media (max-width: 860px) {
+    .case { grid-template-columns: 1fr; }
+    .case-body { grid-template-columns: 1fr; gap: 32px; }
+  }
+
+  .case-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: var(--mono-bg);
+    color: var(--ink);
+    padding: 4px 8px;
+    display: inline-block;
+    margin-bottom: 16px;
+  }
+
+  .case-name {
+    font-family: 'Instrument Serif', serif;
+    font-size: 44px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .case-tagline {
+    font-style: italic;
+    color: var(--accent);
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    margin-bottom: 28px;
+  }
+
+  .case-narrative p {
+    font-size: 16px;
+    color: var(--ink-2);
+    margin-bottom: 14px;
+    line-height: 1.6;
+  }
+
+  .case-narrative p strong { color: var(--ink); font-weight: 600; }
+
+  .specs h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-bottom: 12px;
+    color: var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 8px;
+  }
+
+  .specs ul {
+    list-style: none;
+    margin-bottom: 28px;
+  }
+
+  .specs li {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--rule);
+    font-size: 14px;
+  }
+
+  .specs li:last-child { border-bottom: 0; }
+
+  .specs li .k {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-3);
+    font-size: 11px;
+    padding-top: 2px;
+  }
+
+  .specs li .v { color: var(--ink); }
+
+  /* ---------- AGENDA TIMELINE ---------- */
+  .timeline {
+    margin-top: 16px;
+    margin-bottom: 8px;
+  }
+
+  .timeline-bar {
+    display: grid;
+    grid-template-columns: 15fr 15fr 35fr 40fr 15fr;
+    height: 56px;
+    border: 1px solid var(--ink);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .timeline-bar .seg {
+    border-right: 1px solid var(--ink);
+    padding: 8px 12px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    position: relative;
+  }
+
+  .timeline-bar .seg:last-child { border-right: 0; }
+
+  .timeline-bar .seg.s1 { background: #FFF8D1; }
+  .timeline-bar .seg.s2 { background: #FFE873; }
+  .timeline-bar .seg.s3 { background: #ECF0FF; }
+  .timeline-bar .seg.s4 { background: #2547D0; color: white; }
+  .timeline-bar .seg.s5 { background: var(--ink); color: white; }
+
+  .timeline-bar .seg .lbl {
+    font-size: 10px;
+    opacity: 0.7;
+    font-weight: 500;
+  }
+
+  .timeline-ruler {
+    display: grid;
+    grid-template-columns: 15fr 15fr 35fr 40fr 15fr;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+
+  .timeline-ruler span { padding: 4px 12px; border-right: 1px solid var(--rule); }
+  .timeline-ruler span:last-child { border-right: 0; }
+
+  @media (max-width: 720px) {
+    .timeline-bar .seg { padding: 8px 6px; font-size: 9px; }
+    .timeline-bar .seg .lbl { display: none; }
+    .timeline-ruler { font-size: 9px; }
+    .timeline-ruler span { padding: 4px 6px; }
+  }
+
+  /* ---------- PHASES ---------- */
+  .phases { margin-top: 56px; }
+
+  .phase {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 32px;
+    padding: 36px 0;
+    border-top: 1px solid var(--ink);
+  }
+
+  .phase:last-child { border-bottom: 1px solid var(--ink); }
+
+  .phase-left { padding-top: 4px; }
+
+  .phase-num {
+    font-family: 'Instrument Serif', serif;
+    font-size: 64px;
+    line-height: 0.9;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .phase-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+
+  .phase-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 32px;
+    margin-bottom: 6px;
+    line-height: 1.05;
+  }
+
+  .phase-goal {
+    font-size: 14px;
+    color: var(--accent);
+    margin-bottom: 18px;
+    font-style: italic;
+  }
+
+  .phase-body {
+    color: var(--ink-2);
+    margin-bottom: 20px;
+    font-size: 15px;
+  }
+
+  .phase-do {
+    background: var(--mono-bg);
+    border-left: 3px solid var(--ink);
+    padding: 18px 22px;
+    margin-bottom: 16px;
+  }
+
+  .phase-do h5 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--ink);
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .phase-do ol {
+    list-style: none;
+    counter-reset: stepcount;
+  }
+
+  .phase-do ol li {
+    counter-increment: stepcount;
+    padding: 6px 0 6px 32px;
+    position: relative;
+    font-size: 14px;
+    color: var(--ink);
+  }
+
+  .phase-do ol li::before {
+    content: counter(stepcount, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    top: 9px;
+  }
+
+  @media (max-width: 720px) {
+    .phase { grid-template-columns: 1fr; gap: 14px; padding: 28px 0; }
+    .phase-num { font-size: 48px; }
+    .phase-title { font-size: 24px; }
+  }
+
+  /* ---------- PROMPTS ---------- */
+  .prompts-grid {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+  }
+
+  .prompts-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 860px) {
+    .prompts-grid { grid-template-columns: 1fr; }
+    .prompts-body { grid-template-columns: 1fr; }
+  }
+
+  .prompt-card {
+    border: 1px solid var(--ink);
+    padding: 24px;
+    background: var(--bg);
+  }
+
+  .prompt-card.dark {
+    background: var(--ink);
+    color: white;
+    border-color: var(--ink);
+  }
+
+  .prompt-card .tool {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+
+  .prompt-card.dark .tool { color: var(--highlight); }
+
+  .prompt-card h4 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px;
+    margin-bottom: 6px;
+    line-height: 1.1;
+  }
+
+  .prompt-card .for {
+    font-size: 13px;
+    color: var(--ink-3);
+    margin-bottom: 18px;
+  }
+
+  .prompt-card.dark .for { color: #AEB3BC; }
+
+  .prompt-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.65;
+    background: var(--mono-bg);
+    padding: 14px;
+    color: var(--ink);
+    border-radius: 2px;
+    white-space: pre-wrap;
+  }
+
+  .prompt-card.dark .prompt-text {
+    background: #1A1A1F;
+    color: #EAEAEC;
+  }
+
+  /* ---------- SUCCESS ---------- */
+  .success-grid {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 24px;
+  }
+
+  .success-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border-top: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+  }
+
+  .success-list .cell {
+    padding: 28px 24px;
+    border-right: 1px solid var(--rule);
+  }
+
+  .success-list .cell:last-child { border-right: 0; }
+
+  .success-list .cell .icon {
+    font-family: 'Instrument Serif', serif;
+    font-size: 36px;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+
+  .success-list .cell h5 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+
+  .success-list .cell p {
+    font-size: 13.5px;
+    color: var(--ink-2);
+    line-height: 1.55;
+  }
+
+  @media (max-width: 860px) {
+    .success-grid { grid-template-columns: 1fr; }
+    .success-list { grid-template-columns: 1fr; }
+    .success-list .cell {
+      border-right: 0;
+      border-bottom: 1px solid var(--rule);
+    }
+    .success-list .cell:last-child { border-bottom: 0; }
+  }
+
+  /* ---------- PITFALLS ---------- */
+  .pitfalls {
+    margin-top: 36px;
+    border-top: 1px solid var(--ink);
+    padding-top: 28px;
+  }
+
+  .pitfalls h4 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-bottom: 16px;
+  }
+
+  .pitfalls ul { list-style: none; }
+
+  .pitfalls li {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 16px;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--rule);
+    font-size: 14px;
+    color: var(--ink-2);
+  }
+
+  .pitfalls li:last-child { border-bottom: 0; }
+
+  .pitfalls li .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding-top: 2px;
+  }
+
+  /* ---------- FOOTER ---------- */
+  footer {
+    border-top: 1px solid var(--ink);
+    padding: 36px 0;
+    font-size: 12px;
+    color: var(--ink-3);
+  }
+
+  footer .wrap {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  footer .signature {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    color: var(--ink);
+    font-size: 14px;
+  }
+
+  /* ---------- PRINT ---------- */
+  @media print {
+    .topbar { display: none; }
+    section { page-break-inside: avoid; padding: 32px 0; }
+    .phase { page-break-inside: avoid; }
+    body { font-size: 11pt; }
+  }
+
+  /* selection */
+  ::selection { background: var(--highlight); color: var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- ========== TOP BAR ========== -->
+<div class="topbar">
+  <div class="wrap">
+    <div class="mark">vibe<span>·</span>coding studio</div>
+    <nav>
+      <a href="#premise">Premise</a>
+      <a href="#case">The Build</a>
+      <a href="#agenda">Agenda</a>
+      <a href="#prompts">Prompts</a>
+      <a href="#success">Outcomes</a>
+    </nav>
+  </div>
+</div>
+
+<!-- ========== HERO ========== -->
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-meta">
+      <div class="cell">
+        <div class="label">Format</div>
+        <div class="val">Live workshop · hands-on</div>
+      </div>
+      <div class="cell">
+        <div class="label">Duration</div>
+        <div class="val">120 minutes</div>
+      </div>
+      <div class="cell">
+        <div class="label">Audience</div>
+        <div class="val">Business executives · non-engineers</div>
+      </div>
+      <div class="cell">
+        <div class="label">Tools</div>
+        <div class="val">ChatPRD &nbsp;&middot;&nbsp; Vercel v0</div>
+      </div>
+    </div>
+
+    <h1 class="display">Ship a real app <em>before lunch</em>, without writing code.</h1>
+
+    <p class="lede">
+      In two hours, every executive in the room will leave with a working web prototype of an internal tool they actually need — built entirely through conversation with AI. <strong>No engineers. No mock-ups. No project plan.</strong> Just a sharp business problem, a PRD generated by ChatPRD, and a live app generated by Vercel v0. This is the playbook.
+    </p>
+  </div>
+</header>
+
+<!-- ========== PREMISE ========== -->
+<section id="premise">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="num">/ 01</div>
+      <h2 class="display">Why <em>vibecoding</em> belongs on an executive's desk.</h2>
+    </div>
+
+    <div class="premise">
+      <div class="spacer"></div>
+      <div class="col">
+        <h3>The Shift</h3>
+        <p>For a generation, "I have an idea for a tool" meant a six-month engineering queue. Today, the same sentence — typed into the right AI — produces a working prototype before the meeting ends. The bottleneck has moved from <em>building</em> to <em>articulating</em>.</p>
+      </div>
+      <div class="col">
+        <h3>Why Executives</h3>
+        <p>The leaders who can describe a problem precisely, scope it ruthlessly, and judge a prototype critically are now the most productive builders in their company. This workshop hands them the muscle memory — not the syntax — to do that.</p>
+      </div>
+
+      <div class="spacer"></div>
+      <div class="col">
+        <h3>What Vibecoding Means</h3>
+        <p>Building software by stating <em>intent</em> in natural language and steering an AI through iteration. The deliverable is the same as code; the medium is conversation. Quality comes from clarity of thought, not knowledge of frameworks.</p>
+      </div>
+      <div class="col">
+        <h3>What You Walk Out With</h3>
+        <p>A deployed, shareable URL of a working internal tool. A reusable PRD template. A library of prompts. And — the real point — the conviction that the next problem on your desk is something you can prototype yourself, this week.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== USE CASE ========== -->
+<section id="case">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="num">/ 02</div>
+      <h2 class="display">The build: <em>ClientPulse.</em></h2>
+    </div>
+
+    <div class="case">
+      <div></div>
+      <div class="case-body">
+        <div class="case-narrative">
+          <span class="case-tag">internal · b2b · ops</span>
+          <div class="case-name">ClientPulse</div>
+          <div class="case-tagline">Account health, at a glance, before it's a crisis.</div>
+
+          <p><strong>The scenario.</strong> You lead a 40-person consulting firm with 32 active client accounts. Right now, the "state of each account" lives in spreadsheets, Slack threads, and the heads of individual partners. Renewal conversations get ambushed by problems that were visible weeks earlier — to someone, somewhere.</p>
+
+          <p><strong>The ask.</strong> A lightweight internal app where every account manager logs a weekly 60-second check-in (green / yellow / red, plus a sentence on what changed), and the leadership team sees a single portfolio dashboard. Yellow and red accounts surface. Stale accounts surface. Action items don't disappear into chat.</p>
+
+          <p><strong>Why this case.</strong> It's universal — every services business, sales team, customer-success org, or partnerships group lives this exact problem. The data model is small enough to finish in 90 minutes. And the finished prototype is good enough to actually pilot on Monday.</p>
+        </div>
+
+        <aside class="specs">
+          <h4>Scope at a glance</h4>
+          <ul>
+            <li><span class="k">01</span><span class="v">Account list view with health colour</span></li>
+            <li><span class="k">02</span><span class="v">Account detail page · check-in history</span></li>
+            <li><span class="k">03</span><span class="v">New check-in form (status + notes + actions)</span></li>
+            <li><span class="k">04</span><span class="v">Portfolio dashboard for leadership</span></li>
+            <li><span class="k">05</span><span class="v">At-risk filter &amp; stale-account flag</span></li>
+          </ul>
+
+          <h4>Personas in the room</h4>
+          <ul>
+            <li><span class="k">AM</span><span class="v">Account manager — logs check-ins weekly</span></li>
+            <li><span class="k">PL</span><span class="v">Practice lead — scans portfolio Monday AM</span></li>
+            <li><span class="k">MD</span><span class="v">Managing director — drills into red accounts</span></li>
+          </ul>
+
+          <h4>Out of scope (on purpose)</h4>
+          <ul>
+            <li><span class="k">—</span><span class="v">Auth, billing, integrations, mobile native</span></li>
+            <li><span class="k">—</span><span class="v">Real database (use mock data in v0)</span></li>
+          </ul>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== AGENDA ========== -->
+<section id="agenda">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="num">/ 03</div>
+      <h2 class="display">The 120-minute <em>arc.</em></h2>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-bar">
+        <div class="seg s1">Orient<span class="lbl">15 min</span></div>
+        <div class="seg s2">Frame<span class="lbl">15 min</span></div>
+        <div class="seg s3">PRD · ChatPRD<span class="lbl">35 min</span></div>
+        <div class="seg s4">Prototype · v0<span class="lbl">40 min</span></div>
+        <div class="seg s5">Showcase<span class="lbl">15 min</span></div>
+      </div>
+      <div class="timeline-ruler">
+        <span>00:00 → 00:15</span>
+        <span>00:15 → 00:30</span>
+        <span>00:30 → 01:05</span>
+        <span>01:05 → 01:45</span>
+        <span>01:45 → 02:00</span>
+      </div>
+    </div>
+
+    <div class="phases">
+
+      <!-- Phase 1 -->
+      <div class="phase">
+        <div class="phase-left">
+          <div class="phase-num">01</div>
+          <div class="phase-time">00:00 — 00:15</div>
+        </div>
+        <div>
+          <h3 class="phase-title">Orient</h3>
+          <div class="phase-goal">Goal — shift the room from "AI is interesting" to "AI is my next hire."</div>
+          <p class="phase-body">Open by showing the finished ClientPulse prototype on screen. Click through it. Then say the words that change the day: <em>we will rebuild this, from zero, together, in the next 105 minutes.</em> Briefly define vibecoding (intent, not syntax). Set the ground rule: nobody opens a code editor.</p>
+
+          <div class="phase-do">
+            <h5>Instructor checklist</h5>
+            <ol>
+              <li>Demo the finished app live (90 sec)</li>
+              <li>Define vibecoding in one sentence</li>
+              <li>Show ChatPRD and v0 home screens side-by-side</li>
+              <li>Confirm everyone has both tabs open and signed in</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="phase">
+        <div class="phase-left">
+          <div class="phase-num">02</div>
+          <div class="phase-time">00:15 — 00:30</div>
+        </div>
+        <div>
+          <h3 class="phase-title">Frame the problem</h3>
+          <div class="phase-goal">Goal — produce a one-paragraph brief sharp enough to feed an AI.</div>
+          <p class="phase-body">Hand out the ClientPulse scenario card. Have each participant rewrite the problem in their own words, name the primary user, and write a single "if this app exists, what changes on Monday morning?" sentence. This step is the entire game — vibecoding fails when the brief is fuzzy.</p>
+
+          <div class="phase-do">
+            <h5>Participant deliverable</h5>
+            <ol>
+              <li>Problem in 3 sentences</li>
+              <li>Primary user (one person, named)</li>
+              <li>Success line — what changes when this exists</li>
+              <li>Three features that MUST be in v1; one that won't</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 3 -->
+      <div class="phase">
+        <div class="phase-left">
+          <div class="phase-num">03</div>
+          <div class="phase-time">00:30 — 01:05</div>
+        </div>
+        <div>
+          <h3 class="phase-title">PRD with ChatPRD</h3>
+          <div class="phase-goal">Goal — turn the brief into a structured PRD that v0 can consume.</div>
+          <p class="phase-body">Open ChatPRD. Paste the seed prompt (see prompt library below). ChatPRD will ask clarifying questions — answer them in plain business language. The output is a real PRD with user stories, screens, and acceptance criteria. Resist the urge to edit too much; iterate by talking to it, not by rewriting Word docs.</p>
+
+          <div class="phase-do">
+            <h5>Sequence</h5>
+            <ol>
+              <li>Paste the seed prompt (see Prompt 01)</li>
+              <li>Answer ChatPRD's clarifying questions in your own voice</li>
+              <li>Ask it to add user stories per screen</li>
+              <li>Ask it to write acceptance criteria for the at-risk filter</li>
+              <li>Export the PRD — keep the tab open, you'll quote from it</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 4 -->
+      <div class="phase">
+        <div class="phase-left">
+          <div class="phase-num">04</div>
+          <div class="phase-time">01:05 — 01:45</div>
+        </div>
+        <div>
+          <h3 class="phase-title">Prototype with v0</h3>
+          <div class="phase-goal">Goal — produce a clickable, deployed prototype of all four screens.</div>
+          <p class="phase-body">Open Vercel v0. Paste the screen-by-screen prompt (see Prompt 02). v0 will generate a full UI in seconds. Now the real skill: <em>iterating in plain English.</em> "Make the red accounts more urgent." "The dashboard feels heavy — try a quieter layout." "Add a column for days since last check-in." Each turn produces a new version. Pick favorites. Deploy.</p>
+
+          <div class="phase-do">
+            <h5>Build order (do not skip)</h5>
+            <ol>
+              <li>Generate the portfolio dashboard first — the executive view</li>
+              <li>Then the account list with health filters</li>
+              <li>Then the account detail page</li>
+              <li>Then the new check-in form</li>
+              <li>Hit "Deploy" — get a shareable URL</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- Phase 5 -->
+      <div class="phase">
+        <div class="phase-left">
+          <div class="phase-num">05</div>
+          <div class="phase-time">01:45 — 02:00</div>
+        </div>
+        <div>
+          <h3 class="phase-title">Showcase &amp; reflect</h3>
+          <div class="phase-goal">Goal — three participants demo; everyone leaves with a clear next action.</div>
+          <p class="phase-body">Three volunteers screenshare their deployed prototype for 90 seconds each. Not a beauty contest — focus the debrief on the gap between their original brief and the final result. Where did the AI misread intent? Where did they course-correct well? Close by asking every participant to name one problem on their desk this week they'll prototype themselves.</p>
+
+          <div class="phase-do">
+            <h5>Close-out</h5>
+            <ol>
+              <li>3 volunteer demos · 90 seconds each</li>
+              <li>Group reflection — what surprised you?</li>
+              <li>Each person commits to one problem they'll vibecode this week</li>
+              <li>Share the prompt library &amp; deployed URLs in the chat</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ========== PROMPT LIBRARY ========== -->
+<section id="prompts">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="num">/ 04</div>
+      <h2 class="display">The prompt <em>library.</em></h2>
+    </div>
+
+    <div class="prompts-grid">
+      <div></div>
+      <div class="prompts-body">
+
+        <div class="prompt-card">
+          <div class="tool">Prompt 01 · ChatPRD</div>
+          <h4>The seed prompt</h4>
+          <div class="for">Paste this first. Then converse.</div>
+          <div class="prompt-text">I'm a non-technical executive. I want a PRD for an internal web app called ClientPulse.
+
+Context: A 40-person consulting firm with 32 active client accounts. Account health lives in spreadsheets and Slack. Renewals get ambushed by problems leaders should have seen coming.
+
+Users: account managers (log weekly check-ins), practice leads (scan portfolio), managing director (drills into red accounts).
+
+Core screens I want covered:
+1. Portfolio dashboard (leadership view, at-risk surfaced)
+2. Account list (filter by health, sort by last check-in)
+3. Account detail page (history of check-ins)
+4. New check-in form (green/yellow/red, notes, action items)
+
+Out of scope: auth, billing, integrations, mobile native, real database.
+
+Please ask me 3–5 clarifying questions before writing the PRD. Keep the PRD tight — user stories, screens, acceptance criteria. No fluff.</div>
+        </div>
+
+        <div class="prompt-card dark">
+          <div class="tool">Prompt 02 · Vercel v0</div>
+          <h4>The build prompt</h4>
+          <div class="for">Start with the dashboard. Iterate per screen.</div>
+          <div class="prompt-text">Build the portfolio dashboard for an internal B2B account-health app called ClientPulse.
+
+Top of page: 4 stat tiles — total accounts (32), green (21), yellow (8), red (3). Clean, restrained, no gradients.
+
+Below: a table of accounts. Columns: account name, owner (avatar + name), ARR, health (colored dot), last check-in (relative time, red if > 14 days), trend arrow.
+
+Sidebar: filters for health, owner, days-since-check-in.
+
+Top-right: "Log check-in" button (primary action).
+
+Use mock data — 12 realistic-looking B2B account names. Use Tailwind. Keep typography tight. Avoid heavy shadows. Treat red accounts with quiet urgency, not screaming red.
+
+After you generate this, I'll ask for the next screen.</div>
+        </div>
+
+        <div class="prompt-card dark">
+          <div class="tool">Prompt 03 · Vercel v0</div>
+          <h4>Iteration moves</h4>
+          <div class="for">Use these one at a time. Read the result. Pick or reject.</div>
+          <div class="prompt-text">→ "Make red accounts feel urgent without being loud."
+
+→ "The dashboard feels busy — quieter layout, more whitespace."
+
+→ "Add a column showing days since last check-in. Red over 14."
+
+→ "Replace the avatar circles with initials in subtle squares."
+
+→ "Make this feel like a tool for senior partners, not a SaaS startup."
+
+→ "Show what happens when an account manager clicks an account — generate that page next."
+
+→ "Add a sticky filter bar so I can scan 200 accounts."</div>
+        </div>
+
+        <div class="prompt-card">
+          <div class="tool">Prompt 04 · ChatPRD</div>
+          <h4>Sharpening prompts</h4>
+          <div class="for">After the first PRD draft. Use to deepen specific sections.</div>
+          <div class="prompt-text">→ "Write user stories from the practice lead's POV for the portfolio dashboard."
+
+→ "Write acceptance criteria for the at-risk filter — what counts as at-risk?"
+
+→ "What's the smallest possible v1 we could ship in two weeks?"
+
+→ "What edge cases am I missing? Be blunt."
+
+→ "Rewrite the PRD assuming the reader is a designer who's never used the product."</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- PITFALLS -->
+    <div class="pitfalls">
+      <h4>What goes wrong — and how to recover</h4>
+      <ul>
+        <li><span class="tag">Drift</span>The AI builds a beautiful screen that solves a different problem. Recover by pasting one line from your original brief and asking what it ignored.</li>
+        <li><span class="tag">Bloat</span>You let v0 add features mid-flow. Hold the line — out-of-scope today is out-of-scope today. Iterate on what exists.</li>
+        <li><span class="tag">Aesthetic spiral</span>You spend 20 minutes on font choices. Set a 5-minute cap per visual iteration. Move on.</li>
+        <li><span class="tag">Vague prompt</span>Output feels generic. Always answer: who sees this, what are they doing, what changes after they use it.</li>
+        <li><span class="tag">No commit</span>You don't deploy. The exercise only sticks if a real URL exists. Deploy before the showcase.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========== SUCCESS ========== -->
+<section id="success">
+  <div class="wrap">
+    <div class="section-header">
+      <div class="num">/ 05</div>
+      <h2 class="display">What success <em>looks like.</em></h2>
+    </div>
+
+    <div class="success-grid">
+      <div></div>
+      <div>
+        <div class="success-list">
+          <div class="cell">
+            <div class="icon">i.</div>
+            <h5>A deployed URL</h5>
+            <p>Every participant leaves with a live, shareable link to a working ClientPulse prototype. Not a screenshot. Not a slide. A URL.</p>
+          </div>
+          <div class="cell">
+            <div class="icon">ii.</div>
+            <h5>A reusable PRD</h5>
+            <p>The ChatPRD output is a real document the participant can drop into any future build — for ClientPulse or anything else.</p>
+          </div>
+          <div class="cell">
+            <div class="icon">iii.</div>
+            <h5>A committed next problem</h5>
+            <p>Each participant names — out loud — a real problem on their desk they will vibecode this week. Without that commit, the workshop is theatre.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer>
+  <div class="wrap">
+    <div>Workshop playbook · ClientPulse build · v1</div>
+    <div class="signature">Built for executives who'd rather ship than slide.</div>
+  </div>
+</footer>
+
+</body>
+</html>
